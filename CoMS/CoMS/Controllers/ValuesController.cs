@@ -31,7 +31,7 @@ namespace CoMS.Controllers
         {
         }
 
-        // DELETE api/values/5
+        // DELETE api/values/5 kiet
         public void Delete(int id)
         {
         }
