@@ -4,15 +4,19 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using CoMS.Models;
+using System.Web.Http.Description;
+using CoMS.Resources;
 
 namespace CoMS.Controllers
 {
     public class ValuesController : ApiController
     {
         // GET api/values
-        public IEnumerable<string> Get()
+        [ResponseType(typeof(GetValue))]
+        public HttpResponseMessage Get()
         {
-            return new string[] { "value3", "value4" };
+            return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, null));
         }
 
         // GET api/values/5
@@ -35,5 +39,12 @@ namespace CoMS.Controllers
         public void Delete(int id)
         {
         }
+    }
+
+    public class GetValue
+    {
+        public int errorCode { get; set; }
+        public string message { get; set; }
+        public List<object> data { get; set; }
     }
 }
