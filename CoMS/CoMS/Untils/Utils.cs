@@ -5,8 +5,7 @@ using System.Web;
 
 namespace CoMS.Untils
 {
-    public static class Constants
+    public class Utils
     {
-        
     }
 }
