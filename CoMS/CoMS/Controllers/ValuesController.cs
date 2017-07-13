@@ -35,7 +35,7 @@ namespace CoMS.Controllers
         {
         }
 
-        // DELETE api/values/5
+        // DELETE api/values/5 thien
         public void Delete(int id)
         {
         }
