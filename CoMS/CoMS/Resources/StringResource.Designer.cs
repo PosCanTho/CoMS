@@ -22,7 +22,7 @@ namespace CoMS.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class StringResource {
+    public class StringResource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace CoMS.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CoMS.Resources.StringResource", typeof(StringResource).Assembly);
@@ -51,7 +51,7 @@ namespace CoMS.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace CoMS.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Tiếng Anh.
         /// </summary>
-        internal static string English {
+        public static string English {
             get {
                 return ResourceManager.GetString("English", resourceCulture);
             }
@@ -72,16 +72,25 @@ namespace CoMS.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Success.
         /// </summary>
-        internal static string Success {
+        public static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tài khoản hoặc mật khẩu không chính xác.
+        /// </summary>
+        public static string Username_or_password_incorrect {
+            get {
+                return ResourceManager.GetString("Username_or_password_incorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tiếng Việt.
         /// </summary>
-        internal static string Vietnamese {
+        public static string Vietnamese {
             get {
                 return ResourceManager.GetString("Vietnamese", resourceCulture);
             }

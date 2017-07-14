@@ -123,6 +123,9 @@
   <data name="Success" xml:space="preserve">
     <value>Success</value>
   </data>
+  <data name="Username_or_password_incorrect" xml:space="preserve">
+    <value>Username or password incorrect</value>
+  </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>Vietnamese</value>
   </data>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="9a06d3d6bcd2436f953b51261b28d2d4" Name="Diagram1">
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.ACCOUNT" Width="1.5" PointX="6" PointY="56.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP" Width="1.5" PointX="7.5" PointY="122.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.ACCOUNT_FOR_CONFERENCE" Width="1.5" PointX="8.25" PointY="74.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.ALL_TYPE_NAME" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE" Width="1.5" PointX="9.75" PointY="146.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS" Width="1.5" PointX="9.75" PointY="143.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.APPROVED_CONFERENCE_ATTENDEE_TYPES" Width="1.5" PointX="9.75" PointY="149.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.AUTHOR" Width="1.5" PointX="11.25" PointY="78" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP" Width="1.5" PointX="19.5" PointY="69.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.AUTHOR_PAPER_TEXT_RELATIONSHIP" Width="1.5" PointX="21.5" PointY="83.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE" Width="1.5" PointX="3" PointY="71.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_ATTENDEE" Width="1.5" PointX="11.25" PointY="70.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION" Width="1.5" PointX="15.5" PointY="85.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_ATTENDEE_TYPE" Width="1.5" PointX="7.5" PointY="152.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_BOARD_OF_REVIEW" Width="1.5" PointX="5.25" PointY="74.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_FIELD_OF_STUDY_RELATIONSHIP" Width="1.5" PointX="11.25" PointY="82.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_PRESENTATION_TYPE" Width="1.5" PointX="10.5" PointY="95.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_REGISTRATION_PACKAGE" Width="1.5" PointX="5.25" PointY="108.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_REGISTRATION_PACKAGE_CONDITIONS" Width="1.5" PointX="7.5" PointY="146.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_REGISTRATION_PACKAGE_OFFERING" Width="1.5" PointX="5.25" PointY="81.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_REGISTRATION_PACKAGE_OFFERING_TYPE" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_SESSION" Width="1.5" PointX="7.5" PointY="85.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_SESSION_CHAIR" Width="1.5" PointX="5.25" PointY="70.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_SESSION_CHAIR_CONFERENCE_SESSION_RELATIONSHIP" Width="1.5" PointX="15.75" PointY="80.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT" Width="1.5" PointX="9.75" PointY="91" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_SESSION_TOPIC" Width="1.5" PointX="5.25" PointY="101" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_SETTING_RIGHTS" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_TYPE" Width="1.5" PointX="0.75" PointY="78.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP" Width="1.5" PointX="8.25" PointY="71.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.COUNTRY" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.FACILITY" Width="1.5" PointX="4.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.FIELD_OF_STUDY" Width="1.5" PointX="9" PointY="67.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.GENDER_TYPE" Width="1.5" PointX="7.5" PointY="149.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.LINE_OF_BUSINES_TYPE" Width="1.5" PointX="7.5" PointY="143.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_FUNCTION" Width="1.5" PointX="3" PointY="89.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU" Width="1.5" PointX="13.25" PointY="93.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_GROUP" Width="1.5" PointX="16.25" PointY="93.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_GROUP_ACCOUNT_FOR_CONFERENCE" Width="1.5" PointX="18.5" PointY="84.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE" Width="1.5" PointX="5.25" PointY="85.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_GROUP_MENU_FOR_CONFERENCE" Width="1.5" PointX="10.25" PointY="86" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.MOBILEFORM_MENU" Width="1.5" PointX="8" PointY="97.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.ORGANIZATION" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.PAPER_ABSTRACT" Width="1.5" PointX="14.5" PointY="50" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.PAPER_REVIEW_SUMUP_BY_CONFERENCE_BOARD_OF_REVIEW" Width="1.5" PointX="17.5" PointY="62.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.PAPER_TEXT" Width="1.5" PointX="12.25" PointY="52.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.PERSON" Width="1.5" PointX="3" PointY="59.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.PRESENTER" Width="1.5" PointX="13.25" PointY="86.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.PRESENTER_CONFERENCE_SESSION_RELATIONSHIP" Width="1.5" PointX="15.5" PointY="89.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE" Width="1.5" PointX="9.75" PointY="118" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.REVIEWER" Width="1.5" PointX="13.5" PointY="75.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP" Width="1.5" PointX="16.75" PointY="73.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.REVIEWER_PAPER_TEXT_RELATIONSHIP" Width="1.5" PointX="19.75" PointY="76.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE" Width="1.5" PointX="12.75" PointY="90.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.SUPPORT_STAFF" Width="1.5" PointX="14.25" PointY="71.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP" Width="1.5" PointX="22.5" PointY="76" IsExpanded="true" />
+        <EntityTypeShape EntityType="CONFERENCE_MANAGEMENT_SYSTEMModel.TYPE_OF_STUDY" Width="1.5" PointX="6" PointY="66.375" IsExpanded="true" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP_ACCOUNT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_ACCOUNT_FOR_CONFERENCE_ACCOUNT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP_CONFERENCE_REGISTRATION_PACKAGE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_ACCOUNT_FOR_CONFERENCE_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_ACCOUNT_FOR_CONFERENCE_ACCOUNT_FOR_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE_CONFERENCE_REGISTRATION_PACKAGE_CONDITIONS" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE_GENDER_TYPE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS_CONFERENCE_REGISTRATION_PACKAGE_CONDITIONS1" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS_LINE_OF_BUSINES_TYPE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_APPROVED_CONFERENCE_ATTENDEE_TYPES_CONFERENCE_ATTENDEE_TYPE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_APPROVED_CONFERENCE_ATTENDEE_TYPES_CONFERENCE_REGISTRATION_PACKAGE_CONDITIONS" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_AUTHOR_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_AUTHOR_PAPER_ABSTRACT_RELATIONSHIP_AUTHOR" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_AUTHOR_PAPER_TEXT_RELATIONSHIP_AUTHOR" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_AUTHOR_PERSON" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_AUTHOR_PAPER_ABSTRACT_RELATIONSHIP_PAPER_ABSTRACT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_AUTHOR_PAPER_TEXT_RELATIONSHIP_PAPER_TEXT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_ATTENDEE_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_BOARD_OF_REVIEW_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_CONFERENCE_TYPE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_FIELD_OF_STUDY_RELATIONSHIP_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_REGISTRATION_PACKAGE_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_REGISTRATION_PACKAGE_OFFERING_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_CHAIR_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_MENU_FOR_CONFERENCE_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_PRESENTER_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SESSION_TOPICS_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SUPPORT_STAFF_CONFERENCE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION_CONFERENCE_ATTENDEE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_ATTENDEE_PERSON" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_CONFERENCE_BOARD_OF_REVIEW1" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_FIELD_OF_STUDY_RELATIONSHIP_FIELD_OF_STUDY" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE_CONFERENCE_PRESENTATION_TYPE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_REGISTRATION_PACKAGE_CONDITIONS_CONFERENCE_REGISTRATION_PACKAGE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE_CONFERENCE_REGISTRATION_PACKAGE" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_CHAIR_CONFERENCE_SESSION_RELATIONSHIP_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_CONFERENCE_SESSION_TOPIC" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_PRESENTER_CONFERENCE_SESSION_RELATIONSHIP_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP_CONFERENCE_SESSION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_CHAIR_CONFERENCE_SESSION_RELATIONSHIP_CONFERENCE_SESSION_CHAIR" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_CHAIR_PERSON" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT_PAPER_TEXT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP_TYPE_OF_STUDY" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_FIELD_OF_STUDY_FIELD_OF_STUDY" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU_MOBILEFORM_FUNCTION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE_MOBILEFORM_FUNCTION" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU_MOBILEFORM_MENU" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_ACCOUNT_FOR_CONFERENCE_MOBILEFORM_GROUP" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE_MOBILEFORM_GROUP" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_MOBILEFORM_GROUP_MENU_FOR_CONFERENCE_MOBILEFORM_MENU" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_PAPER_ABSTRACT_PAPER_TEXT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP_PAPER_ABSTRACT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_PAPER_TEXT_RELATIONSHIP_PAPER_TEXT_SUM_UP_REVIEW" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_PRESENTER_CONFERENCE_SESSION_RELATIONSHIP_PAPER_TEXT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_PAPER_TEXT_RELATIONSHIP_PAPER_TEXT" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_PRESENTER_PERSON" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_PERSON" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SUPPORT_STAFF_PERSON" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_PRESENTER_CONFERENCE_SESSION_RELATIONSHIP_PRESENTER" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP_REVIEWER" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_REVIEWER_PAPER_TEXT_RELATIONSHIP_REVIEWER" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP_SUPPORT_STAFF" ManuallyRouted="false" />
+        <AssociationConnector Association="CONFERENCE_MANAGEMENT_SYSTEMModel.FK_TYPE_OF_STUDY_TYPE_OF_STUDY" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

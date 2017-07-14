@@ -123,6 +123,9 @@
   <data name="Success" xml:space="preserve">
     <value>Success</value>
   </data>
+  <data name="Username_or_password_incorrect" xml:space="preserve">
+    <value>Tài khoản hoặc mật khẩu không chính xác</value>
+  </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>Tiếng Việt</value>
   </data>
