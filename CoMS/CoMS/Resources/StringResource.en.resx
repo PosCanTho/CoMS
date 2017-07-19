@@ -117,14 +117,62 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Account_does_not_exist" xml:space="preserve">
+    <value>Account does not exist.</value>
+  </data>
+  <data name="Data_not_received" xml:space="preserve">
+    <value>Data not received.</value>
+  </data>
+  <data name="Email_already_exists" xml:space="preserve">
+    <value>Email already exist.</value>
+  </data>
+  <data name="Email_does_not_exist" xml:space="preserve">
+    <value>Email does not exist.</value>
+  </data>
+  <data name="Email_invalid" xml:space="preserve">
+    <value>Email invalid.</value>
+  </data>
   <data name="English" xml:space="preserve">
     <value>English</value>
+  </data>
+  <data name="Forgot_password" xml:space="preserve">
+    <value>Forgot password.</value>
+  </data>
+  <data name="Password_is_incorrect" xml:space="preserve">
+    <value>Password is incorrect.</value>
+  </data>
+  <data name="Password_must_not_be_less_than_6_characters" xml:space="preserve">
+    <value>Password must not be less than 6 characters.</value>
+  </data>
+  <data name="Please_enter_email" xml:space="preserve">
+    <value>Please enter email.</value>
+  </data>
+  <data name="Please_enter_fullname" xml:space="preserve">
+    <value>Please enter fullname.</value>
+  </data>
+  <data name="Please_enter_password" xml:space="preserve">
+    <value>Please enter password.</value>
+  </data>
+  <data name="Please_enter_username" xml:space="preserve">
+    <value>Please enter username.</value>
+  </data>
+  <data name="Sorry_an_error_has_occurred" xml:space="preserve">
+    <value>Sorry an error has occurred</value>
   </data>
   <data name="Success" xml:space="preserve">
     <value>Success</value>
   </data>
+  <data name="Username_already_exists" xml:space="preserve">
+    <value>Username already exists.</value>
+  </data>
+  <data name="Username_must_not_be_less_than_6_characters" xml:space="preserve">
+    <value>Username must not be less than 6 characters.</value>
+  </data>
+  <data name="Username_name_does_not_exist" xml:space="preserve">
+    <value>Username name does not exist.</value>
+  </data>
   <data name="Username_or_password_incorrect" xml:space="preserve">
-    <value>Username or password incorrect</value>
+    <value>Username or password incorrect.</value>
   </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>Vietnamese</value>

@@ -61,11 +61,128 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tài khoản không tồn tại..
+        /// </summary>
+        public static string Account_does_not_exist {
+            get {
+                return ResourceManager.GetString("Account_does_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chưa nhận được dữ liệu..
+        /// </summary>
+        public static string Data_not_received {
+            get {
+                return ResourceManager.GetString("Data_not_received", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email đã tồn tại..
+        /// </summary>
+        public static string Email_already_exists {
+            get {
+                return ResourceManager.GetString("Email_already_exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email không tồn tại..
+        /// </summary>
+        public static string Email_does_not_exist {
+            get {
+                return ResourceManager.GetString("Email_does_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email không hợp lệ..
+        /// </summary>
+        public static string Email_invalid {
+            get {
+                return ResourceManager.GetString("Email_invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tiếng Anh.
         /// </summary>
         public static string English {
             get {
                 return ResourceManager.GetString("English", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Khôi phục mật khẩu..
+        /// </summary>
+        public static string Forgot_password {
+            get {
+                return ResourceManager.GetString("Forgot_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mật khẩu không đúng..
+        /// </summary>
+        public static string Password_is_incorrect {
+            get {
+                return ResourceManager.GetString("Password_is_incorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mật khẩu không được nhỏ hơn 6 ký tự..
+        /// </summary>
+        public static string Password_must_not_be_less_than_6_characters {
+            get {
+                return ResourceManager.GetString("Password_must_not_be_less_than_6_characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vui lòng nhập email..
+        /// </summary>
+        public static string Please_enter_email {
+            get {
+                return ResourceManager.GetString("Please_enter_email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vui lòng nhập họ và tên..
+        /// </summary>
+        public static string Please_enter_fullname {
+            get {
+                return ResourceManager.GetString("Please_enter_fullname", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vui lòng nhập mật khẩu..
+        /// </summary>
+        public static string Please_enter_password {
+            get {
+                return ResourceManager.GetString("Please_enter_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vui lòng nhập tài khoản..
+        /// </summary>
+        public static string Please_enter_username {
+            get {
+                return ResourceManager.GetString("Please_enter_username", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Xin lỗi, đã có lỗi xảy ra..
+        /// </summary>
+        public static string Sorry_an_error_has_occurred {
+            get {
+                return ResourceManager.GetString("Sorry_an_error_has_occurred", resourceCulture);
             }
         }
         
@@ -79,7 +196,34 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tài khoản hoặc mật khẩu không chính xác.
+        ///   Looks up a localized string similar to Tài khoản đã tồn tại..
+        /// </summary>
+        public static string Username_already_exists {
+            get {
+                return ResourceManager.GetString("Username_already_exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tài khoản không được nhỏ hơn 6 ký tự..
+        /// </summary>
+        public static string Username_must_not_be_less_than_6_characters {
+            get {
+                return ResourceManager.GetString("Username_must_not_be_less_than_6_characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tền tài khoản không tồn tại..
+        /// </summary>
+        public static string Username_name_does_not_exist {
+            get {
+                return ResourceManager.GetString("Username_name_does_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tài khoản hoặc mật khẩu không chính xác..
         /// </summary>
         public static string Username_or_password_incorrect {
             get {
