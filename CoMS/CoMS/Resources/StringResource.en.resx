@@ -117,11 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="About" xml:space="preserve">
+    <value>about</value>
+  </data>
+  <data name="About_an_hour_ago" xml:space="preserve">
+    <value>about an hour ago</value>
+  </data>
+  <data name="About_a_minute_ago" xml:space="preserve">
+    <value>about a minute ago</value>
+  </data>
+  <data name="About_a_month_ago" xml:space="preserve">
+    <value>about a month ago</value>
+  </data>
+  <data name="About_a_year_ago" xml:space="preserve">
+    <value>about a year ago</value>
+  </data>
   <data name="Account_does_not_exist" xml:space="preserve">
     <value>Account does not exist.</value>
   </data>
   <data name="Data_not_received" xml:space="preserve">
     <value>Data not received.</value>
+  </data>
+  <data name="Days_ago" xml:space="preserve">
+    <value>days ago</value>
   </data>
   <data name="Email_already_exists" xml:space="preserve">
     <value>Email already exist.</value>
@@ -137,6 +155,15 @@
   </data>
   <data name="Forgot_password" xml:space="preserve">
     <value>Forgot password.</value>
+  </data>
+  <data name="Hours_ago" xml:space="preserve">
+    <value>hours ago</value>
+  </data>
+  <data name="Minutes_ago" xml:space="preserve">
+    <value>minutes ago</value>
+  </data>
+  <data name="Months_ago" xml:space="preserve">
+    <value>months ago</value>
   </data>
   <data name="Password_is_incorrect" xml:space="preserve">
     <value>Password is incorrect.</value>
@@ -155,6 +182,12 @@
   </data>
   <data name="Please_enter_username" xml:space="preserve">
     <value>Please enter username.</value>
+  </data>
+  <data name="Seconds_ago" xml:space="preserve">
+    <value>seconds ago</value>
+  </data>
+  <data name="Server_fcm_key" xml:space="preserve">
+    <value>AIzaSyBuUdOTXwtg66HCjLJUw3rmyl-rdFw3LWo</value>
   </data>
   <data name="Sorry_an_error_has_occurred" xml:space="preserve">
     <value>Sorry an error has occurred</value>
@@ -176,5 +209,14 @@
   </data>
   <data name="Vietnamese" xml:space="preserve">
     <value>Vietnamese</value>
+  </data>
+  <data name="Years_ago" xml:space="preserve">
+    <value>years ago</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>yesterday</value>
+  </data>
+  <data name="You_have_bookmark_this_person" xml:space="preserve">
+    <value>You have bookmark this person.</value>
   </data>
 </root>

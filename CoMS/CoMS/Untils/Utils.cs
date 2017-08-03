@@ -74,19 +74,19 @@ namespace CoMS.Untils
         public static string GetFullName(string firstName, string middleName, string lastName)
         {
             string fullName = null;
-            if (string.IsNullOrEmpty(firstName))
+            if (!string.IsNullOrEmpty(firstName))
             {
-                fullName += firstName;
+                fullName += firstName.Trim();
             }
-            if (string.IsNullOrEmpty(middleName))
+            if (!string.IsNullOrEmpty(middleName))
             {
-                fullName += " "+middleName;
+                fullName += " " + middleName.Trim();
             }
-            if (string.IsNullOrEmpty(lastName))
+            if (!string.IsNullOrEmpty(lastName))
             {
-                fullName += " " + lastName;
+                fullName += " " + lastName.Trim();
             }
-            return fullName;
+            return fullName.Trim();
         }
 
         //Gửi email
@@ -113,5 +113,7 @@ namespace CoMS.Untils
             client.Port = !string.IsNullOrEmpty(smtpPort) ? Convert.ToInt32(smtpPort) : 0;
             client.Send(message);
         }
+
+        
     }
 }

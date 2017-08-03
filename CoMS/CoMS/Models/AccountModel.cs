@@ -38,9 +38,9 @@ namespace CoMS.Models
             }
         }
 
-        public ACCOUNT GetAccountById(int id)
+        public ACCOUNT GetAccountById(decimal personId)
         {
-            return db.ACCOUNTs.Find(id);
+            return db.ACCOUNTs.SingleOrDefault(a => a.PERSON_ID == personId);
         }
 
         public ACCOUNT GetAccountByEmail(string email)
@@ -63,6 +63,11 @@ namespace CoMS.Models
             }
         }
 
+        public List<ACCOUNT> ListAccount()
+        {
+            var listAccount = db.ACCOUNTs;
+            return listAccount.ToList();
+        }
 
     }
 }

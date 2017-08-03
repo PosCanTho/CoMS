@@ -83,6 +83,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PagedList, Version=1.17.0.0, Culture=neutral, PublicKeyToken=abbb863e9397c5e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\PagedList.1.17.0.0\lib\net40\PagedList.dll</HintPath>
+    </Reference>
+    <Reference Include="PagedList.Mvc, Version=4.5.0.0, Culture=neutral, PublicKeyToken=abbb863e9397c5e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\PagedList.Mvc.4.5.0.0\lib\net40\PagedList.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
       <HintPath>..\packages\Swashbuckle.Core.5.5.3\lib\net40\Swashbuckle.Core.dll</HintPath>
       <Private>True</Private>
@@ -203,6 +209,12 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\BookmarkController.cs" />
+    <Compile Include="Controllers\ConferenceController.cs" />
+    <Compile Include="Controllers\ScheduleController.cs" />
+    <Compile Include="Entities Framework\MYDB.cs" />
+    <Compile Include="Models\BookmarkModel.cs" />
+    <Compile Include="Controllers\ChatController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PaperAbstractController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
@@ -216,6 +228,7 @@
     <Compile Include="Entities Framework\AUTHOR.cs" />
     <Compile Include="Entities Framework\AUTHOR_PAPER_ABSTRACT_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\AUTHOR_PAPER_TEXT_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\BOOKMARK.cs" />
     <Compile Include="Entities Framework\CONFERENCE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_ATTENDEE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION.cs" />
@@ -235,6 +248,8 @@
     <Compile Include="Entities Framework\CONFERENCE_SETTING_RIGHTS.cs" />
     <Compile Include="Entities Framework\CONFERENCE_TYPE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\CONVERSATION.cs" />
+    <Compile Include="Entities Framework\CONVERSATION_REPLY.cs" />
     <Compile Include="Entities Framework\COUNTRY.cs" />
     <Compile Include="Entities Framework\DB.cs" />
     <Compile Include="Entities Framework\FACILITY.cs" />
@@ -281,6 +296,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModel.cs" />
+    <Compile Include="Models\ConversationReplyModel.cs" />
     <Compile Include="Models\PersonModel.cs" />
     <Compile Include="Models\ResponseData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -295,12 +311,14 @@
       <DependentUpon>StringResource.en.resx</DependentUpon>
     </Compile>
     <Compile Include="Untils\Constants.cs" />
+    <Compile Include="Untils\DateTimeFormater.cs" />
     <Compile Include="Untils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\PagedList.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />

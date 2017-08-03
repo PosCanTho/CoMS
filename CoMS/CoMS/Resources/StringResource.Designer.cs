@@ -61,6 +61,51 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to about.
+        /// </summary>
+        public static string About {
+            get {
+                return ResourceManager.GetString("About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to khoảng một phút trước.
+        /// </summary>
+        public static string About_a_minute_ago {
+            get {
+                return ResourceManager.GetString("About_a_minute_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to khoảng một tháng trước.
+        /// </summary>
+        public static string About_a_month_ago {
+            get {
+                return ResourceManager.GetString("About_a_month_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to khoảng một năm trước.
+        /// </summary>
+        public static string About_a_year_ago {
+            get {
+                return ResourceManager.GetString("About_a_year_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to khoảng một giờ trước.
+        /// </summary>
+        public static string About_an_hour_ago {
+            get {
+                return ResourceManager.GetString("About_an_hour_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tài khoản không tồn tại..
         /// </summary>
         public static string Account_does_not_exist {
@@ -75,6 +120,24 @@ namespace CoMS.Resources {
         public static string Data_not_received {
             get {
                 return ResourceManager.GetString("Data_not_received", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ngày trước.
+        /// </summary>
+        public static string Days_ago {
+            get {
+                return ResourceManager.GetString("Days_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Xóa danh sách tin nhắn thất bại..
+        /// </summary>
+        public static string Delete_list_message_fail {
+            get {
+                return ResourceManager.GetString("Delete_list_message_fail", resourceCulture);
             }
         }
         
@@ -120,6 +183,33 @@ namespace CoMS.Resources {
         public static string Forgot_password {
             get {
                 return ResourceManager.GetString("Forgot_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to giờ trước.
+        /// </summary>
+        public static string Hours_ago {
+            get {
+                return ResourceManager.GetString("Hours_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to phút trước.
+        /// </summary>
+        public static string Minutes_ago {
+            get {
+                return ResourceManager.GetString("Minutes_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to tháng trước.
+        /// </summary>
+        public static string Months_ago {
+            get {
+                return ResourceManager.GetString("Months_ago", resourceCulture);
             }
         }
         
@@ -174,6 +264,24 @@ namespace CoMS.Resources {
         public static string Please_enter_username {
             get {
                 return ResourceManager.GetString("Please_enter_username", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to seconds ago.
+        /// </summary>
+        public static string Seconds_ago {
+            get {
+                return ResourceManager.GetString("Seconds_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AIzaSyBuUdOTXwtg66HCjLJUw3rmyl-rdFw3LWo.
+        /// </summary>
+        public static string Server_fcm_key {
+            get {
+                return ResourceManager.GetString("Server_fcm_key", resourceCulture);
             }
         }
         
@@ -237,6 +345,33 @@ namespace CoMS.Resources {
         public static string Vietnamese {
             get {
                 return ResourceManager.GetString("Vietnamese", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to năm trước.
+        /// </summary>
+        public static string Years_ago {
+            get {
+                return ResourceManager.GetString("Years_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to hôm qua.
+        /// </summary>
+        public static string Yesterday {
+            get {
+                return ResourceManager.GetString("Yesterday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have bookmark this person..
+        /// </summary>
+        public static string You_have_bookmark_this_person {
+            get {
+                return ResourceManager.GetString("You_have_bookmark_this_person", resourceCulture);
             }
         }
     }
