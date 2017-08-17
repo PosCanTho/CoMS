@@ -8,11 +8,13 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace CoMS.Controllers
 {
     public class BaseController : ApiController
     {
+       
         protected HttpResponseMessage ResponseFail(string msg)
         {
             return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(Constants.ERROR_CODE_FAIL, msg));

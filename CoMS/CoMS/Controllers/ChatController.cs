@@ -15,6 +15,7 @@ namespace CoMS.Controllers
 {
     public class ChatController : BaseController
     {
+        [Authorize]
         [HttpPost]
         [Route("api/SendMessage")]
         public HttpResponseMessage SendMessage([FromBody]Chat chat)
@@ -99,6 +100,7 @@ namespace CoMS.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         [Route("api/ListMessage")]
         public HttpResponseMessage ListMessage([FromBody]ListMessageData data)
@@ -133,6 +135,7 @@ namespace CoMS.Controllers
             return ResponseSuccess(StringResource.Success, listMessage);
         }
 
+        [Authorize]
         [HttpPost]
         [Route("api/DeleteAllMessage")]
         public HttpResponseMessage DeleteAllMessage(decimal personIdDelete, [FromBody]Data data)
@@ -163,6 +166,8 @@ namespace CoMS.Controllers
                 return ResponseFail(StringResource.Delete_list_message_fail);
             }
         }
+
+        [Authorize]
         [HttpGet]
         [Route("api/ListConversation")]
         public HttpResponseMessage ListConversation(decimal personId)

@@ -13,7 +13,7 @@ namespace CoMS.Controllers
 {
     public class BookmarkController : BaseController
     {
-
+        [Authorize]
         [HttpGet]
         [Route("api/ListBookmark")]
         public HttpResponseMessage ListBookmark(decimal personId)
@@ -22,6 +22,7 @@ namespace CoMS.Controllers
             return ResponseSuccess(StringResource.Success, bookmarkModel.ListBookmark(personId));
         }
 
+        [Authorize]
         [HttpPost]
         [Route("api/AddBookmark")]
         public HttpResponseMessage AddBookmark([FromBody] Bookmark bookmark)
@@ -74,6 +75,7 @@ namespace CoMS.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         [Route("api/DeleteBookmark")]
         public HttpResponseMessage DeleteBookmark([FromBody] Bookmark bookmark)
