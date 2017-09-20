@@ -219,4 +219,7 @@
   <data name="You_have_bookmark_this_person" xml:space="preserve">
     <value>You have bookmark this person.</value>
   </data>
+  <data name="Please_select_gender" xml:space="preserve">
+    <value>Please select gender.</value>
+  </data>
 </root>

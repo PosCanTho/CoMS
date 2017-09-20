@@ -16,16 +16,16 @@ namespace CoMS.Models
             myDB = new MYDB();
         }
 
-        public CONVERSATION_REPLY GetConversationById(decimal id)
+        public Conversation_Reply GetConversationById(decimal id)
         {
-            return myDB.CONVERSATION_REPLY.Find(id);
+            return myDB.Conversation_Reply.Find(id);
         }
 
-        public bool AddMessage(CONVERSATION_REPLY conversationReply)
+        public bool AddMessage(Conversation_Reply conversationReply)
         {
             try
             {
-                var result = myDB.CONVERSATION_REPLY.Add(conversationReply);
+                var result = myDB.Conversation_Reply.Add(conversationReply);
                 myDB.SaveChanges();
                 return true;
             }
@@ -35,19 +35,19 @@ namespace CoMS.Models
             }
         }
 
-        public List<CONVERSATION_REPLY> ListMessage(decimal personIdFrom, decimal personIdTo, int page = 1, int pageSize = 10)
+        public List<Conversation_Reply> ListMessage(decimal personIdFrom, decimal personIdTo, int page = 1, int pageSize = 10)
         {
-            var listConversation = myDB.CONVERSATION_REPLY.Where(c => ((c.PERSON_ID_FROM == personIdFrom && c.PERSON_ID_TO == personIdTo) || (c.PERSON_ID_FROM == personIdTo && c.PERSON_ID_TO == personIdFrom)) && (c.PERSON_ID_DELETE != personIdFrom));
+            var listConversation = myDB.Conversation_Reply.Where(c => ((c.PERSON_ID_FROM == personIdFrom && c.PERSON_ID_TO == personIdTo) || (c.PERSON_ID_FROM == personIdTo && c.PERSON_ID_TO == personIdFrom)) && (c.PERSON_ID_DELETE != personIdFrom));
             return listConversation.OrderByDescending(c => c.TIME).ToPagedList(page, pageSize).ToList();
         }
 
-        public List<CONVERSATION_REPLY> ListAllMessage(decimal personIdFrom, decimal personIdTo)
+        public List<Conversation_Reply> ListAllMessage(decimal personIdFrom, decimal personIdTo)
         {
-            var listConversation = myDB.CONVERSATION_REPLY.Where(c => ((c.PERSON_ID_FROM == personIdFrom && c.PERSON_ID_TO == personIdTo) || (c.PERSON_ID_FROM == personIdTo && c.PERSON_ID_TO == personIdFrom)));
+            var listConversation = myDB.Conversation_Reply.Where(c => ((c.PERSON_ID_FROM == personIdFrom && c.PERSON_ID_TO == personIdTo) || (c.PERSON_ID_FROM == personIdTo && c.PERSON_ID_TO == personIdFrom)));
             return listConversation.ToList();
         }
 
-        public bool UpdatePersonIdDelete(CONVERSATION_REPLY conversationReply)
+        public bool UpdatePersonIdDelete(Conversation_Reply conversationReply)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace CoMS.Models
         {
             try
             {
-                myDB.CONVERSATION_REPLY.Remove(GetConversationById(conversationReplyId));
+                myDB.Conversation_Reply.Remove(GetConversationById(conversationReplyId));
                 myDB.SaveChanges();
                 return true;
             }
@@ -81,14 +81,14 @@ namespace CoMS.Models
             }
         }
 
-        public List<CONVERSATION_REPLY> ListConversation(decimal personId)
+        public List<Conversation_Reply> ListConversation(decimal personId)
         {
-            var listConversation = myDB.CONVERSATION_REPLY.Where(c => c.PERSON_ID_TO == personId || c.PERSON_ID_FROM == personId).ToList();
-            var list = from c in listConversation group c by new { c.PERSON_ID_FROM, c.PERSON_ID_TO} into l select new CONVERSATION_REPLY { PERSON_ID_FROM = l.Key.PERSON_ID_FROM, PERSON_ID_TO = l.Key.PERSON_ID_TO};
+            var listConversation = myDB.Conversation_Reply.Where(c => c.PERSON_ID_TO == personId || c.PERSON_ID_FROM == personId).ToList();
+            var list = from c in listConversation group c by new { c.PERSON_ID_FROM, c.PERSON_ID_TO} into l select new Conversation_Reply { PERSON_ID_FROM = l.Key.PERSON_ID_FROM, PERSON_ID_TO = l.Key.PERSON_ID_TO};
             return list.ToList();
         }
 
-        public CONVERSATION_REPLY GetConversationReplyLast(decimal personIdFrom, decimal personIdTo)
+        public Conversation_Reply GetConversationReplyLast(decimal personIdFrom, decimal personIdTo)
         {
             var c = ListAllMessage( personIdFrom,  personIdTo).Last();
             return c;

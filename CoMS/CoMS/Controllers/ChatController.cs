@@ -15,7 +15,7 @@ namespace CoMS.Controllers
 {
     public class ChatController : BaseController
     {
-        [Authorize]
+       
         [HttpPost]
         [Route("api/SendMessage")]
         public HttpResponseMessage SendMessage([FromBody]Chat chat)
@@ -26,7 +26,7 @@ namespace CoMS.Controllers
                 {
                     var result = "-1";
                     var webAddr = "https://fcm.googleapis.com/fcm/send";
-                    string DeviceId = "duq3x96Dt38:APA91bEwfCCw84_quAvlQDOH-yToqeekqxpBwTqJffTcduAteEz3enf0Ond2SF2eRo9c3ua1yk5Q60LzPYAFNnBYA3_cG3kuk1ZHiQMKJqcOR60WNukXBH6ZLSVfuDgf54cfatwivFO_";
+                    string DeviceId = new ManageDeviceModel().GetDeviceByPersonId(chat.data.PersonIdTo).DEVICE_TOKEN;
 
                     var httpWebRequest = (HttpWebRequest)WebRequest.Create(webAddr);
                     httpWebRequest.ContentType = "application/json";
@@ -34,7 +34,7 @@ namespace CoMS.Controllers
                     httpWebRequest.Method = "POST";
                     /*Thêm vào CSDL*/
                     var conversationReplyModel = new ConversationReplyModel();
-                    var conversationReply = new CONVERSATION_REPLY();
+                    var conversationReply = new Conversation_Reply();
                     conversationReply.MESSAGE = chat.Body;
                     conversationReply.TIME = DateTime.Now;
                     conversationReply.PERSON_ID_FROM = chat.data.PersonIdFrom;
@@ -100,7 +100,7 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+       
         [HttpPost]
         [Route("api/ListMessage")]
         public HttpResponseMessage ListMessage([FromBody]ListMessageData data)
@@ -135,7 +135,7 @@ namespace CoMS.Controllers
             return ResponseSuccess(StringResource.Success, listMessage);
         }
 
-        [Authorize]
+
         [HttpPost]
         [Route("api/DeleteAllMessage")]
         public HttpResponseMessage DeleteAllMessage(decimal personIdDelete, [FromBody]Data data)
@@ -167,16 +167,16 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+       
         [HttpGet]
         [Route("api/ListConversation")]
         public HttpResponseMessage ListConversation(decimal personId)
         {
             var model = new ConversationReplyModel();
             var list = model.ListConversation(personId);
-            var listConversation = new List<CONVERSATION_REPLY>();
+            var listConversation = new List<Conversation_Reply>();
             var listConversationResponse = new List<Conversation>();
-            foreach (CONVERSATION_REPLY item in list)
+            foreach (Conversation_Reply item in list)
             {
                 var personIdFrom = item.PERSON_ID_FROM;
                 var personIdTo = item.PERSON_ID_TO;
@@ -191,11 +191,13 @@ namespace CoMS.Controllers
                         conversationResponse.PersonId = personIdFrom.Value == personId ? personIdTo.Value : personIdFrom.Value;
 
                         var account = accountModel.GetAccountById(conversationResponse.PersonId);
-                        conversationResponse.Name = Utils.GetFullName(account.CURRENT_FIRST_NAME, account.CURRENT_MIDDLE_NAME, account.CURRENT_LAST_NAME);
-                        conversationResponse.Message = conversation.MESSAGE;
+                    
+                            conversationResponse.Name = Utils.GetFullName(account.CURRENT_FIRST_NAME, account.CURRENT_MIDDLE_NAME, account.CURRENT_LAST_NAME);
+                            conversationResponse.Message = conversation.MESSAGE;
 
-                        listConversation.Add(conversation);
-                        listConversationResponse.Add(conversationResponse);
+                            listConversation.Add(conversation);
+                            listConversationResponse.Add(conversationResponse);
+                        
 
                     }
                 }

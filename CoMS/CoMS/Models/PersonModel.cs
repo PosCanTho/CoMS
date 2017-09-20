@@ -30,6 +30,11 @@ namespace CoMS.Models
             }
         }
 
+        public decimal GetIdMaxPerson()
+        {
+            return db.People.Select(x => x.PERSON_ID).Max();
+        }
+
         public PERSON GetPersonByEmail(string email)
         {
             return db.People.SingleOrDefault(p => p.CURRENT_PERSONAL_EMAIL == email);

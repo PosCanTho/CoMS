@@ -34,7 +34,18 @@ namespace CoMS.Controllers
                 }
                 else
                 {
-                    return ResponseSuccess(StringResource.Success);
+                    var personModel = new PersonModel();
+                    var result = personModel.GetPersonById(account.PERSON_ID.HasValue ? account.PERSON_ID.Value : 0);
+
+                    var profile = new UserMyProfile();
+                    profile.PersonId = result.PERSON_ID;
+                    profile.Fullname = Utils.GetFullName(result.CURRENT_FIRST_NAME, result.CURRENT_MIDDLE_NAME, result.CURRENT_LAST_NAME);
+                    profile.Email = result.CURRENT_PERSONAL_EMAIL;
+                    profile.PhoneNumber = result.CURRENT_PHONE_NUMBER;
+                    profile.BirthDay = result.BIRTH_DATE;
+                    profile.Gender = result.CURRENT_GENDER;
+                    profile.Image = account.Image;
+                    return ResponseSuccess(StringResource.Success, profile);
                 }
             }
             else
@@ -49,8 +60,9 @@ namespace CoMS.Controllers
         {
             if (user != null)
             {
+                
+   
                 var accountModel = new AccountModel();
-                var personModel = new PersonModel();
 
                 if (String.IsNullOrEmpty(user.Fullname))
                 {
@@ -59,6 +71,10 @@ namespace CoMS.Controllers
                 else if (String.IsNullOrEmpty(user.Email))
                 {
                     return ResponseFail(StringResource.Please_enter_email);
+                }
+                else if (user.Gender == -1)
+                {
+                    return ResponseFail(StringResource.Please_select_gender);
                 }
                 else if (String.IsNullOrEmpty(user.Username))
                 {
@@ -90,40 +106,61 @@ namespace CoMS.Controllers
                 }
                 else
                 {
-                    var names = Utils.GetFirstMiddleLastName(user.Fullname.Trim());
-                    // var person = new PERSON();
-                    // person.PERSON_ID = 4;
-                    // person.CURRENT_FIRST_NAME = names[0];
-                    // person.CURRENT_MIDDLE_NAME = names[1];
-                    // person.CURRENT_LAST_NAME = names[2];
-                    // person.CREATED_DATETIME = DateTime.Now;
+                    var personModel = new PersonModel();
+                    decimal personId = personModel.GetIdMaxPerson()+1;
 
-                    // var resultPerson = personModel.AddPerson(person);
-                    // if (resultPerson)
-                    //{
-                    var account = new ACCOUNT();
-                    account.CURRENT_FIRST_NAME = names[0];
-                    account.CURRENT_MIDDLE_NAME = names[1];
-                    account.CURRENT_LAST_NAME = names[2];
-                    account.UserName = user.Username.Trim();
-                    account.Email = user.Email.Trim();
-                    account.Password = Encoding.ASCII.GetBytes(user.Password);
-                    account.CREATED_DATETIME = DateTime.Now;
-                    //account.PERSON_ID = personModel.GetPersonByEmail(user.Email).PERSON_ID;
-                    var result = accountModel.Register(account);
-                    if (result)
+                    var names = Utils.GetFirstMiddleLastName(user.Fullname.Trim());
+
+                    var person = new PERSON();
+                    person.PERSON_ID = personId;
+                    person.CURRENT_FIRST_NAME = names[0];
+                    person.CURRENT_MIDDLE_NAME = names[1];
+                    person.CURRENT_LAST_NAME = names[2];
+                    person.CREATED_DATETIME = DateTime.Now;
+                    person.CURRENT_GENDER = user.Gender;
+                    person.CURRENT_PERSONAL_EMAIL = user.Email;
+                    person.CREATED_DATETIME = DateTime.Now;
+
+                    var resultPerson = personModel.AddPerson(person);
+                    if (resultPerson)
                     {
-                        return ResponseSuccess(StringResource.Success);
+                        var account = new ACCOUNT();
+                        account.CURRENT_FIRST_NAME = names[0];
+                        account.CURRENT_MIDDLE_NAME = names[1];
+                        account.CURRENT_LAST_NAME = names[2];
+                        account.UserName = user.Username.Trim();
+                        account.CURRENT_EMAIL = user.Email.Trim();
+                        account.Password = Encoding.ASCII.GetBytes(user.Password);
+                        account.CURRENT_GENDER = user.Gender;
+                        account.Reg_GenUserNameDate = DateTime.Now;
+                        account.CREATED_DATETIME = DateTime.Now;
+                        account.PERSON_ID = personId;
+                        account.IsChangePass = false;
+                        account.IsGenPass = true;
+                        account.IsGenUserName = true;
+                        var result = accountModel.Register(account);
+                        if (result)
+                        {
+                            var profile = new UserMyProfile();
+                            profile.PersonId = personId;
+                            profile.Fullname = Utils.GetFullName(person.CURRENT_FIRST_NAME, person.CURRENT_MIDDLE_NAME, person.CURRENT_LAST_NAME);
+                            profile.Email = person.CURRENT_PERSONAL_EMAIL;
+                            profile.PhoneNumber = person.CURRENT_PHONE_NUMBER;
+                            profile.BirthDay = person.BIRTH_DATE;
+                            profile.Gender = person.CURRENT_GENDER;
+                            profile.Image = account.OFFICIAL_IMAGE;
+
+                            return ResponseSuccess(StringResource.Success, profile);
+                        }
+                        else
+                        {
+                            return ResponseFail(StringResource.Sorry_an_error_has_occurred);
+                        }
                     }
                     else
                     {
                         return ResponseFail(StringResource.Sorry_an_error_has_occurred);
                     }
-                    //}
-                    //else
-                    //{
-                    //    return ResponseFail(StringResource.Sorry_an_error_has_occurred);
-                    //}
                 }
             }
             else
@@ -132,7 +169,7 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+
         [HttpPost]
         [Route("api/ChangePassword")]
         public HttpResponseMessage ChangePassword([FromBody] UserChangePassword user)
@@ -172,7 +209,7 @@ namespace CoMS.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("api/ForgotPassword")]
         public HttpResponseMessage ForgotPassword(string email)
         {
@@ -186,12 +223,12 @@ namespace CoMS.Controllers
                 string content = System.IO.File.ReadAllText("C:\\inetpub\\wwwroot\\CoMS\\CoMS\\CoMS\\Views\\Template\\Email.html");
                 content = content.Replace("{{Username}}", "pvthiendeveloper");
                 content = content.Replace("{{Password}}", "123456");
-                Utils.SendEmail("pvthiendeveloper@gmail.com", StringResource.Forgot_password, content);
+                Utils.SendEmail(email, StringResource.Forgot_password, content);
                 return ResponseSuccess(StringResource.Success);
             }
         }
 
-        [Authorize]
+       
         [HttpGet]
         [Route("api/MyProfile")]
         [ResponseType(typeof(UserMyProfile))]
@@ -208,6 +245,7 @@ namespace CoMS.Controllers
                 else
                 {
                     var profile = new UserMyProfile();
+                    profile.PersonId = result.PERSON_ID;
                     profile.Fullname = Utils.GetFullName(result.CURRENT_FIRST_NAME, result.CURRENT_MIDDLE_NAME, result.CURRENT_LAST_NAME);
                     profile.Email = result.CURRENT_PERSONAL_EMAIL;
                     profile.PhoneNumber = result.CURRENT_PHONE_NUMBER;
@@ -222,7 +260,7 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+       
         [HttpPost]
         [Route("api/EditProfile")]
         [ResponseType(typeof(ResponseData))]
@@ -231,7 +269,9 @@ namespace CoMS.Controllers
             if (profile != null)
             {
                 var personModel = new PersonModel();
-                var person = personModel.GetPersonById(profile.Id);
+                var accountModel = new AccountModel();
+
+                var person = personModel.GetPersonById(profile.PersonId);
                 if (person == null)
                 {
                     return ResponseFail(StringResource.Account_does_not_exist);
@@ -239,15 +279,41 @@ namespace CoMS.Controllers
                 else
                 {
                     var names = Utils.GetFirstMiddleLastName(profile.Fullname);
-                    person.CURRENT_FIRST_NAME = !names[0].Equals(person.CURRENT_FIRST_NAME) ? names[0] : person.CURRENT_FIRST_NAME;
-                    person.CURRENT_LAST_NAME = !names[0].Equals(person.CURRENT_LAST_NAME) ? names[0] : person.CURRENT_LAST_NAME;
-                    person.CURRENT_MIDDLE_NAME = !names[0].Equals(person.CURRENT_MIDDLE_NAME) ? names[0] : person.CURRENT_MIDDLE_NAME;
-                    person.CURRENT_PERSONAL_EMAIL = !profile.Email.Equals(person.CURRENT_PERSONAL_EMAIL) ? profile.Email : person.CURRENT_PERSONAL_EMAIL;
-                    person.CURRENT_PHONE_NUMBER = profile.PhoneNumber != person.CURRENT_PHONE_NUMBER ? profile.PhoneNumber : person.CURRENT_PHONE_NUMBER;
-                    person.BIRTH_DATE = profile.BirthDay != person.BIRTH_DATE ? profile.BirthDay : person.BIRTH_DATE; ;
-                    person.CURRENT_GENDER = profile.Gender != person.CURRENT_GENDER ? profile.Gender : person.CURRENT_GENDER;
+                    string firstName = names[0];
+                    string midleName = names[1];
+                    string lastName = names[2];
+                    if (!string.IsNullOrEmpty(firstName))
+                    {
+                        person.CURRENT_FIRST_NAME = !firstName.Equals(person.CURRENT_FIRST_NAME) ? firstName : person.CURRENT_FIRST_NAME;
+                    }
+                    if (!string.IsNullOrEmpty(midleName))
+                    {
+                        person.CURRENT_MIDDLE_NAME = !midleName.Equals(person.CURRENT_MIDDLE_NAME) ? midleName : person.CURRENT_MIDDLE_NAME;
+                    }
+                    if (!string.IsNullOrEmpty(lastName))
+                    {
+                        person.CURRENT_LAST_NAME = !lastName.Equals(person.CURRENT_LAST_NAME) ? lastName : person.CURRENT_LAST_NAME;
+                    }
+                    if (!string.IsNullOrEmpty(profile.Email))
+                    {
+                        person.CURRENT_PERSONAL_EMAIL = !profile.Email.Equals(person.CURRENT_PERSONAL_EMAIL) ? profile.Email : person.CURRENT_PERSONAL_EMAIL;
+                    }
+                    if (!string.IsNullOrEmpty(profile.PhoneNumber))
+                    {
+                        person.CURRENT_PHONE_NUMBER = profile.PhoneNumber != person.CURRENT_PHONE_NUMBER ? profile.PhoneNumber : person.CURRENT_PHONE_NUMBER;
+                    }
+                    if (profile.BirthDay != null)
+                    {
+                        person.BIRTH_DATE = profile.BirthDay != person.BIRTH_DATE ? profile.BirthDay : person.BIRTH_DATE; ;
+                    }
+                    if (profile.Gender >= 0)
+                    {
+                        person.CURRENT_GENDER = profile.Gender != person.CURRENT_GENDER ? profile.Gender : person.CURRENT_GENDER;
+                    }
+                    person.UPDATED_DATETIME = DateTime.Now;
 
                     personModel.UpdatePerson(person);
+                    accountModel.UpdateAccount(person);
                     return ResponseSuccess(StringResource.Success);
                 }
             }
@@ -257,15 +323,16 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+  
         [HttpPost]
         [Route("api/GetProfile")]
         [ResponseType(typeof(Profile))]
         public HttpResponseMessage GetProfile([FromBody]UserProfile user)
         {
             var personModel = new PersonModel();
+            var accountModel = new AccountModel();
             var personBookmark = personModel.GetPersonById(user.PersonIdBookmark);
-            var account = new AccountModel().GetAccountById(user.PersonIdBookmark);
+            var account = accountModel.GetAccountById(user.PersonIdBookmark);
             if (personBookmark != null && account != null)
             {
 
@@ -275,6 +342,7 @@ namespace CoMS.Controllers
                 profile.Image = account.Image;
                 profile.Name = Utils.GetFullName(personBookmark.CURRENT_FIRST_NAME, personBookmark.CURRENT_MIDDLE_NAME, personBookmark.CURRENT_LAST_NAME);
                 profile.IsBookmark = new BookmarkModel().CheckBookmark(user.PersonId, user.PersonIdBookmark);
+                profile.ListPastConference = accountModel.ListPastConference(user.PersonIdBookmark);
                 return ResponseSuccess(StringResource.Success, profile);
             }
             else
@@ -283,7 +351,7 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+   
         [HttpGet]
         [Route("api/ListAccount")]
         public HttpResponseMessage ListAccount()
@@ -302,14 +370,13 @@ namespace CoMS.Controllers
             return ResponseSuccess(StringResource.Success, listAccount);
         }
 
-
-
         public class UserRegister
         {
             public string Fullname { get; set; }
             public string Email { get; set; }
             public string Username { get; set; }
             public string Password { get; set; }
+            public int Gender { get; set; }
 
         }
 
@@ -330,16 +397,18 @@ namespace CoMS.Controllers
 
         public class UserMyProfile
         {
+            public decimal PersonId { get; set; }
             public string Fullname { get; set; }
             public string Email { get; set; }
             public string PhoneNumber { get; set; }
             public DateTime? BirthDay { get; set; }
             public decimal? Gender { get; set; }
+            public string Image { get; set; }
         }
 
         public class UserEditMyProfile
         {
-            public int Id { get; set; }
+            public int PersonId { get; set; }
             public string Fullname { get; set; }
             public string Email { get; set; }
             public string PhoneNumber { get; set; }
@@ -364,16 +433,7 @@ namespace CoMS.Controllers
             public string TwitterUrl { get; set; }
             public string Instagram { get; set; }
             public bool IsBookmark { get; set; }
-            public List<PastSession> ListPastSession { get; set; }
-        }
-
-        public class PastSession
-        {
-            public decimal ConferenceId { get; set; }
-            public string ConferenceName { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
-            public string FacilityName { get; set; }
+            public object ListPastConference { get; set; }
         }
 
         public class UserInfo

@@ -12,7 +12,7 @@ namespace CoMS.Controllers
 {
     public class RegistrationController : BaseController
     {
-        [Authorize]
+       
         [HttpGet]
         [Route("api/ListPackage")]
         public HttpResponseMessage ListConferencePackage(int conferenceId)

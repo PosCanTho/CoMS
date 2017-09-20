@@ -13,7 +13,7 @@ namespace CoMS.Controllers
 {
     public class BookmarkController : BaseController
     {
-        [Authorize]
+      
         [HttpGet]
         [Route("api/ListBookmark")]
         public HttpResponseMessage ListBookmark(decimal personId)
@@ -22,7 +22,7 @@ namespace CoMS.Controllers
             return ResponseSuccess(StringResource.Success, bookmarkModel.ListBookmark(personId));
         }
 
-        [Authorize]
+     
         [HttpPost]
         [Route("api/AddBookmark")]
         public HttpResponseMessage AddBookmark([FromBody] Bookmark bookmark)
@@ -45,7 +45,7 @@ namespace CoMS.Controllers
                     var account = accountModel.GetAccountById(bookmark.PersonIdBookmark);
                     if (account != null)
                     {
-                        var book = new BOOKMARK();
+                        var book = new CoMS.Entities_Framework.Bookmark();
                         book.PERSON_ID = bookmark.PersonId;
                         book.PERSON_ID_BOOKMARK = bookmark.PersonIdBookmark;
                         book.NAME_BOOKMARK = Utils.GetFullName(account.CURRENT_FIRST_NAME, account.CURRENT_MIDDLE_NAME, account.CURRENT_LAST_NAME);
@@ -75,13 +75,13 @@ namespace CoMS.Controllers
             }
         }
 
-        [Authorize]
+    
         [HttpPost]
         [Route("api/DeleteBookmark")]
         public HttpResponseMessage DeleteBookmark([FromBody] Bookmark bookmark)
         {
             var bookmarkModel = new BookmarkModel();
-            var book = new BOOKMARK();
+            var book = new CoMS.Entities_Framework.Bookmark();
             book.PERSON_ID = bookmark.PersonId;
             book.PERSON_ID_BOOKMARK = bookmark.PersonIdBookmark;
             bool result = bookmarkModel.RemoveBookmark(book);

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using CoMS.Entities_Framework;
 
-namespace CoMS.Controllers
+namespace CoMS.Models
 {
     public class BookmarkModel
     {
@@ -14,14 +14,14 @@ namespace CoMS.Controllers
             myDB = new MYDB();
         }
 
-        public BOOKMARK GetBookmarkByPersonId(decimal? personId, decimal? personIdBookmark)
+        public Bookmark GetBookmarkByPersonId(decimal? personId, decimal? personIdBookmark)
         {
-            return myDB.BOOKMARKs.SingleOrDefault(b => b.PERSON_ID == personId && b.PERSON_ID_BOOKMARK == personIdBookmark);
+            return myDB.Bookmarks.SingleOrDefault(b => b.PERSON_ID == personId && b.PERSON_ID_BOOKMARK == personIdBookmark);
         }
 
         public bool CheckBookmark(decimal personId, decimal personIdBookmark)
         {
-            var result = myDB.BOOKMARKs.SingleOrDefault(b => b.PERSON_ID == personId && b.PERSON_ID_BOOKMARK == personIdBookmark);
+            var result = myDB.Bookmarks.SingleOrDefault(b => b.PERSON_ID == personId && b.PERSON_ID_BOOKMARK == personIdBookmark);
             if (result != null)
             {
                 return true;
@@ -29,11 +29,11 @@ namespace CoMS.Controllers
             return false;
         }
 
-        public bool AddBookmark(BOOKMARK bookmark)
+        public bool AddBookmark(Bookmark bookmark)
         {
             try
             {
-                myDB.BOOKMARKs.Add(bookmark);
+                myDB.Bookmarks.Add(bookmark);
                 myDB.SaveChanges();
                 return true;
             }
@@ -42,18 +42,18 @@ namespace CoMS.Controllers
                 return false;
             }
         }
-        public List<BOOKMARK> ListBookmark(decimal personId)
+        public List<Bookmark> ListBookmark(decimal personId)
         {
-            var result = myDB.BOOKMARKs.Where(b => b.PERSON_ID == personId);
+            var result = myDB.Bookmarks.Where(b => b.PERSON_ID == personId);
             return result.ToList();
         }
 
-        public bool RemoveBookmark(BOOKMARK bookmark)
+        public bool RemoveBookmark(Bookmark bookmark)
         {
             try
             {
                 var result = GetBookmarkByPersonId(bookmark.PERSON_ID, bookmark.PERSON_ID_BOOKMARK);
-                myDB.BOOKMARKs.Remove(result);
+                myDB.Bookmarks.Remove(result);
                 myDB.SaveChanges();
                 return true;
             }

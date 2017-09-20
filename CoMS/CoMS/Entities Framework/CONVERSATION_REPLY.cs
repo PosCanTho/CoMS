@@ -6,7 +6,7 @@ namespace CoMS.Entities_Framework
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    public partial class CONVERSATION_REPLY
+    public partial class Conversation_Reply
     {
         [Key]
         [Column(TypeName = "numeric")]

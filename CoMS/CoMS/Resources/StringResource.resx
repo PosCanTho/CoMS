@@ -222,4 +222,7 @@
   <data name="Delete_list_message_fail" xml:space="preserve">
     <value>Xóa danh sách tin nhắn thất bại.</value>
   </data>
+  <data name="Please_select_gender" xml:space="preserve">
+    <value>Vui lòng chọn giới tính.</value>
+  </data>
 </root>

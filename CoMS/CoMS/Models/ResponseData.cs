@@ -9,8 +9,8 @@ namespace CoMS.Models
     {
         public ResponseData()
         {
-            this.errorCode = 1;
-            this.message = "Success";
+            this.errorCode = -1;
+            this.message = "";
             this.data = null;
         }
 

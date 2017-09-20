@@ -12,50 +12,77 @@ namespace CoMS.Entities_Framework
         {
         }
 
-        public virtual DbSet<BOOKMARK> BOOKMARKs { get; set; }
-        public virtual DbSet<CONVERSATION> CONVERSATIONs { get; set; }
-        public virtual DbSet<CONVERSATION_REPLY> CONVERSATION_REPLY { get; set; }
+        public virtual DbSet<Bookmark> Bookmarks { get; set; }
+        public virtual DbSet<Conference_Location> Conference_Location { get; set; }
+        public virtual DbSet<Conference_Map> Conference_Map { get; set; }
+        public virtual DbSet<Conversation_Reply> Conversation_Reply { get; set; }
+        public virtual DbSet<Manage_Device> Manage_Device { get; set; }
+        public virtual DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BOOKMARK>()
+            modelBuilder.Entity<Bookmark>()
                 .Property(e => e.BOOKMARK_ID)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<BOOKMARK>()
+            modelBuilder.Entity<Bookmark>()
                 .Property(e => e.PERSON_ID)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<BOOKMARK>()
+            modelBuilder.Entity<Bookmark>()
                 .Property(e => e.PERSON_ID_BOOKMARK)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION>()
-                .Property(e => e.CONVERSATION_ID)
+            modelBuilder.Entity<Conference_Location>()
+                .Property(e => e.CONFERENCE_LOCATION_ID)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION>()
-                .Property(e => e.PERSON_ID_ONE)
+            modelBuilder.Entity<Conference_Location>()
+                .Property(e => e.CONFERENCE_MAP_ID)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION>()
-                .Property(e => e.PERSON_ID_TWO)
+            modelBuilder.Entity<Conference_Map>()
+                .Property(e => e.CONFERENCE_MAP_ID)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION_REPLY>()
+            modelBuilder.Entity<Conference_Map>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Conversation_Reply>()
                 .Property(e => e.CONVERSATION_REPLY_ID)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION_REPLY>()
+            modelBuilder.Entity<Conversation_Reply>()
                 .Property(e => e.PERSON_ID_FROM)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION_REPLY>()
+            modelBuilder.Entity<Conversation_Reply>()
                 .Property(e => e.PERSON_ID_TO)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<CONVERSATION_REPLY>()
+            modelBuilder.Entity<Conversation_Reply>()
                 .Property(e => e.PERSON_ID_DELETE)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Manage_Device>()
+                .Property(e => e.MANAGE_DEVICE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Manage_Device>()
+                .Property(e => e.PERSON_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Notification>()
+                .Property(e => e.NOTIFICATION_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Notification>()
+                .Property(e => e.PERSON_ID_FROM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Notification>()
+                .Property(e => e.PERSON_ID_TO)
                 .HasPrecision(18, 0);
         }
     }

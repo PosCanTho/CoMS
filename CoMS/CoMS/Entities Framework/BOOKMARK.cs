@@ -6,8 +6,8 @@ namespace CoMS.Entities_Framework
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    [Table("BOOKMARK")]
-    public partial class BOOKMARK
+    [Table("Bookmark")]
+    public partial class Bookmark
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -36,6 +36,7 @@ namespace CoMS.Untils
         //Vị trí mảng thứ 0 là họ, 1 là chữ lót, 2 là tên
         public static string[] GetFirstMiddleLastName(string fullName)
         {
+            //Pham Van Thien
             var names = fullName.Split(' ');
             string first = null;
             string last = null;
@@ -43,17 +44,17 @@ namespace CoMS.Untils
             int length = names.Length;
             if (length == 1)
             {
-                first = names[0];
+                last = names[0];
             }
             else if (length == 2)
             {
-                first = names[0];
-                last = names[1];
+                first = names[1];
+                last = names[0];
             }
             else if (length > 2)
             {
-                first = names[0];
-                last = names[length - 1];
+                first = names[length - 1];
+                last = names[0];
                 for (int i = 1; i < length - 1; i++)
                 {
                     if (i == 1)
@@ -74,17 +75,17 @@ namespace CoMS.Untils
         public static string GetFullName(string firstName, string middleName, string lastName)
         {
             string fullName = null;
-            if (!string.IsNullOrEmpty(firstName))
+            if (!string.IsNullOrEmpty(lastName))
             {
-                fullName += firstName.Trim();
+                fullName += lastName.Trim();
             }
             if (!string.IsNullOrEmpty(middleName))
             {
                 fullName += " " + middleName.Trim();
             }
-            if (!string.IsNullOrEmpty(lastName))
+            if (!string.IsNullOrEmpty(firstName))
             {
-                fullName += " " + lastName.Trim();
+                fullName += " " + firstName.Trim();
             }
             return fullName.Trim();
         }

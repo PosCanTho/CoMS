@@ -268,6 +268,15 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vui lòng chọn giới tính..
+        /// </summary>
+        public static string Please_select_gender {
+            get {
+                return ResourceManager.GetString("Please_select_gender", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to seconds ago.
         /// </summary>
         public static string Seconds_ago {
