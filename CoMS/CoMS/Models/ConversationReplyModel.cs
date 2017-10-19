@@ -41,6 +41,12 @@ namespace CoMS.Models
             return listConversation.OrderByDescending(c => c.TIME).ToPagedList(page, pageSize).ToList();
         }
 
+        public List<Conversation_Reply> ListMessage(decimal personId, decimal personIdFrom, decimal personIdTo)
+        {
+            var listConversation = myDB.Conversation_Reply.Where(c => ((c.PERSON_ID_FROM == personIdFrom && c.PERSON_ID_TO == personIdTo) || (c.PERSON_ID_FROM == personIdTo && c.PERSON_ID_TO == personIdFrom)) && (c.PERSON_ID_DELETE != personId));
+            return listConversation.OrderByDescending(c => c.TIME).ToList();
+        }
+
         public List<Conversation_Reply> ListAllMessage(decimal personIdFrom, decimal personIdTo)
         {
             var listConversation = myDB.Conversation_Reply.Where(c => ((c.PERSON_ID_FROM == personIdFrom && c.PERSON_ID_TO == personIdTo) || (c.PERSON_ID_FROM == personIdTo && c.PERSON_ID_TO == personIdFrom)));
@@ -88,10 +94,13 @@ namespace CoMS.Models
             return list.ToList();
         }
 
-        public Conversation_Reply GetConversationReplyLast(decimal personIdFrom, decimal personIdTo)
+        public Conversation_Reply GetConversationReplyLast(decimal personId, decimal personIdFrom, decimal personIdTo)
         {
-            var c = ListAllMessage( personIdFrom,  personIdTo).Last();
-            return c;
+            var c = ListMessage(personId, personIdFrom, personIdTo);
+            if (c.Count > 0) {
+                return c.First();
+            }
+            return null;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace CoMS.Controllers
                     var result = "-1";
                     var webAddr = "https://fcm.googleapis.com/fcm/send";
                     string DeviceId = new ManageDeviceModel().GetDeviceByPersonId(chat.data.PersonIdTo).DEVICE_TOKEN;
-
+                 
                     var httpWebRequest = (HttpWebRequest)WebRequest.Create(webAddr);
                     httpWebRequest.ContentType = "application/json";
                     httpWebRequest.Headers.Add("Authorization:key=" + StringResource.Server_fcm_key);
@@ -42,6 +42,9 @@ namespace CoMS.Controllers
                     conversationReplyModel.AddMessage(conversationReply);
 
                     /*Tạo dữ liệu trả về*/
+                    var accountModel = new AccountModel();
+                    var accountFrom = accountModel.GetAccountById(chat.data.PersonIdFrom);
+
                     DateTime? dt = conversationReply.TIME;
                     var msg = new MessageResponse();
                     msg.ConversationReplyId = conversationReply.CONVERSATION_REPLY_ID;
@@ -58,9 +61,7 @@ namespace CoMS.Controllers
 
                     using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
                     {
-                        var accountModel = new AccountModel();
-                        var accountFrom = accountModel.GetAccountById(chat.data.PersonIdFrom);
-
+                       
                         var notification = new Notification();
                         notification.body = chat.Body;
                         notification.title = Utils.GetFullName(accountFrom.CURRENT_FIRST_NAME, accountFrom.CURRENT_MIDDLE_NAME, accountFrom.CURRENT_LAST_NAME);
@@ -180,27 +181,24 @@ namespace CoMS.Controllers
             {
                 var personIdFrom = item.PERSON_ID_FROM;
                 var personIdTo = item.PERSON_ID_TO;
-                if (personIdFrom.HasValue && personIdTo.HasValue)
-                {
-                    var conversation = model.GetConversationReplyLast(personIdFrom.Value, personIdTo.Value);
-                    bool isExist = listConversation.Any(c => c.CONVERSATION_REPLY_ID == conversation.CONVERSATION_REPLY_ID);
-                    if (!isExist)
-                    {
-                        var accountModel = new AccountModel();
-                        var conversationResponse = new Conversation();
-                        conversationResponse.PersonId = personIdFrom.Value == personId ? personIdTo.Value : personIdFrom.Value;
+                    var conversation = model.GetConversationReplyLast(personId, personIdFrom, personIdTo);
+                    if (conversation != null) { 
+                        bool isExist = listConversation.Any(c => c.CONVERSATION_REPLY_ID == conversation.CONVERSATION_REPLY_ID);
+                        if (!isExist)
+                        {
+                            var accountModel = new AccountModel();
+                            var conversationResponse = new Conversation();
+                            conversationResponse.PersonId = personIdFrom == personId ? personIdTo : personIdFrom;
 
-                        var account = accountModel.GetAccountById(conversationResponse.PersonId);
+                            var account = accountModel.GetAccountById(conversationResponse.PersonId);
                     
-                            conversationResponse.Name = Utils.GetFullName(account.CURRENT_FIRST_NAME, account.CURRENT_MIDDLE_NAME, account.CURRENT_LAST_NAME);
-                            conversationResponse.Message = conversation.MESSAGE;
+                                conversationResponse.Name = Utils.GetFullName(account.CURRENT_FIRST_NAME, account.CURRENT_MIDDLE_NAME, account.CURRENT_LAST_NAME);
+                                conversationResponse.Message = conversation.MESSAGE;
 
-                            listConversation.Add(conversation);
-                            listConversationResponse.Add(conversationResponse);
-                        
-
+                                listConversation.Add(conversation);
+                                listConversationResponse.Add(conversationResponse);
+                        }
                     }
-                }
             }
             return ResponseSuccess(StringResource.Success, listConversationResponse);
         }
@@ -244,6 +242,7 @@ namespace CoMS.Controllers
         public string TimeFormat { get; set; }
         public DateTime? Time { get; set; }
         public decimal? PersonIdFrom { get; set; }
+        public string PersonNameFrom { get; set; }
         public decimal? PersonIdTo { get; set; }
     }
 

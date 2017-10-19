@@ -325,10 +325,6 @@ namespace CoMS.Entities_Framework
                 .Property(e => e.ORGANIZATION_ID_5)
                 .HasPrecision(18, 0);
 
-            modelBuilder.Entity<AUTHOR_PAPER_ABSTRACT_RELATIONSHIP>()
-                .Property(e => e.THRU_DATE)
-                .IsFixedLength();
-
             modelBuilder.Entity<AUTHOR_PAPER_TEXT_RELATIONSHIP>()
                 .Property(e => e.PERSON_ID)
                 .HasPrecision(18, 0);
@@ -360,10 +356,6 @@ namespace CoMS.Entities_Framework
             modelBuilder.Entity<AUTHOR_PAPER_TEXT_RELATIONSHIP>()
                 .Property(e => e.ORGANIZATION_ID_5)
                 .HasPrecision(18, 0);
-
-            modelBuilder.Entity<AUTHOR_PAPER_TEXT_RELATIONSHIP>()
-                .Property(e => e.THRU_DATE)
-                .IsFixedLength();
 
             modelBuilder.Entity<CONFERENCE>()
                 .Property(e => e.CONFERENCE_ID)
@@ -1434,6 +1426,10 @@ namespace CoMS.Entities_Framework
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<PAPER_ABSTRACT>()
+                .Property(e => e.CONFERENCE_SESSION_TOPIC_ID_3)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<PAPER_ABSTRACT>()
                 .Property(e => e.TYPE_OF_STUDY_ID_3)
                 .HasPrecision(18, 0);
 
@@ -1442,11 +1438,19 @@ namespace CoMS.Entities_Framework
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<PAPER_ABSTRACT>()
+                .Property(e => e.CONFERENCE_SESSION_TOPIC_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<PAPER_ABSTRACT>()
                 .Property(e => e.TYPE_OF_STUDY_ID_4)
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<PAPER_ABSTRACT>()
                 .Property(e => e.CONFERENCE_PRESENTATION_TYPE_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<PAPER_ABSTRACT>()
+                .Property(e => e.CONFERENCE_SESSION_TOPIC_ID_5)
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<PAPER_ABSTRACT>()
@@ -1469,6 +1473,10 @@ namespace CoMS.Entities_Framework
                 .HasMany(e => e.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP)
                 .WithRequired(e => e.PAPER_ABSTRACT)
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<PAPER_ABSTRACT>()
+                .HasOptional(e => e.PAPER_TEXT)
+                .WithRequired(e => e.PAPER_ABSTRACT);
 
             modelBuilder.Entity<PAPER_ABSTRACT>()
                 .HasMany(e => e.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
@@ -1538,10 +1546,6 @@ namespace CoMS.Entities_Framework
                 .HasMany(e => e.CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT)
                 .WithRequired(e => e.PAPER_TEXT)
                 .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<PAPER_TEXT>()
-                .HasOptional(e => e.PAPER_ABSTRACT)
-                .WithRequired(e => e.PAPER_TEXT);
 
             modelBuilder.Entity<PAPER_TEXT>()
                 .HasMany(e => e.PRESENTER_CONFERENCE_SESSION_RELATIONSHIP)

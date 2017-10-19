@@ -239,28 +239,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AuthorAbstractController.cs" />
     <Compile Include="Controllers\AuthorPaperTextController.cs" />
-    <Compile Include="Controllers\BaseController.cs" />
-    <Compile Include="Controllers\BookmarkController.cs" />
-    <Compile Include="Controllers\ConferenceController.cs" />
-    <Compile Include="Controllers\ManageDeviceController.cs" />
-    <Compile Include="Controllers\MapController.cs" />
-    <Compile Include="Controllers\NotificationController.cs" />
-    <Compile Include="Controllers\PaperAbstractController.cs" />
-    <Compile Include="Controllers\RegistrationController.cs" />
-    <Compile Include="Controllers\ReviewPaperAbstractsController.cs" />
-    <Compile Include="Controllers\ScheduleController.cs" />
-    <Compile Include="Entities Framework\Bookmark.cs" />
-    <Compile Include="Entities Framework\Conference_Location.cs" />
-    <Compile Include="Entities Framework\Conference_Map.cs" />
-    <Compile Include="Entities Framework\Conversation_Reply.cs" />
-    <Compile Include="Entities Framework\Manage_Device.cs" />
-    <Compile Include="Entities Framework\MYDB.cs" />
-    <Compile Include="Entities Framework\Notification.cs" />
-    <Compile Include="Models\AuthorAbstractModel.cs" />
-    <Compile Include="Models\AuthorPaperTextModel.cs" />
-    <Compile Include="Models\BookmarkModel.cs" />
-    <Compile Include="Controllers\ChatController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Entities Framework\ACCOUNT.cs" />
     <Compile Include="Entities Framework\ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\ACCOUNT_FOR_CONFERENCE.cs" />
@@ -271,12 +249,15 @@
     <Compile Include="Entities Framework\AUTHOR.cs" />
     <Compile Include="Entities Framework\AUTHOR_PAPER_ABSTRACT_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\AUTHOR_PAPER_TEXT_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\Bookmark.cs" />
     <Compile Include="Entities Framework\CONFERENCE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_ATTENDEE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION.cs" />
     <Compile Include="Entities Framework\CONFERENCE_ATTENDEE_TYPE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_BOARD_OF_REVIEW.cs" />
     <Compile Include="Entities Framework\CONFERENCE_FIELD_OF_STUDY_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\Conference_Location.cs" />
+    <Compile Include="Entities Framework\Conference_Map.cs" />
     <Compile Include="Entities Framework\CONFERENCE_PRESENTATION_TYPE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_REGISTRATION_PACKAGE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_REGISTRATION_PACKAGE_CONDITIONS.cs" />
@@ -290,12 +271,14 @@
     <Compile Include="Entities Framework\CONFERENCE_SETTING_RIGHTS.cs" />
     <Compile Include="Entities Framework\CONFERENCE_TYPE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\Conversation_Reply.cs" />
     <Compile Include="Entities Framework\COUNTRY.cs" />
     <Compile Include="Entities Framework\DB.cs" />
     <Compile Include="Entities Framework\FACILITY.cs" />
     <Compile Include="Entities Framework\FIELD_OF_STUDY.cs" />
     <Compile Include="Entities Framework\GENDER_TYPE.cs" />
     <Compile Include="Entities Framework\LINE_OF_BUSINES_TYPE.cs" />
+    <Compile Include="Entities Framework\Manage_Device.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_FUNCTION.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_GROUP.cs" />
@@ -303,6 +286,8 @@
     <Compile Include="Entities Framework\MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_GROUP_MENU_FOR_CONFERENCE.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_MENU.cs" />
+    <Compile Include="Entities Framework\MYDB.cs" />
+    <Compile Include="Entities Framework\Notification.cs" />
     <Compile Include="Entities Framework\ORGANIZATION.cs" />
     <Compile Include="Entities Framework\PAPER_ABSTRACT.cs" />
     <Compile Include="Entities Framework\PAPER_REVIEW_SUMUP_BY_CONFERENCE_BOARD_OF_REVIEW.cs" />
@@ -332,6 +317,21 @@
     <Compile Include="Entities Framework\WINFORM_GROUP_FUNCTION_FOR_CONFERENCE.cs" />
     <Compile Include="Entities Framework\WINFORM_GROUP_MENU_FOR_CONFERENCE.cs" />
     <Compile Include="Entities Framework\WINFORM_MENU.cs" />
+    <Compile Include="Models\AuthorPaperTextModel.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\BookmarkController.cs" />
+    <Compile Include="Controllers\ConferenceController.cs" />
+    <Compile Include="Controllers\ManageDeviceController.cs" />
+    <Compile Include="Controllers\MapController.cs" />
+    <Compile Include="Controllers\NotificationController.cs" />
+    <Compile Include="Controllers\PaperAbstractController.cs" />
+    <Compile Include="Controllers\RegistrationController.cs" />
+    <Compile Include="Controllers\ReviewPaperAbstractsController.cs" />
+    <Compile Include="Controllers\ScheduleController.cs" />
+    <Compile Include="Models\AuthorAbstractModel.cs" />
+    <Compile Include="Models\BookmarkModel.cs" />
+    <Compile Include="Controllers\ChatController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -454,7 +454,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>56032</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:56032/</IISUrl>
+          <IISUrl>http://localhost:8882/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -16,10 +16,9 @@ namespace CoMS.Entities_Framework
         [Column(TypeName = "numeric")]
         public decimal PERSON_ID { get; set; }
 
-        [Required]
         public string DEVICE_TOKEN { get; set; }
 
-        public DateTime CREATE_DATE { get; set; }
+        public DateTime? CREATE_DATE { get; set; }
 
         public DateTime? UPDATE_DATE { get; set; }
     }

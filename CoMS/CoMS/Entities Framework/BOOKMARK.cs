@@ -10,14 +10,15 @@ namespace CoMS.Entities_Framework
     public partial class Bookmark
     {
         [Key]
+        [Column(TypeName = "numeric")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal BOOKMARK_ID { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? PERSON_ID { get; set; }
+        public decimal PERSON_ID { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? PERSON_ID_BOOKMARK { get; set; }
+        public decimal PERSON_ID_BOOKMARK { get; set; }
 
         [StringLength(600)]
         public string NAME_BOOKMARK { get; set; }
@@ -27,6 +28,6 @@ namespace CoMS.Entities_Framework
 
         public string DESCRIPTION { get; set; }
 
-        public DateTime CREATE_DATE { get; set; }
+        public DateTime? CREATE_DATE { get; set; }
     }
 }

@@ -191,11 +191,6 @@ namespace CoMS.Entities_Framework
         [StringLength(150)]
         public string CANCELLATION_FEE_AMOUNT_CURRENCY_UOM_NAME_1 { get; set; }
 
-        public bool? CANCELLATION_REFUND_BY_REGISTRATION_PAYMENT_METHOD_ { get; set; }
-
-        [StringLength(250)]
-        public string CANCELLATION_REFUND_BY_REGISTRATION_PAYMENT_METHOD_SCRIPT_ { get; set; }
-
         public bool? CANCELLATION_REFUND_BANK_TRANSFER_ACCEPTED_1 { get; set; }
 
         [StringLength(250)]

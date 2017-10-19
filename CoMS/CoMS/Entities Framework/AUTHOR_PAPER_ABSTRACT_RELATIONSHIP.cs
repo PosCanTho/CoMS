@@ -67,8 +67,7 @@ namespace CoMS.Entities_Framework
 
         public DateTime? FROM_DATE { get; set; }
 
-        [StringLength(10)]
-        public string THRU_DATE { get; set; }
+        public DateTime? THRU_DATE { get; set; }
 
         public short? AUTHOR_ORDER_NUMBER { get; set; }
 

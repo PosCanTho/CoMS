@@ -49,11 +49,11 @@ namespace CoMS.Controllers
                     notificationResponse.Title = notifi.TITLE;
                     notificationResponse.Message = notifi.MESSAGE;
                     notificationResponse.Image = notifi.IMAGE;
-                    notificationResponse.PersonIdFrom = notifi.PERSON_ID_FROM.Value;
-                    notificationResponse.PersonIdTo = notifi.PERSON_ID_TO.Value;
+                    notificationResponse.PersonIdFrom = notifi.PERSON_ID_FROM;
+                    notificationResponse.PersonIdTo = notifi.PERSON_ID_TO;
                     notificationResponse.Readed = notifi.READED.Value;
                     notificationResponse.CreateDate = notifi.CREATE_DATE.Value;
-                    notificationResponse.NumberUnread = notificationModel.GetNumberUnread(notifi.PERSON_ID_TO.Value);
+                    notificationResponse.NumberUnread = notificationModel.GetNumberUnread(notifi.PERSON_ID_TO);
 
                     using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
                     {
@@ -112,11 +112,11 @@ namespace CoMS.Controllers
                 notificationResponse.Title = item.TITLE;
                 notificationResponse.Message = item.MESSAGE;
                 notificationResponse.Image = item.IMAGE;
-                notificationResponse.PersonIdFrom = item.PERSON_ID_FROM.Value;
-                notificationResponse.PersonIdTo = item.PERSON_ID_TO.Value;
+                notificationResponse.PersonIdFrom = item.PERSON_ID_FROM;
+                notificationResponse.PersonIdTo = item.PERSON_ID_TO;
                 notificationResponse.Readed = item.READED.Value;
                 notificationResponse.CreateDate = item.CREATE_DATE.Value;
-                notificationResponse.NumberUnread = model.GetNumberUnread(item.PERSON_ID_TO.Value);
+                notificationResponse.NumberUnread = model.GetNumberUnread(item.PERSON_ID_TO);
                 listResponse.Add(notificationResponse);
 
             }

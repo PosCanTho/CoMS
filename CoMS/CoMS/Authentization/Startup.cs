@@ -19,7 +19,7 @@ namespace CoMS
             {
                 TokenEndpointPath = new PathString("/api/token"),
                 Provider = new OAuthAppProvider(),
-                AccessTokenExpireTimeSpan = TimeSpan.FromDays(30),
+                AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
                 AllowInsecureHttp = true
             };
         }

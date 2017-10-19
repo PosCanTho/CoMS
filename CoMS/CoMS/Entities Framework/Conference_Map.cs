@@ -19,7 +19,7 @@ namespace CoMS.Entities_Framework
         public decimal CONFERENCE_MAP_ID { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? CONFERENCE_ID { get; set; }
+        public decimal CONFERENCE_ID { get; set; }
 
         public string CONFERENCE_NAME { get; set; }
 

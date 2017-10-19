@@ -115,6 +115,11 @@ namespace CoMS.Untils
             client.Send(message);
         }
 
-        
+        public static String EncryptMd5(String value)
+        {
+            System.Security.Cryptography.MD5 hs = System.Security.Cryptography.MD5.Create();
+            byte[] db = hs.ComputeHash(System.Text.Encoding.UTF8.GetBytes(value));
+            return Convert.ToBase64String(db);
+        }
     }
 }

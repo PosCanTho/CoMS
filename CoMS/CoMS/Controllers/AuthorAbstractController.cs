@@ -22,15 +22,16 @@ namespace CoMS.Controllers
         public HttpResponseMessage ListPaperAbstract([FromBody] UserAuthor user)
         {
             /*
-             * Yêu cầu:
-             * Người dùng tác giả gửi username và pass, lấy tất cả các bài paper abstract của tác giả đó
+             * Yêu c?u:
+             * Ngu?i dùng tác gi? g?i username và pass, l?y t?t c? các bài paper abstract c?a tác gi? dó
              */
             if (user != null)
             {
                 var query = from list_author_paper_abstract_relationship in db.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP
                             join list_paper_abstarct in db.PAPER_ABSTRACT on list_author_paper_abstract_relationship.PAPER_ID equals list_paper_abstarct.PAPER_ID
                             join confer in db.CONFERENCEs on list_author_paper_abstract_relationship.CONFERENCE_ID equals confer.CONFERENCE_ID
-                            where list_author_paper_abstract_relationship.PERSON_ID == user.id
+                            where list_author_paper_abstract_relationship.PERSON_ID == user.PERSON_ID
+
                             select
                             new
                             {
@@ -70,7 +71,7 @@ namespace CoMS.Controllers
                                 list_paper_abstarct.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
                                 list_paper_abstarct.FIRST_SUBMITTED_DATE_1,
                                 list_paper_abstarct.LAST_REVISED_DATE_1,
-
+                                list_paper_abstarct.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
 
                                 CONFERENCE_NAME2 = list_paper_abstarct.PAPER_ABSTRACT_TITLE_2 == null ? null : (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_2),
                                 confer.PAPER_ABSTRACT_DEADLINE_2,
@@ -89,6 +90,7 @@ namespace CoMS.Controllers
                                 list_paper_abstarct.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
                                 list_paper_abstarct.FIRST_SUBMITTED_DATE_2,
                                 list_paper_abstarct.LAST_REVISED_DATE_2,
+                                list_paper_abstarct.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
 
 
                                 CONFERENCE_NAME3 = list_paper_abstarct.PAPER_ABSTRACT_TITLE_2 == null ? null : (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_2),
@@ -107,6 +109,7 @@ namespace CoMS.Controllers
                                 CONFERENCE_SESSION_TOPIC_ID_3 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2,
                                 CONFERENCE_SESSION_TOPIC_NAME_3 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2,
                                 CONFERENCE_SESSION_TOPIC_NAME_EN_3 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                list_paper_abstarct.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
 
 
                                 confer.PAPER_ABSTRACT_DEADLINE_4,
@@ -123,6 +126,7 @@ namespace CoMS.Controllers
                                 CONFERENCE_SESSION_TOPIC_ID_4 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2,
                                 CONFERENCE_SESSION_TOPIC_NAME_4 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2,
                                 CONFERENCE_SESSION_TOPIC_NAME_EN_4 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                list_paper_abstarct.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
 
 
                                 CONFERENCE_NAME5 = list_paper_abstarct.PAPER_ABSTRACT_TITLE_2 == null ? null : (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_2),
@@ -140,11 +144,14 @@ namespace CoMS.Controllers
                                 CONFERENCE_SESSION_TOPIC_ID_5 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2,
                                 CONFERENCE_SESSION_TOPIC_NAME_5 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2,
                                 CONFERENCE_SESSION_TOPIC_NAME_EN_5 = list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                list_paper_abstarct.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
 
 
                                 list_paper_abstarct.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                list_paper_abstarct.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
                                 list_paper_abstarct.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_REVIEWER_PERSON_ID,
-                                list_paper_abstarct.PAPER_ABSTRACT_WITHDRAWN
+                                list_paper_abstarct.PAPER_ABSTRACT_WITHDRAWN,
+                                list_paper_abstarct.PAPER_ABSTRACT_WITHDRAWN_DATE
                             };
                 if (query != null)
                 {
@@ -180,10 +187,13 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", q.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
                                             new JProperty("FIRST_SUBMITTED_DATE", q.FIRST_SUBMITTED_DATE_1),
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_1),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME", q.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_ABSTRACT_WITHDRAWN", q.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", q.PAPER_ABSTRACT_WITHDRAWN_DATE),
                                             new JProperty("POSITION", 1)
                                             );
                             jsonArray.Add(json1);
@@ -218,10 +228,13 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", q.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
                                             new JProperty("FIRST_SUBMITTED_DATE", q.FIRST_SUBMITTED_DATE_2),
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_2),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME", q.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_ABSTRACT_WITHDRAWN", q.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", q.PAPER_ABSTRACT_WITHDRAWN_DATE),
                                             new JProperty("POSITION", 2)
                                             );
                             jsonArray.Add(json2);
@@ -254,10 +267,13 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", q.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
                                             new JProperty("FIRST_SUBMITTED_DATE", q.FIRST_SUBMITTED_DATE_3),
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_3),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME", q.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_ABSTRACT_WITHDRAWN", q.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", q.PAPER_ABSTRACT_WITHDRAWN_DATE),
                                             new JProperty("POSITION", 3)
                                             );
                             jsonArray.Add(json3);
@@ -290,10 +306,13 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", q.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
                                             new JProperty("FIRST_SUBMITTED_DATE", q.FIRST_SUBMITTED_DATE_4),
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_4),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME", q.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_ABSTRACT_WITHDRAWN", q.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", q.PAPER_ABSTRACT_WITHDRAWN_DATE),
                                             new JProperty("POSITION", 4)
                                             );
                             jsonArray.Add(json4);
@@ -326,10 +345,13 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", q.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
                                             new JProperty("FIRST_SUBMITTED_DATE", q.FIRST_SUBMITTED_DATE_5),
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_5),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME", q.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_ABSTRACT_WITHDRAWN", q.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", q.PAPER_ABSTRACT_WITHDRAWN_DATE),
                                             new JProperty("POSITION", 5)
                                             );
                             jsonArray.Add(json5);
@@ -483,7 +505,7 @@ namespace CoMS.Controllers
 
         public class UserAuthor
         {
-            public int id { get; set; }
+            public int PERSON_ID { get; set; }
         }
 
 

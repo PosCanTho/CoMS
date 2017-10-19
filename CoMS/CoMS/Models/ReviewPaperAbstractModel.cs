@@ -18,25 +18,19 @@ namespace CoMS.Models
             db = new DB();
         }
 
-        //public int GetAuThorAbstractRelationshipByIdPerson(int PERSON_ID)
-        //{
-        //    var t = from paper in db.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP
-        //            where paper.PERSON_ID == PERSON_ID
-        //            select new { paper.PAPER_ID };
-
-        //}
-        //public REVIEWER_PAPER_ABSTRACT_RELATIONSHIP SeeReviewAbstract(int PERSON_ID, int CONFERENCE_BOARD_OF_REVIEW_ID, int CONFERENCE_ID,
-        //   bool APPROVED
-        //   )
-        //{
-        //    var review = from review_paper_abstract in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-        //                 where review_paper_abstract.PERSON_ID == PERSON_ID &&
-        //                 review_paper_abstract.CONFERENCE_BOARD_OF_REVIEW_ID == CONFERENCE_BOARD_OF_REVIEW_ID &&
-        //                 review_paper_abstract.CONFERENCE_ID == CONFERENCE_ID &&
-        //                 review_paper_abstract.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == APPROVED
-        //                 select review_paper_abstract;
-        //    return review;
-        //}
+        public bool AddReview(REVIEWER_PAPER_ABSTRACT_RELATIONSHIP review)
+        {
+            try
+            {
+                db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.Add(review);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
         public bool ReviewPaperAbstract(
                     int PERSON_ID ,
@@ -94,6 +88,8 @@ namespace CoMS.Models
                     item.REVIEW_TEXT_EN = REVIEW_TEXT_EN;
                     item.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT = APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT;
                     item.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE = DateTime.Now;
+
+
 
                     db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.Add(item);
                     db.SaveChanges();

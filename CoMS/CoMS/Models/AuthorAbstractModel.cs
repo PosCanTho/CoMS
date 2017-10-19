@@ -23,6 +23,26 @@ namespace CoMS.Models
             return db.PAPER_ABSTRACT.Find(id);
         }
 
+        public bool UpdateStatusFinal(int PAPER_ID, int PERSON_ID)
+        {
+            try
+            {
+                var paperAbstract = GetPaperAbstractById(PAPER_ID);
+                paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT = true;
+                paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE = DateTime.Now;
+                paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_REVIEWER_PERSON_ID = PERSON_ID;
+
+                string value1 = PAPER_ID + "-" + 1 + "-" + "FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT";
+                paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_SCRIPT = Utils.EncryptMd5(value1);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
 
         // Rút bài và thay đổi trạng thái trong csdl
         public bool WithdrawnPaperAbstract(int id)
@@ -32,6 +52,8 @@ namespace CoMS.Models
                 var paperAbstract = GetPaperAbstractById(id);
                 paperAbstract.PAPER_ABSTRACT_WITHDRAWN = true;
                 paperAbstract.PAPER_ABSTRACT_WITHDRAWN_DATE = DateTime.Now;
+                string value = id + "-" + 1 + "-" + "PAPER_ABSTRACT_WITHDRAWN";
+                paperAbstract.PAPER_ABSTRACT_WITHDRAWN_SCRIPT = Utils.EncryptMd5(value);
                 db.SaveChanges();
                 return true;
             }
@@ -41,7 +63,7 @@ namespace CoMS.Models
             }
         }
 
-        
+
 
         // update abstract
         public bool UpdateAbstractById(int PAPER_ID, String PAPER_ABSTRACT_TITLE, String PAPER_ABSTRACT_TITLE_EN, int CONFERENCE_SESSION_TOPIC_ID,

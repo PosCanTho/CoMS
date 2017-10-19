@@ -50,7 +50,7 @@ namespace CoMS.Controllers
                         book.PERSON_ID_BOOKMARK = bookmark.PersonIdBookmark;
                         book.NAME_BOOKMARK = Utils.GetFullName(account.CURRENT_FIRST_NAME, account.CURRENT_MIDDLE_NAME, account.CURRENT_LAST_NAME);
                         book.IMAGE_BOOKMARK = account.Image;
-                        book.DESCRIPTION = account.Note;
+                        book.DESCRIPTION = account.CURRENT_HOME_ORGANIZATION_NAME;
                         book.CREATE_DATE = DateTime.Now;
 
                         bool result = bookmarkModel.AddBookmark(book);

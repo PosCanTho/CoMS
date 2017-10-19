@@ -122,7 +122,20 @@ namespace CoMS.Entities_Framework
 
         public DateTime? LAST_REVISED_DATE_2 { get; set; }
 
-        public DateTime? LAST_REVISED_DATE_3 { get; set; }
+        [StringLength(500)]
+        public string PAPER_ABSTRACT_TITLE_3 { get; set; }
+
+        [StringLength(500)]
+        public string PAPER_ABSTRACT_TITLE_EN_3 { get; set; }
+
+        [Column(TypeName = "numeric")]
+        public decimal? CONFERENCE_SESSION_TOPIC_ID_3 { get; set; }
+
+        [StringLength(500)]
+        public string CONFERENCE_SESSION_TOPIC_NAME_3 { get; set; }
+
+        [StringLength(500)]
+        public string CONFERENCE_SESSION_TOPIC_NAME_EN_3 { get; set; }
 
         public string PAPER_ABSTRACT_TEXT_3 { get; set; }
 
@@ -157,7 +170,22 @@ namespace CoMS.Entities_Framework
 
         public DateTime? FIRST_SUBMITTED_DATE_3 { get; set; }
 
-        public DateTime? LAST_REVISED_DATE_4 { get; set; }
+        public DateTime? LAST_REVISED_DATE_3 { get; set; }
+
+        [StringLength(500)]
+        public string PAPER_ABSTRACT_TITLE_4 { get; set; }
+
+        [StringLength(500)]
+        public string PAPER_ABSTRACT_TITLE_EN_4 { get; set; }
+
+        [Column(TypeName = "numeric")]
+        public decimal? CONFERENCE_SESSION_TOPIC_ID_4 { get; set; }
+
+        [StringLength(500)]
+        public string CONFERENCE_SESSION_TOPIC_NAME_4 { get; set; }
+
+        [StringLength(500)]
+        public string CONFERENCE_SESSION_TOPIC_NAME_EN_4 { get; set; }
 
         public string PAPER_ABSTRACT_TEXT_4 { get; set; }
 
@@ -192,7 +220,22 @@ namespace CoMS.Entities_Framework
 
         public DateTime? FIRST_SUBMITTED_DATE_4 { get; set; }
 
-        public DateTime? LAST_REVISED_DATE_5 { get; set; }
+        public DateTime? LAST_REVISED_DATE_4 { get; set; }
+
+        [StringLength(500)]
+        public string PAPER_ABSTRACT_TITLE_5 { get; set; }
+
+        [StringLength(500)]
+        public string PAPER_ABSTRACT_TITLE_EN_5 { get; set; }
+
+        [Column(TypeName = "numeric")]
+        public decimal? CONFERENCE_SESSION_TOPIC_ID_5 { get; set; }
+
+        [StringLength(500)]
+        public string CONFERENCE_SESSION_TOPIC_NAME_5 { get; set; }
+
+        [StringLength(500)]
+        public string CONFERENCE_SESSION_TOPIC_NAME_EN_5 { get; set; }
 
         public string PAPER_ABSTRACT_TEXT_5 { get; set; }
 
@@ -226,6 +269,8 @@ namespace CoMS.Entities_Framework
         public string CONFERENCE_PRESENTATION_TYPE_NAME_EN_5 { get; set; }
 
         public DateTime? FIRST_SUBMITTED_DATE_5 { get; set; }
+
+        public DateTime? LAST_REVISED_DATE_5 { get; set; }
 
         public bool? PAPER_ABSTRACT_WITHDRAWN { get; set; }
 

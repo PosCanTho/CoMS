@@ -17,7 +17,7 @@ namespace CoMS.Entities_Framework
         public decimal CONFERENCE_SESSION_ID { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal CONFERENCE_REGISTRATION_PACKAGE_OFFERING_ID { get; set; }
+        public decimal? CONFERENCE_REGISTRATION_PACKAGE_OFFERING_ID { get; set; }
 
         public string NOTE { get; set; }
 

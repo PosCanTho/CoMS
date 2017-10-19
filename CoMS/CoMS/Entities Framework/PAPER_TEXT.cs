@@ -131,7 +131,7 @@ namespace CoMS.Entities_Framework
         public DateTime? FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_REVIEWER_PERSON_ID { get; set; }
+        public decimal? FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_REVIEWER_PERSON_ID { get; set; }
 
         [Column(TypeName = "numeric")]
         public decimal? FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID { get; set; }

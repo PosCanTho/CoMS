@@ -18,10 +18,10 @@ namespace CoMS.Entities_Framework
         public DateTime? TIME { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? PERSON_ID_FROM { get; set; }
+        public decimal PERSON_ID_FROM { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? PERSON_ID_TO { get; set; }
+        public decimal PERSON_ID_TO { get; set; }
 
         [Column(TypeName = "numeric")]
         public decimal? PERSON_ID_DELETE { get; set; }

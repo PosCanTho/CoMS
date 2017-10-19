@@ -23,10 +23,10 @@ namespace CoMS.Entities_Framework
         public string IMAGE { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? PERSON_ID_FROM { get; set; }
+        public decimal PERSON_ID_FROM { get; set; }
 
         [Column(TypeName = "numeric")]
-        public decimal? PERSON_ID_TO { get; set; }
+        public decimal PERSON_ID_TO { get; set; }
 
         public bool? READED { get; set; }
 

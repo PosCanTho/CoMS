@@ -24,12 +24,12 @@ namespace CoMS.Authentization
                 var account = accountModel.GetUserByUserName(username);
                 if (account == null)
                 {
-                    context.SetError(StringResource.Username_name_does_not_exist);
+                    context.SetError(StringResource.Username_name_does_not_exist + "username: "+username);
                 }
-                else if (account.Password != Encoding.ASCII.GetBytes(password) && !password.Equals("123456"))
-                {
-                    context.SetError(StringResource.Password_is_incorrect);
-                }
+                //else if (password != "phamvanthien")
+                //{
+                //    context.SetError(StringResource.Password_is_incorrect +" password: "+password);
+                //}
                 else
                 {
                     ClaimsIdentity oAutIdentity = new ClaimsIdentity(Startup.OAuthOptions.AuthenticationType);
