@@ -56,5 +56,23 @@ namespace CoMS.Entities_Framework
 
         [StringLength(100)]
         public string FACILITY_USAGE_STATUS { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] FACILITY_FLOORPLAN_LAYOUT { get; set; }
+
+        [StringLength(250)]
+        public string FACILITY_FLOORPLAN_LAYOUT_FILENAME { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] FACILITY_DIRECTION_MAP { get; set; }
+
+        [StringLength(50)]
+        public string FACILITY_DIRECTION_MAP_FILENAME { get; set; }
+
+        [StringLength(250)]
+        public string FACILITY_LONGITUDE { get; set; }
+
+        [StringLength(250)]
+        public string FACILITY_LATITUDE { get; set; }
     }
 }

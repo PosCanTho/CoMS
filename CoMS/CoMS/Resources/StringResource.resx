@@ -225,4 +225,25 @@
   <data name="Please_select_gender" xml:space="preserve">
     <value>Vui lòng chọn giới tính.</value>
   </data>
+  <data name="Conference_do_not_exist" xml:space="preserve">
+    <value>Conference do not exist.</value>
+  </data>
+  <data name="Can_not_follow" xml:space="preserve">
+    <value>Can't follow</value>
+  </data>
+  <data name="Can_not_unfollow" xml:space="preserve">
+    <value>Can't unfollow</value>
+  </data>
+  <data name="Not_found" xml:space="preserve">
+    <value>Not_found</value>
+  </data>
+  <data name="Follow_is_exist" xml:space="preserve">
+    <value>Follow is exist</value>
+  </data>
+  <data name="Get_list_for_new_channel_error" xml:space="preserve">
+    <value>Get list for new channel error</value>
+  </data>
+  <data name="Can_not_create_new_channel" xml:space="preserve">
+    <value>Can not create new channel</value>
+  </data>
 </root>

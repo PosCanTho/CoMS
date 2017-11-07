@@ -30,8 +30,9 @@ namespace CoMS.Controllers
                 var query = from list_author_paper_abstract_relationship in db.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP
                             join list_paper_abstarct in db.PAPER_ABSTRACT on list_author_paper_abstract_relationship.PAPER_ID equals list_paper_abstarct.PAPER_ID
                             join confer in db.CONFERENCEs on list_author_paper_abstract_relationship.CONFERENCE_ID equals confer.CONFERENCE_ID
-                            where list_author_paper_abstract_relationship.PERSON_ID == user.PERSON_ID
-
+                            where
+                            list_author_paper_abstract_relationship.PERSON_ID == user.PERSON_ID
+                            && list_author_paper_abstract_relationship.CONFERENCE_ID == user.CONFERENCE_ID
                             select
                             new
                             {
@@ -51,6 +52,7 @@ namespace CoMS.Controllers
                                 list_author_paper_abstract_relationship.CORRESPONDING_AUTHOR,
                                 CONFERENCE_NAME1 = (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_1),
                                 confer.PAPER_ABSTRACT_DEADLINE_1,
+                                confer.PAPER_TEXT_DEADLINE_1,
                                 confer.FROM_DATE,
                                 confer.THRU_DATE,
                                 list_paper_abstarct.PAPER_ID,
@@ -62,6 +64,7 @@ namespace CoMS.Controllers
                                 list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_1,
                                 list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
                                 list_paper_abstarct.PAPER_ABSTRACT_TEXT_1,
+                                list_paper_abstarct.PAPER_ABSTRACT_TEXT_EN_1,
                                 list_paper_abstarct.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
                                 list_paper_abstarct.TYPE_OF_STUDY_ID_1,
                                 list_paper_abstarct.TYPE_OF_STUDY_NAME_1,
@@ -75,12 +78,14 @@ namespace CoMS.Controllers
 
                                 CONFERENCE_NAME2 = list_paper_abstarct.PAPER_ABSTRACT_TITLE_2 == null ? null : (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_2),
                                 confer.PAPER_ABSTRACT_DEADLINE_2,
+                                confer.PAPER_TEXT_DEADLINE_2,
                                 list_paper_abstarct.PAPER_ABSTRACT_TITLE_2,
                                 list_paper_abstarct.PAPER_ABSTRACT_TITLE_EN_2,
                                 list_paper_abstarct.CONFERENCE_SESSION_TOPIC_ID_2,
                                 list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_2,
                                 list_paper_abstarct.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
                                 list_paper_abstarct.PAPER_ABSTRACT_TEXT_2,
+                                list_paper_abstarct.PAPER_ABSTRACT_TEXT_EN_2,
                                 list_paper_abstarct.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
                                 list_paper_abstarct.TYPE_OF_STUDY_ID_2,
                                 list_paper_abstarct.TYPE_OF_STUDY_NAME_2,
@@ -95,7 +100,9 @@ namespace CoMS.Controllers
 
                                 CONFERENCE_NAME3 = list_paper_abstarct.PAPER_ABSTRACT_TITLE_2 == null ? null : (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_2),
                                 confer.PAPER_ABSTRACT_DEADLINE_3,
+                                confer.PAPER_TEXT_DEADLINE_3,
                                 list_paper_abstarct.PAPER_ABSTRACT_TEXT_3,
+                                list_paper_abstarct.PAPER_ABSTRACT_TEXT_EN_3,
                                 list_paper_abstarct.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
                                 list_paper_abstarct.TYPE_OF_STUDY_ID_3,
                                 list_paper_abstarct.TYPE_OF_STUDY_NAME_3,
@@ -113,7 +120,9 @@ namespace CoMS.Controllers
 
 
                                 confer.PAPER_ABSTRACT_DEADLINE_4,
+                                confer.PAPER_TEXT_DEADLINE_4,
                                 list_paper_abstarct.PAPER_ABSTRACT_TEXT_4,
+                                list_paper_abstarct.PAPER_ABSTRACT_TEXT_EN_4,
                                 list_paper_abstarct.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
                                 list_paper_abstarct.TYPE_OF_STUDY_ID_4,
                                 list_paper_abstarct.TYPE_OF_STUDY_NAME_4,
@@ -131,7 +140,9 @@ namespace CoMS.Controllers
 
                                 CONFERENCE_NAME5 = list_paper_abstarct.PAPER_ABSTRACT_TITLE_2 == null ? null : (confer.CONFERENCE_NAME + " - " + list_paper_abstarct.PAPER_ABSTRACT_TITLE_2),
                                 confer.PAPER_ABSTRACT_DEADLINE_5,
+                                confer.PAPER_TEXT_DEADLINE_5,
                                 list_paper_abstarct.PAPER_ABSTRACT_TEXT_5,
+                                list_paper_abstarct.PAPER_ABSTRACT_TEXT_EN_5,
                                 list_paper_abstarct.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
                                 list_paper_abstarct.TYPE_OF_STUDY_ID_5,
                                 list_paper_abstarct.TYPE_OF_STUDY_NAME_5,
@@ -172,12 +183,14 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME1),
                                             new JProperty("PAPER_ABSTRACT_DEADLINE", q.PAPER_ABSTRACT_DEADLINE_1),
+                                            new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_1),
                                             new JProperty("PAPER_ABSTRACT_TITLE", q.PAPER_ABSTRACT_TITLE_1),
                                             new JProperty("PAPER_ABSTRACT_TITLE_EN", q.PAPER_ABSTRACT_TITLE_EN_1),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_1),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_1),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
                                             new JProperty("PAPER_ABSTRACT_TEXT", q.PAPER_ABSTRACT_TEXT_1),
+                                            new JProperty("PAPER_ABSTRACT_TEXT_EN", q.PAPER_ABSTRACT_TEXT_EN_1),
                                             new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", q.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
                                             new JProperty("TYPE_OF_STUDY_ID", q.TYPE_OF_STUDY_ID_1),
                                             new JProperty("TYPE_OF_STUDY_NAME", q.TYPE_OF_STUDY_NAME_1),
@@ -213,12 +226,14 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME2),
                                             new JProperty("PAPER_ABSTRACT_DEADLINE", q.PAPER_ABSTRACT_DEADLINE_2),
+                                            new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_2),
                                             new JProperty("PAPER_ABSTRACT_TITLE", q.PAPER_ABSTRACT_TITLE_2),
                                             new JProperty("PAPER_ABSTRACT_TITLE_EN", q.PAPER_ABSTRACT_TITLE_EN_2),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_2),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_2),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
                                             new JProperty("PAPER_ABSTRACT_TEXT", q.PAPER_ABSTRACT_TEXT_2),
+                                            new JProperty("PAPER_ABSTRACT_TEXT_EN", q.PAPER_ABSTRACT_TEXT_EN_2),
                                             new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", q.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
                                             new JProperty("TYPE_OF_STUDY_ID", q.TYPE_OF_STUDY_ID_2),
                                             new JProperty("TYPE_OF_STUDY_NAME", q.TYPE_OF_STUDY_NAME_2),
@@ -254,7 +269,9 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME3),
                                             new JProperty("PAPER_ABSTRACT_DEADLINE", q.PAPER_ABSTRACT_DEADLINE_3),
+                                            new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_3),
                                             new JProperty("PAPER_ABSTRACT_TEXT", q.PAPER_ABSTRACT_TEXT_3),
+                                            new JProperty("PAPER_ABSTRACT_TEXT_EN", q.PAPER_ABSTRACT_TEXT_EN_3),
                                             new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", q.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_3),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_3),
@@ -293,7 +310,9 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME4),
                                             new JProperty("PAPER_ABSTRACT_DEADLINE", q.PAPER_ABSTRACT_DEADLINE_4),
+                                            new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_4),
                                             new JProperty("PAPER_ABSTRACT_TEXT", q.PAPER_ABSTRACT_TEXT_4),
+                                            new JProperty("PAPER_ABSTRACT_TEXT_EN", q.PAPER_ABSTRACT_TEXT_EN_4),
                                             new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", q.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_4),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_4),
@@ -332,7 +351,9 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME5),
                                             new JProperty("PAPER_ABSTRACT_DEADLINE", q.PAPER_ABSTRACT_DEADLINE_5),
+                                            new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_5),
                                             new JProperty("PAPER_ABSTRACT_TEXT", q.PAPER_ABSTRACT_TEXT_5),
+                                            new JProperty("PAPER_ABSTRACT_TEXT_EN", q.PAPER_ABSTRACT_TEXT_EN_5),
                                             new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", q.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_5),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_5),
@@ -476,14 +497,14 @@ namespace CoMS.Controllers
         {
 
 
-            if (abstracts.PAPER_ID > 0)
+            if (abstracts.PAPER_ID >= 0)
             {
 
                 var paperAbstractModels = new AuthorAbstractModel();
                 var paperAbstract = paperAbstractModels.UpdateAbstractById(abstracts.PAPER_ID, abstracts.PAPER_ABSTRACT_TITLE, abstracts.PAPER_ABSTRACT_TITLE_EN, abstracts.CONFERENCE_SESSION_TOPIC_ID,
-            abstracts.CONFERENCE_SESSION_TOPIC_NAME, abstracts.CONFERENCE_SESSION_TOPIC_NAME_EN, abstracts.PAPER_ABSTRACT_TEXT, abstracts.FULL_PAPER_OR_WORK_IN_PROGRESS,
+            abstracts.CONFERENCE_SESSION_TOPIC_NAME, abstracts.CONFERENCE_SESSION_TOPIC_NAME_EN, abstracts.PAPER_ABSTRACT_TEXT, abstracts.PAPER_ABSTRACT_TEXT_EN, abstracts.FULL_PAPER_OR_WORK_IN_PROGRESS,
             abstracts.TYPE_OF_STUDY_ID, abstracts.TYPE_OF_STUDY_NAME, abstracts.TYPE_OF_STUDY_NAME_EN, abstracts.CONFERENCE_PRESENTATION_TYPE_ID, abstracts.CONFERENCE_PRESENTATION_TYPE_NAME,
-            abstracts.CONFERENCE_PRESENTATION_TYPE_NAME_EN, abstracts.POSITION);
+            abstracts.CONFERENCE_PRESENTATION_TYPE_NAME_EN, abstracts.POSITION, abstracts.PAPER_ABSTRACT_ATTACHED_FILENAME);
                 if (paperAbstract == true)
                 {
                     var result = new ResuleBoolean();
@@ -506,6 +527,7 @@ namespace CoMS.Controllers
         public class UserAuthor
         {
             public int PERSON_ID { get; set; }
+            public int CONFERENCE_ID { get; set; }
         }
 
 
@@ -552,9 +574,10 @@ namespace CoMS.Controllers
          */
         [HttpPost]
         [Route("api/Session_topic")]
-        public HttpResponseMessage Session_topic()
+        public HttpResponseMessage Session_topic(int conference_id)
         {
             var item = from sesion_topic in db.CONFERENCE_SESSION_TOPIC
+                       where sesion_topic.CONFERENCE_ID == conference_id
                        select new { sesion_topic.CONFERENCE_SESSION_TOPIC_ID, sesion_topic.CONFERENCE_SESSION_TOPIC_NAME, sesion_topic.CONFERENCE_SESSION_TOPIC_NAME_EN };
             if (item != null)
             {
@@ -572,10 +595,13 @@ namespace CoMS.Controllers
          */
         [HttpPost]
         [Route("api/Type_of_study")]
-        public HttpResponseMessage Type_of_study()
+        public HttpResponseMessage Type_of_study(int conference_id)
         {
-            var item = from type_of_study in db.TYPE_OF_STUDY
-                       select new { type_of_study.TYPE_OF_STUDY_ID, type_of_study.TYPE_OF_STUDY_NAME, type_of_study.TYPE_OF_STUDY_NAME_EN };
+            var item = (from type_of_study in db.TYPE_OF_STUDY
+                       join cf_type in db.CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP on type_of_study.TYPE_OF_STUDY_ID equals cf_type.TYPE_OF_STUDY_ID
+                       where cf_type.CONFERENCE_ID == conference_id
+                       select new { type_of_study.TYPE_OF_STUDY_ID, type_of_study.TYPE_OF_STUDY_NAME, type_of_study.TYPE_OF_STUDY_NAME_EN })
+                       .Distinct();
             if (item != null)
             {
                 return ResponseSuccess(StringResource.Success, item);
@@ -592,15 +618,17 @@ namespace CoMS.Controllers
          */
         [HttpPost]
         [Route("api/Conference_presentation_type")]
-        public HttpResponseMessage Conference_presentation_type()
+        public HttpResponseMessage Conference_presentation_type(int conference_id)
         {
-            var item = from conference_presentation in db.CONFERENCE_PRESENTATION_TYPE
+            var item = (from conference_presentation in db.CONFERENCE_PRESENTATION_TYPE
+                       join cf in db.SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE on conference_presentation.CONFERENCE_PRESENTATION_TYPE_ID equals cf.CONFERENCE_PRESENTATION_TYPE_ID
+                       where cf.CONFERENCE_ID == conference_id
                        select new
                        {
                            conference_presentation.CONFERENCE_PRESENTATION_TYPE_ID,
                            conference_presentation.CONFERENCE_PRESENTATION_TYPE_NAME,
                            conference_presentation.CONFERENCE_PRESENTATION_TYPE_NAME_EN
-                       };
+                       }).Distinct();
             if (item != null)
             {
                 return ResponseSuccess(StringResource.Success, item);
@@ -610,6 +638,29 @@ namespace CoMS.Controllers
                 return ResponseFail(StringResource.Data_not_received);
             }
         }
+
+
+
+        [HttpPost]
+        [Route("api/getFileNamePaperAbstract")]
+        public HttpResponseMessage getFileNamePaperAbstract([FromBody] ItemPaper2 paper)
+        {
+            
+            var result = from item in db.PAPER_ABSTRACT
+                         where item.PAPER_ID == paper.PAPER_ID
+                         select new
+                         {
+                             item.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                             item.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                             item.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                             item.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                             item.PAPER_ABSTRACT_ATTACHED_FILENAME_5
+                         };
+            return ResponseSuccess(StringResource.Success, result);
+        }
+
+
+
 
         /*
          * Lấy 1 bài báo theo trạng thái review
@@ -1387,6 +1438,8 @@ namespace CoMS.Controllers
             public String CONFERENCE_SESSION_TOPIC_NAME { get; set; }
             public String CONFERENCE_SESSION_TOPIC_NAME_EN { get; set; }
             public String PAPER_ABSTRACT_TEXT { get; set; }
+            public String PAPER_ABSTRACT_TEXT_EN { get; set; }
+            
             public String FULL_PAPER_OR_WORK_IN_PROGRESS { get; set; }
             public int TYPE_OF_STUDY_ID { get; set; }
             public String TYPE_OF_STUDY_NAME { get; set; }
@@ -1395,6 +1448,14 @@ namespace CoMS.Controllers
             public String CONFERENCE_PRESENTATION_TYPE_NAME { get; set; }
             public String CONFERENCE_PRESENTATION_TYPE_NAME_EN { get; set; }
             public int POSITION { get; set; }
+            public String PAPER_ABSTRACT_ATTACHED_FILENAME { get; set; }
+        }
+
+
+        public class ItemPaper2
+        {
+            public int PAPER_ID { get; set; }
+
         }
 
         //end

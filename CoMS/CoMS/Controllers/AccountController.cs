@@ -15,6 +15,7 @@ namespace CoMS.Controllers
 {
     public class AccountController : BaseController
     {
+        private DB db = new DB();
 
         [HttpPost]
         [Route("api/Login")]
@@ -391,27 +392,46 @@ namespace CoMS.Controllers
         [HttpPost]
         [Route("api/GetProfile")]
         [ResponseType(typeof(Profile))]
-        public HttpResponseMessage GetProfile([FromBody]UserProfile user)
+        public HttpResponseMessage GetProfile(int personId)
         {
-            var personModel = new PersonModel();
-            var accountModel = new AccountModel();
-            var personBookmark = personModel.GetPersonById(user.PersonIdBookmark);
-            var account = accountModel.GetAccountById(user.PersonIdBookmark);
-            if (personBookmark != null && account != null)
+            var account = db.ACCOUNTs.SingleOrDefault(x => x.PERSON_ID == personId);
+            if (account == null)
             {
-
-                var profile = new Profile();
-                profile.PersonId = user.PersonId;
-                profile.PersonIdBookmark = user.PersonIdBookmark;
-                profile.Image = account.Image;
-                profile.Name = Utils.GetFullName(personBookmark.CURRENT_FIRST_NAME, personBookmark.CURRENT_MIDDLE_NAME, personBookmark.CURRENT_LAST_NAME);
-                profile.IsBookmark = new BookmarkModel().CheckBookmark(user.PersonId, user.PersonIdBookmark);
-                profile.ListPastConference = accountModel.ListPastConference(user.PersonIdBookmark);
-                return ResponseSuccess(StringResource.Success, profile);
+                return ResponseFail(StringResource.Account_does_not_exist);
             }
             else
             {
-                return Request.CreateResponse(HttpStatusCode.NotFound, new ResponseData((int)HttpStatusCode.NotFound, StringResource.Account_does_not_exist));
+                var user = new UserMyProfile();
+                user.FirstName = account.CURRENT_FIRST_NAME;
+                user.MidleName = account.CURRENT_MIDDLE_NAME;
+                user.LastName = account.CURRENT_LAST_NAME;
+                user.Fullname = Utils.GetFullName(user.FirstName, user.MidleName, user.LastName);
+                user.UserName = account.UserName;
+                user.Email = account.Email;
+                user.PhoneNumber = account.CURRENT_PHONE;
+                user.BirthDay = new PersonModel().GetPersonById(personId).BIRTH_DATE;
+                user.Gender = account.CURRENT_GENDER;
+                user.Image = account.Image;
+                user.CurrentHomeOrganizationName = account.CURRENT_HOME_ORGANIZATION_NAME;
+                user.CurrentHomeOrganizationNameEn = account.CURRENT_HOME_ORGANIZATION_NAME_EN;
+                return ResponseSuccess(StringResource.Success, user);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/UploadAvatar")]
+        public HttpResponseMessage UploadAvatar(int personId, string imageName)
+        {
+           if (personId > 0 && !String.IsNullOrEmpty(imageName))
+            {
+                var result = db.ACCOUNTs.SingleOrDefault(x => x.PERSON_ID == personId);
+                result.Image = imageName;
+                db.SaveChanges();
+                return ResponseSuccess(StringResource.Success);
+            }
+            else
+            {
+                return ResponseFail(StringResource.Data_not_received);
             }
         }
 

@@ -14,8 +14,12 @@ namespace CoMS.Entities_Framework
 
         public virtual DbSet<ACCOUNT> ACCOUNTs { get; set; }
         public virtual DbSet<ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP> ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP { get; set; }
+        public virtual DbSet<ACCOUNT_DEVICE_RELATIONSHIP> ACCOUNT_DEVICE_RELATIONSHIP { get; set; }
+        public virtual DbSet<ACCOUNT_DOING_CONFERENCE_SURVEY> ACCOUNT_DOING_CONFERENCE_SURVEY { get; set; }
         public virtual DbSet<ACCOUNT_FOR_CONFERENCE> ACCOUNT_FOR_CONFERENCE { get; set; }
+        public virtual DbSet<ACCOUNT_MESSAGING_GROUP_MEMBERSHIP> ACCOUNT_MESSAGING_GROUP_MEMBERSHIP { get; set; }
         public virtual DbSet<ALL_TYPE_NAME> ALL_TYPE_NAME { get; set; }
+        public virtual DbSet<ANSWER_TO_CONFERENCE_SURVEY_QUESTION> ANSWER_TO_CONFERENCE_SURVEY_QUESTION { get; set; }
         public virtual DbSet<APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE> APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE { get; set; }
         public virtual DbSet<APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS> APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS { get; set; }
         public virtual DbSet<APPROVED_CONFERENCE_ATTENDEE_TYPES> APPROVED_CONFERENCE_ATTENDEE_TYPES { get; set; }
@@ -39,13 +43,19 @@ namespace CoMS.Entities_Framework
         public virtual DbSet<CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT> CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT { get; set; }
         public virtual DbSet<CONFERENCE_SESSION_TOPIC> CONFERENCE_SESSION_TOPIC { get; set; }
         public virtual DbSet<CONFERENCE_SETTING_RIGHTS> CONFERENCE_SETTING_RIGHTS { get; set; }
+        public virtual DbSet<CONFERENCE_SURVEY> CONFERENCE_SURVEY { get; set; }
+        public virtual DbSet<CONFERENCE_SURVEY_QUESTION> CONFERENCE_SURVEY_QUESTION { get; set; }
         public virtual DbSet<CONFERENCE_TYPE> CONFERENCE_TYPE { get; set; }
         public virtual DbSet<CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP> CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP { get; set; }
         public virtual DbSet<COUNTRY> COUNTRies { get; set; }
         public virtual DbSet<FACILITY> FACILITies { get; set; }
         public virtual DbSet<FIELD_OF_STUDY> FIELD_OF_STUDY { get; set; }
+        public virtual DbSet<FOLLOWER_RELATIONSHIP> FOLLOWER_RELATIONSHIP { get; set; }
         public virtual DbSet<GENDER_TYPE> GENDER_TYPE { get; set; }
         public virtual DbSet<LINE_OF_BUSINES_TYPE> LINE_OF_BUSINES_TYPE { get; set; }
+        public virtual DbSet<MANDATORY_OR_REGISTED_CONFERENCE_SESSION> MANDATORY_OR_REGISTED_CONFERENCE_SESSION { get; set; }
+        public virtual DbSet<MESSAGE_FEED> MESSAGE_FEED { get; set; }
+        public virtual DbSet<MESSAGING_GROUP> MESSAGING_GROUP { get; set; }
         public virtual DbSet<MOBILEFORM_FUNCTION> MOBILEFORM_FUNCTION { get; set; }
         public virtual DbSet<MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU> MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU { get; set; }
         public virtual DbSet<MOBILEFORM_GROUP> MOBILEFORM_GROUP { get; set; }
@@ -58,15 +68,19 @@ namespace CoMS.Entities_Framework
         public virtual DbSet<PAPER_REVIEW_SUMUP_BY_CONFERENCE_BOARD_OF_REVIEW> PAPER_REVIEW_SUMUP_BY_CONFERENCE_BOARD_OF_REVIEW { get; set; }
         public virtual DbSet<PAPER_TEXT> PAPER_TEXT { get; set; }
         public virtual DbSet<PERSON> People { get; set; }
+        public virtual DbSet<PERSON_LIKING_MESSAGE_FEED> PERSON_LIKING_MESSAGE_FEED { get; set; }
         public virtual DbSet<PRESENTER> PRESENTERs { get; set; }
         public virtual DbSet<PRESENTER_CONFERENCE_SESSION_RELATIONSHIP> PRESENTER_CONFERENCE_SESSION_RELATIONSHIP { get; set; }
         public virtual DbSet<REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE> REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE { get; set; }
         public virtual DbSet<REVIEWER> REVIEWERs { get; set; }
         public virtual DbSet<REVIEWER_PAPER_ABSTRACT_RELATIONSHIP> REVIEWER_PAPER_ABSTRACT_RELATIONSHIP { get; set; }
         public virtual DbSet<REVIEWER_PAPER_TEXT_RELATIONSHIP> REVIEWER_PAPER_TEXT_RELATIONSHIP { get; set; }
+        public virtual DbSet<SAMPLE_CONFERENCE_SURVEY_QUESTION> SAMPLE_CONFERENCE_SURVEY_QUESTION { get; set; }
+        public virtual DbSet<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA> SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA { get; set; }
         public virtual DbSet<SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE> SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE { get; set; }
         public virtual DbSet<SUPPORT_STAFF> SUPPORT_STAFF { get; set; }
         public virtual DbSet<SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP> SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP { get; set; }
+        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<TYPE_OF_STUDY> TYPE_OF_STUDY { get; set; }
         public virtual DbSet<WEBFORM_FUNCTION> WEBFORM_FUNCTION { get; set; }
         public virtual DbSet<WEBFORM_FUNCTION_FOR_WEBFORM_MENU> WEBFORM_FUNCTION_FOR_WEBFORM_MENU { get; set; }
@@ -119,7 +133,48 @@ namespace CoMS.Entities_Framework
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ACCOUNT>()
+                .HasOptional(e => e.ACCOUNT_DEVICE_RELATIONSHIP)
+                .WithRequired(e => e.ACCOUNT);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.ACCOUNT_DOING_CONFERENCE_SURVEY)
+                .WithRequired(e => e.ACCOUNT)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
                 .HasMany(e => e.ACCOUNT_FOR_CONFERENCE)
+                .WithRequired(e => e.ACCOUNT)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP)
+                .WithRequired(e => e.ACCOUNT)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.ANSWER_TO_CONFERENCE_SURVEY_QUESTION)
+                .WithRequired(e => e.ACCOUNT)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.FOLLOWER_RELATIONSHIP)
+                .WithRequired(e => e.ACCOUNT)
+                .HasForeignKey(e => e.FOLLOWED_UserName)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.FOLLOWER_RELATIONSHIP1)
+                .WithRequired(e => e.ACCOUNT1)
+                .HasForeignKey(e => e.FOLLOWING_UserName)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.MESSAGE_FEED)
+                .WithRequired(e => e.ACCOUNT)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT>()
+                .HasMany(e => e.SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA)
                 .WithRequired(e => e.ACCOUNT)
                 .WillCascadeOnDelete(false);
 
@@ -181,6 +236,22 @@ namespace CoMS.Entities_Framework
 
             modelBuilder.Entity<ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP>()
                 .Property(e => e.CANCELLATION_REFUND_ONSITE_CASH_PAYMENT_PROCESSED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ACCOUNT_DEVICE_RELATIONSHIP>()
+                .Property(e => e.UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ACCOUNT_DEVICE_RELATIONSHIP>()
+                .Property(e => e.PERSON_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ACCOUNT_DOING_CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ACCOUNT_DOING_CONFERENCE_SURVEY>()
+                .Property(e => e.UserName)
                 .IsUnicode(false);
 
             modelBuilder.Entity<ACCOUNT_FOR_CONFERENCE>()
@@ -248,6 +319,30 @@ namespace CoMS.Entities_Framework
                 .WithRequired(e => e.ACCOUNT_FOR_CONFERENCE)
                 .HasForeignKey(e => new { e.UserName, e.CONFERENCE_ID })
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<ACCOUNT_MESSAGING_GROUP_MEMBERSHIP>()
+                .Property(e => e.UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ACCOUNT_MESSAGING_GROUP_MEMBERSHIP>()
+                .Property(e => e.MESSAGING_GROUP_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ACCOUNT_MESSAGING_GROUP_MEMBERSHIP>()
+                .Property(e => e.CREATED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ACCOUNT_MESSAGING_GROUP_MEMBERSHIP>()
+                .Property(e => e.DELETED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ANSWER_TO_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ANSWER_TO_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_ID)
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE>()
                 .Property(e => e.CONFERENCE_REGISTRATION_PACKAGE_CONDITION_ID)
@@ -472,7 +567,32 @@ namespace CoMS.Entities_Framework
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<CONFERENCE>()
+                .HasMany(e => e.CONFERENCE_SURVEY)
+                .WithRequired(e => e.CONFERENCE)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE>()
                 .HasMany(e => e.CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP)
+                .WithRequired(e => e.CONFERENCE)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE>()
+                .HasMany(e => e.FOLLOWER_RELATIONSHIP)
+                .WithRequired(e => e.CONFERENCE)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE>()
+                .HasMany(e => e.MANDATORY_OR_REGISTED_CONFERENCE_SESSION)
+                .WithRequired(e => e.CONFERENCE)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE>()
+                .HasMany(e => e.MESSAGE_FEED)
+                .WithRequired(e => e.CONFERENCE)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE>()
+                .HasMany(e => e.MESSAGING_GROUP)
                 .WithRequired(e => e.CONFERENCE)
                 .WillCascadeOnDelete(false);
 
@@ -989,6 +1109,11 @@ namespace CoMS.Entities_Framework
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<CONFERENCE_SESSION>()
+                .HasMany(e => e.MANDATORY_OR_REGISTED_CONFERENCE_SESSION)
+                .WithRequired(e => e.CONFERENCE_SESSION)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE_SESSION>()
                 .HasMany(e => e.PRESENTER_CONFERENCE_SESSION_RELATIONSHIP)
                 .WithRequired(e => e.CONFERENCE_SESSION)
                 .WillCascadeOnDelete(false);
@@ -1174,6 +1299,221 @@ namespace CoMS.Entities_Framework
                 .Property(e => e.SETTING_FINAL_PAPER_TEXT_APPROVAL_OR_REJECTION_RIGHT_PERSON_ID_5)
                 .HasPrecision(18, 0);
 
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.SURVEY_FOR_CONFERENCE_SESSION_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_1)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_2)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_3)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_5)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_6)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_7)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_8)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_9)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_GROUP_ID_10)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_3)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_4)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_5)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_6)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_7)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_8)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_9)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_10)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_11)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_12)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_13)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_14)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_15)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_16)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_17)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_18)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_19)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CONFERENCE_SURVEY_UserName_20)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.CREATED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .Property(e => e.DELETED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .HasMany(e => e.ACCOUNT_DOING_CONFERENCE_SURVEY)
+                .WithRequired(e => e.CONFERENCE_SURVEY)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY>()
+                .HasMany(e => e.CONFERENCE_SURVEY_QUESTION)
+                .WithRequired(e => e.CONFERENCE_SURVEY)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_A)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_B)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_C)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_D)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_E)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_F)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_G)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CONFERENCE_SURVEY_QUESTION_POINT_H)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.MINIMUM_RATING_SCALE_VALUE)
+                .HasPrecision(6, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.MAXIMUM_RATING_SCALE_VALUE)
+                .HasPrecision(6, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.RATING_SCALE_STEP_VALUE)
+                .HasPrecision(6, 2);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CREATED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.DELETED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<CONFERENCE_SURVEY_QUESTION>()
+                .HasMany(e => e.ANSWER_TO_CONFERENCE_SURVEY_QUESTION)
+                .WithRequired(e => e.CONFERENCE_SURVEY_QUESTION)
+                .WillCascadeOnDelete(false);
+
             modelBuilder.Entity<CONFERENCE_TYPE>()
                 .Property(e => e.CONFERENCE_TYPE_ID)
                 .HasPrecision(18, 0);
@@ -1212,6 +1552,18 @@ namespace CoMS.Entities_Framework
                 .WithOptional(e => e.FIELD_OF_STUDY2)
                 .HasForeignKey(e => e.ROOT_FIELD_OF_STUDY_ID);
 
+            modelBuilder.Entity<FOLLOWER_RELATIONSHIP>()
+                .Property(e => e.FOLLOWED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<FOLLOWER_RELATIONSHIP>()
+                .Property(e => e.FOLLOWING_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<FOLLOWER_RELATIONSHIP>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
             modelBuilder.Entity<GENDER_TYPE>()
                 .Property(e => e.GENDER_TYPE_ID)
                 .HasPrecision(18, 0);
@@ -1229,6 +1581,213 @@ namespace CoMS.Entities_Framework
                 .HasMany(e => e.APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS)
                 .WithRequired(e => e.LINE_OF_BUSINES_TYPE)
                 .HasForeignKey(e => e.CONFERENCE_ATTENDEE_LINE_OF_BUSINESS_TYPE_ID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.PERSON_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.CONFERENCE_SESSION_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.FACILITY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.OVERLAPPING_CONFERENCE_SESSION_ID_1)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.OVERLAPPING_CONFERENCE_SESSION_ID_2)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.OVERLAPPING_CONFERENCE_SESSION_ID_3)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.OVERLAPPING_CONFERENCE_SESSION_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>()
+                .Property(e => e.OVERLAPPING_CONFERENCE_SESSION_ID_5)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.MESSAGE_FEED_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.REPLYING_TO_MESSAGE_FEED_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_1)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_2)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_3)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_5)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_6)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_7)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_8)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_9)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_MESSAGING_GROUP_ID_10)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_3)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_4)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_5)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_6)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_7)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_8)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_9)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_10)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_11)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_12)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_13)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_14)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_15)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_16)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_17)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_18)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_19)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.RECIPIENT_UserName_20)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .Property(e => e.DELETED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .HasMany(e => e.MESSAGE_FEED1)
+                .WithOptional(e => e.MESSAGE_FEED2)
+                .HasForeignKey(e => e.REPLYING_TO_MESSAGE_FEED_ID);
+
+            modelBuilder.Entity<MESSAGE_FEED>()
+                .HasMany(e => e.PERSON_LIKING_MESSAGE_FEED)
+                .WithRequired(e => e.MESSAGE_FEED)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MESSAGING_GROUP>()
+                .Property(e => e.MESSAGING_GROUP_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGING_GROUP>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<MESSAGING_GROUP>()
+                .Property(e => e.CREATED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGING_GROUP>()
+                .Property(e => e.DELETED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<MESSAGING_GROUP>()
+                .HasMany(e => e.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP)
+                .WithRequired(e => e.MESSAGING_GROUP)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<MOBILEFORM_FUNCTION>()
@@ -1601,6 +2160,11 @@ namespace CoMS.Entities_Framework
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<PERSON>()
+                .HasMany(e => e.MANDATORY_OR_REGISTED_CONFERENCE_SESSION)
+                .WithRequired(e => e.PERSON)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<PERSON>()
                 .HasMany(e => e.PRESENTERs)
                 .WithRequired(e => e.PERSON)
                 .WillCascadeOnDelete(false);
@@ -1614,6 +2178,18 @@ namespace CoMS.Entities_Framework
                 .HasMany(e => e.SUPPORT_STAFF)
                 .WithRequired(e => e.PERSON)
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<PERSON_LIKING_MESSAGE_FEED>()
+                .Property(e => e.MESSAGE_FEED_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<PERSON_LIKING_MESSAGE_FEED>()
+                .Property(e => e.UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<PERSON_LIKING_MESSAGE_FEED>()
+                .Property(e => e.PERSON_ID)
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<PRESENTER>()
                 .Property(e => e.PERSON_ID)
@@ -1764,6 +2340,306 @@ namespace CoMS.Entities_Framework
             modelBuilder.Entity<REVIEWER_PAPER_TEXT_RELATIONSHIP>()
                 .Property(e => e.PAPER_TEXT_REVIEW_RATING_POINT)
                 .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_A)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_B)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_C)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_D)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_E)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_F)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_G)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.SAMPLE_CONFERENCE_SURVEY_QUESTION_POINT_H)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.MINIMUM_RATING_SCALE_VALUE)
+                .HasPrecision(6, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.MAXIMUM_RATING_SCALE_VALUE)
+                .HasPrecision(6, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.RATING_SCALE_STEP_VALUE)
+                .HasPrecision(6, 2);
+
+            modelBuilder.Entity<SAMPLE_CONFERENCE_SURVEY_QUESTION>()
+                .Property(e => e.CREATED_UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.UserName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_1)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_1)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_2)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_2)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_3)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_3)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_4)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_5)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_5)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_6)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_6)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_7)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_7)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_8)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_8)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_9)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_9)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_10)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_10)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_11)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_11)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_12)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_12)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_13)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_13)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_14)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_14)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_15)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_15)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_16)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_16)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_17)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_17)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_18)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_18)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_19)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_19)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_20)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_20)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_21)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_21)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_22)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_22)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_23)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_23)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_24)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_24)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_25)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_25)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_26)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_26)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_27)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_27)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_28)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_28)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_29)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_29)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.CONFERENCE_SESSION_ID_30)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA>()
+                .Property(e => e.FACILITY_ID_30)
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE>()
                 .Property(e => e.CONFERENCE_ID)

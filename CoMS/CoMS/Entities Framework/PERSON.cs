@@ -15,6 +15,7 @@ namespace CoMS.Entities_Framework
             AUTHORs = new HashSet<AUTHOR>();
             CONFERENCE_ATTENDEE = new HashSet<CONFERENCE_ATTENDEE>();
             CONFERENCE_SESSION_CHAIR = new HashSet<CONFERENCE_SESSION_CHAIR>();
+            MANDATORY_OR_REGISTED_CONFERENCE_SESSION = new HashSet<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>();
             PRESENTERs = new HashSet<PRESENTER>();
             REVIEWERs = new HashSet<REVIEWER>();
             SUPPORT_STAFF = new HashSet<SUPPORT_STAFF>();
@@ -161,6 +162,9 @@ namespace CoMS.Entities_Framework
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CONFERENCE_SESSION_CHAIR> CONFERENCE_SESSION_CHAIR { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MANDATORY_OR_REGISTED_CONFERENCE_SESSION> MANDATORY_OR_REGISTED_CONFERENCE_SESSION { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PRESENTER> PRESENTERs { get; set; }

@@ -67,9 +67,9 @@ namespace CoMS.Models
 
         // update abstract
         public bool UpdateAbstractById(int PAPER_ID, String PAPER_ABSTRACT_TITLE, String PAPER_ABSTRACT_TITLE_EN, int CONFERENCE_SESSION_TOPIC_ID,
-            String CONFERENCE_SESSION_TOPIC_NAME, String CONFERENCE_SESSION_TOPIC_NAME_EN, String PAPER_ABSTRACT_TEXT, String FULL_PAPER_OR_WORK_IN_PROGRESS,
+            String CONFERENCE_SESSION_TOPIC_NAME, String CONFERENCE_SESSION_TOPIC_NAME_EN, String PAPER_ABSTRACT_TEXT, String PAPER_ABSTRACT_TEXT_EN, String FULL_PAPER_OR_WORK_IN_PROGRESS,
             int TYPE_OF_STUDY_ID, String TYPE_OF_STUDY_NAME, String TYPE_OF_STUDY_NAME_EN, int CONFERENCE_PRESENTATION_TYPE_ID, String CONFERENCE_PRESENTATION_TYPE_NAME,
-            String CONFERENCE_PRESENTATION_TYPE_NAME_EN, int POSITION)
+            String CONFERENCE_PRESENTATION_TYPE_NAME_EN, int POSITION, String PAPER_ABSTRACT_ATTACHED_FILENAME)
         {
             try
             {
@@ -85,6 +85,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_1 = CONFERENCE_SESSION_TOPIC_NAME;
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 = CONFERENCE_SESSION_TOPIC_NAME_EN;
                         paperAbstract.PAPER_ABSTRACT_TEXT_1 = PAPER_ABSTRACT_TEXT;
+                        paperAbstract.PAPER_ABSTRACT_TEXT_EN_1 = PAPER_ABSTRACT_TEXT_EN;
                         paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_1 = FULL_PAPER_OR_WORK_IN_PROGRESS;
                         paperAbstract.TYPE_OF_STUDY_ID_1 = TYPE_OF_STUDY_ID;
                         paperAbstract.TYPE_OF_STUDY_NAME_1 = TYPE_OF_STUDY_NAME;
@@ -93,6 +94,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_1 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
                         paperAbstract.LAST_REVISED_DATE_1 = DateTime.Now;
+                        paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_1 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 2:
                         paperAbstract.PAPER_ABSTRACT_TITLE_2 = PAPER_ABSTRACT_TITLE;
@@ -101,6 +103,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_2 = CONFERENCE_SESSION_TOPIC_NAME;
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 = CONFERENCE_SESSION_TOPIC_NAME_EN;
                         paperAbstract.PAPER_ABSTRACT_TEXT_2 = PAPER_ABSTRACT_TEXT;
+                        paperAbstract.PAPER_ABSTRACT_TEXT_EN_2 = PAPER_ABSTRACT_TEXT_EN;
                         paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_2 = FULL_PAPER_OR_WORK_IN_PROGRESS;
                         paperAbstract.TYPE_OF_STUDY_ID_2 = TYPE_OF_STUDY_ID;
                         paperAbstract.TYPE_OF_STUDY_NAME_2 = TYPE_OF_STUDY_NAME;
@@ -109,6 +112,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_2 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
                         paperAbstract.LAST_REVISED_DATE_2 = DateTime.Now;
+                        paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_2 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 3:
                         paperAbstract.PAPER_ABSTRACT_TITLE_2 = PAPER_ABSTRACT_TITLE;
@@ -118,6 +122,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 = CONFERENCE_SESSION_TOPIC_NAME_EN;
 
                         paperAbstract.PAPER_ABSTRACT_TEXT_3 = PAPER_ABSTRACT_TEXT;
+                        paperAbstract.PAPER_ABSTRACT_TEXT_EN_3 = PAPER_ABSTRACT_TEXT_EN;
                         paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_3 = FULL_PAPER_OR_WORK_IN_PROGRESS;
                         paperAbstract.TYPE_OF_STUDY_ID_3 = TYPE_OF_STUDY_ID;
                         paperAbstract.TYPE_OF_STUDY_NAME_3 = TYPE_OF_STUDY_NAME;
@@ -126,6 +131,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_3 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
                         paperAbstract.LAST_REVISED_DATE_3 = DateTime.Now;
+                        paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_3 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 4:
                         paperAbstract.PAPER_ABSTRACT_TITLE_2 = PAPER_ABSTRACT_TITLE;
@@ -135,6 +141,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 = CONFERENCE_SESSION_TOPIC_NAME_EN;
 
                         paperAbstract.PAPER_ABSTRACT_TEXT_4 = PAPER_ABSTRACT_TEXT;
+                        paperAbstract.PAPER_ABSTRACT_TEXT_EN_4 = PAPER_ABSTRACT_TEXT_EN;
                         paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_4 = FULL_PAPER_OR_WORK_IN_PROGRESS;
                         paperAbstract.TYPE_OF_STUDY_ID_4 = TYPE_OF_STUDY_ID;
                         paperAbstract.TYPE_OF_STUDY_NAME_4 = TYPE_OF_STUDY_NAME;
@@ -143,6 +150,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_4 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
                         paperAbstract.LAST_REVISED_DATE_4 = DateTime.Now;
+                        paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_4 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 5:
                         paperAbstract.PAPER_ABSTRACT_TITLE_2 = PAPER_ABSTRACT_TITLE;
@@ -152,6 +160,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 = CONFERENCE_SESSION_TOPIC_NAME_EN;
 
                         paperAbstract.PAPER_ABSTRACT_TEXT_5 = PAPER_ABSTRACT_TEXT;
+                        paperAbstract.PAPER_ABSTRACT_TEXT_EN_5 = PAPER_ABSTRACT_TEXT_EN;
                         paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_5 = FULL_PAPER_OR_WORK_IN_PROGRESS;
                         paperAbstract.TYPE_OF_STUDY_ID_5 = TYPE_OF_STUDY_ID;
                         paperAbstract.TYPE_OF_STUDY_NAME_5 = TYPE_OF_STUDY_NAME;
@@ -160,6 +169,7 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_5 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
                         paperAbstract.LAST_REVISED_DATE_5 = DateTime.Now;
+                        paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_5 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                 }
                 paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT = null;

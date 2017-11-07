@@ -151,6 +151,19 @@ namespace CoMS.Controllers
             }
             return ResponseFail(StringResource.Sorry_an_error_has_occurred);
         }
+
+        [HttpGet]
+        [Route("api/DeleteNotificationById")]
+        public HttpResponseMessage DeleteNotificationById(decimal personId, decimal notificationId)
+        {
+            var model = new NotificationModel();
+            var result = model.DeleteAddNotificationById(personId, notificationId);
+            if (result)
+            {
+                return ResponseSuccess(StringResource.Success);
+            }
+            return ResponseFail(StringResource.Sorry_an_error_has_occurred);
+        }
     }
 
     public class NotificationRequest

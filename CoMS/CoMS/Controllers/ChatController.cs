@@ -236,6 +236,7 @@ namespace CoMS.Controllers
     public class MessageResponse
     {
         public decimal ConversationReplyId { get; set; }
+
         public string Message { get; set; }
         public bool IsMoreThanOneDay { get; set; }
         public bool IsToDay { get; set; }

@@ -46,6 +46,10 @@ namespace CoMS.Entities_Framework
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<Conference_Map>()
+                .Property(e => e.FACILITY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Conference_Map>()
                 .Property(e => e.CONFERENCE_ID)
                 .HasPrecision(18, 0);
 

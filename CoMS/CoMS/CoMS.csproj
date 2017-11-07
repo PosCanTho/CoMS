@@ -199,6 +199,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Views\Base\" />
+    <Folder Include="Views\NewFeed\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -237,12 +238,21 @@
     <Compile Include="Authentization\OAuthAppProvider.cs" />
     <Compile Include="Authentization\Startup.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AgendaController.cs" />
     <Compile Include="Controllers\AuthorAbstractController.cs" />
     <Compile Include="Controllers\AuthorPaperTextController.cs" />
+    <Compile Include="Controllers\ChannelController.cs" />
+    <Compile Include="Controllers\FollowController.cs" />
+    <Compile Include="Controllers\GroupController.cs" />
+    <Compile Include="Controllers\NewFeedController.cs" />
     <Compile Include="Entities Framework\ACCOUNT.cs" />
     <Compile Include="Entities Framework\ACCOUNT_CONFERENCE_REGISTRATION_PACKAGE_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\ACCOUNT_DEVICE_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\ACCOUNT_DOING_CONFERENCE_SURVEY.cs" />
     <Compile Include="Entities Framework\ACCOUNT_FOR_CONFERENCE.cs" />
+    <Compile Include="Entities Framework\ACCOUNT_MESSAGING_GROUP_MEMBERSHIP.cs" />
     <Compile Include="Entities Framework\ALL_TYPE_NAME.cs" />
+    <Compile Include="Entities Framework\ANSWER_TO_CONFERENCE_SURVEY_QUESTION.cs" />
     <Compile Include="Entities Framework\APPROVED_CONFERENCE_ATTENDEE_GENDER_TYPE.cs" />
     <Compile Include="Entities Framework\APPROVED_CONFERENCE_ATTENDEE_LINE_OF_BUSINESS.cs" />
     <Compile Include="Entities Framework\APPROVED_CONFERENCE_ATTENDEE_TYPES.cs" />
@@ -269,6 +279,8 @@
     <Compile Include="Entities Framework\CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT.cs" />
     <Compile Include="Entities Framework\CONFERENCE_SESSION_TOPIC.cs" />
     <Compile Include="Entities Framework\CONFERENCE_SETTING_RIGHTS.cs" />
+    <Compile Include="Entities Framework\CONFERENCE_SURVEY.cs" />
+    <Compile Include="Entities Framework\CONFERENCE_SURVEY_QUESTION.cs" />
     <Compile Include="Entities Framework\CONFERENCE_TYPE.cs" />
     <Compile Include="Entities Framework\CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\Conversation_Reply.cs" />
@@ -276,9 +288,13 @@
     <Compile Include="Entities Framework\DB.cs" />
     <Compile Include="Entities Framework\FACILITY.cs" />
     <Compile Include="Entities Framework\FIELD_OF_STUDY.cs" />
+    <Compile Include="Entities Framework\FOLLOWER_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\GENDER_TYPE.cs" />
     <Compile Include="Entities Framework\LINE_OF_BUSINES_TYPE.cs" />
     <Compile Include="Entities Framework\Manage_Device.cs" />
+    <Compile Include="Entities Framework\MANDATORY_OR_REGISTED_CONFERENCE_SESSION.cs" />
+    <Compile Include="Entities Framework\MESSAGE_FEED.cs" />
+    <Compile Include="Entities Framework\MESSAGING_GROUP.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_FUNCTION.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_FUNCTION_FOR_MOBILEFORM_MENU.cs" />
     <Compile Include="Entities Framework\MOBILEFORM_GROUP.cs" />
@@ -293,15 +309,19 @@
     <Compile Include="Entities Framework\PAPER_REVIEW_SUMUP_BY_CONFERENCE_BOARD_OF_REVIEW.cs" />
     <Compile Include="Entities Framework\PAPER_TEXT.cs" />
     <Compile Include="Entities Framework\PERSON.cs" />
+    <Compile Include="Entities Framework\PERSON_LIKING_MESSAGE_FEED.cs" />
     <Compile Include="Entities Framework\PRESENTER.cs" />
     <Compile Include="Entities Framework\PRESENTER_CONFERENCE_SESSION_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE.cs" />
     <Compile Include="Entities Framework\REVIEWER.cs" />
     <Compile Include="Entities Framework\REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.cs" />
     <Compile Include="Entities Framework\REVIEWER_PAPER_TEXT_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\SAMPLE_CONFERENCE_SURVEY_QUESTION.cs" />
+    <Compile Include="Entities Framework\SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA.cs" />
     <Compile Include="Entities Framework\SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE.cs" />
     <Compile Include="Entities Framework\SUPPORT_STAFF.cs" />
     <Compile Include="Entities Framework\SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP.cs" />
+    <Compile Include="Entities Framework\sysdiagram.cs" />
     <Compile Include="Entities Framework\TYPE_OF_STUDY.cs" />
     <Compile Include="Entities Framework\WEBFORM_FUNCTION.cs" />
     <Compile Include="Entities Framework\WEBFORM_FUNCTION_FOR_WEBFORM_MENU.cs" />
@@ -336,9 +356,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModel.cs" />
-    <Compile Include="Models\ConferenceMapModel.cs" />
+    <Compile Include="Models\ChannelModel.cs" />
     <Compile Include="Models\ConversationReplyModel.cs" />
+    <Compile Include="Models\FollowModel.cs" />
     <Compile Include="Models\ManageDeviceModel.cs" />
+    <Compile Include="Models\NewFeedModel.cs" />
     <Compile Include="Models\NotificationModel.cs" />
     <Compile Include="Models\PersonModel.cs" />
     <Compile Include="Models\RegistrationModel.cs" />

@@ -18,86 +18,6 @@ namespace CoMS.Controllers
         private MYDB myDB = new MYDB();
 
         [HttpPost]
-        [Route("api/ListConference")]
-        public HttpResponseMessage Conference(int page = 1, int pageSize = 10)
-        {
-            var result = from ds in db.CONFERENCEs.OrderByDescending(x => x.CONFERENCE_ID).ToPagedList(page, pageSize)
-                         select new
-                         {
-                             ds.CONFERENCE_ID,
-                             ds.CONFERENCE_NAME,
-                             ds.CONFERENCE_NAME_EN,
-                             ds.CONFERENCE_TYPE_ID,
-                             ds.CONFERENCE_TYPE_NAME,
-                             ds.CONFERENCE_TYPE_NAME_EN,
-                             ds.FROM_DATE,
-                             ds.THRU_DATE,
-                             ds.ORGANIZING_ORGANIZATION_ID_1,
-                             ds.ORGANIZING_ORGANIZATION_NAME_1,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_1,
-                             ds.ORGANIZING_ORGANIZATION_ID_2,
-                             ds.ORGANIZING_ORGANIZATION_NAME_2,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_2,
-                             ds.ORGANIZING_ORGANIZATION_ID_3,
-                             ds.ORGANIZING_ORGANIZATION_NAME_3,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_3,
-                             ds.ORGANIZING_ORGANIZATION_ID_4,
-                             ds.ORGANIZING_ORGANIZATION_NAME_4,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_4,
-                             ds.ORGANIZING_ORGANIZATION_ID_5,
-                             ds.ORGANIZING_ORGANIZATION_NAME_5,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_5,
-                             ds.ORGANIZING_ORGANIZATION_ID_6,
-                             ds.ORGANIZING_ORGANIZATION_NAME_6,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_6,
-                             ds.ORGANIZING_ORGANIZATION_ID_7,
-                             ds.ORGANIZING_ORGANIZATION_NAME_7,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_7,
-                             ds.ORGANIZING_ORGANIZATION_ID_8,
-                             ds.ORGANIZING_ORGANIZATION_NAME_8,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_8,
-                             ds.ORGANIZING_ORGANIZATION_ID_9,
-                             ds.ORGANIZING_ORGANIZATION_NAME_9,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_9,
-                             ds.ORGANIZING_ORGANIZATION_ID_10,
-                             ds.ORGANIZING_ORGANIZATION_NAME_10,
-                             ds.ORGANIZING_ORGANIZATION_NAME_EN_10,
-                             ds.MAIN_FIELD_OF_STUDY_ID,
-                             ds.MAIN_FIELD_OF_STUDY_NAME,
-                             ds.MAIN_FIELD_OF_STUDY_NAME_EN,
-                             ds.CONFERENCE_MAIN_THEME,
-                             ds.CONFERENCE_MAIN_THEME_EN,
-                             ds.NUMBER_OF_PAPER_ABSTRACT_SUBMISSION_DEADLINES,
-                             ds.PAPER_ABSTRACT_DEADLINE_1,
-                             ds.PAPER_ABSTRACT_DEADLINE_2,
-                             ds.PAPER_ABSTRACT_DEADLINE_3,
-                             ds.PAPER_ABSTRACT_DEADLINE_4,
-                             ds.PAPER_ABSTRACT_DEADLINE_5,
-                             ds.WORD_COUNT_LIMIT_OF_PAPER_ABSTRACT,
-                             ds.NUMBER_OF_PAPER_TEXT_SUBMISSION_DEADLINES,
-                             ds.PAPER_TEXT_DEADLINE_1,
-                             ds.PAPER_TEXT_DEADLINE_2,
-                             ds.PAPER_TEXT_DEADLINE_3,
-                             ds.PAPER_TEXT_DEADLINE_4,
-                             ds.PAPER_TEXT_DEADLINE_5,
-                             ds.LIMIT_NUMBER_OF_PAGES_OF_PAPER_TEXT,
-                             ds.SUGGESTED_PAPER_ABSTRACT_REVIEW_RATING_SCALE,
-                             ds.SUGGESTED_PAPER_ABSTRACT_REVIEW_RATING_SCALE_STEP,
-                             ds.SUGGESTED_PAPER_ABSTRACT_REVIEW_RATING_SCALE_START_POINT,
-                             ds.SUGGESTED_PAPER_ABSTRACT_REVIEW_RATING_SCALE_END_POINT,
-                             ds.SUGGESTED_PAPER_TEXT_REVIEW_RATING_SCALE,
-                             ds.SUGGESTED_PAPER_TEXT_REVIEW_RATING_SCALE_STEP,
-                             ds.SUGGESTED_PAPER_TEXT_REVIEW_RATING_SCALE_START_POINT,
-                             ds.SUGGESTED_PAPER_TEXT_REVIEW_RATING_SCALE_END_POINT
-                         };
-            if (result != null)
-            {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
-            }
-            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
-        }
-
-        [HttpPost]
         [Route("api/ConferenceUser")]
         public HttpResponseMessage ConferenceUser(String username)
         {
@@ -180,54 +100,11 @@ namespace CoMS.Controllers
         }
 
         [HttpPost]
-        [Route("api/ListOrganization")]
-        public HttpResponseMessage ListOrganization(int organizing_organization_id)
-        {
-            var result = (from ds in db.ORGANIZATIONs
-                          where ds.ORGANIZATION_ID == organizing_organization_id
-                          select new
-                          {
-                              ds.ORGANIZATION_ID,
-                              ds.ORGANIZATION_CODE,
-                              ds.ORGANIZATION_NAME,
-                              ds.ORGANIZATION_NAME_EN,
-                              ds.ADDRESS,
-                              ds.WARD,
-                              ds.DISTRICT,
-                              ds.CITY,
-                              ds.STATE,
-                              ds.COUNTRY,
-                              ds.ORGANIZATION_TELEPHONE,
-                              ds.ORGANIZATION_FAX,
-                              ds.ORGANIZATION_EMAIL,
-                              ds.ORGANIZATION_WEBSITE,
-                              ds.ZIPCODE,
-                              ds.POSTAL_CODE,
-                              ds.DESCRIPTION,
-                              ds.DESCRIPTION_EN,
-                              ds.ESTABLISHED_DATE,
-                              ds.ESTABLISHMENT_DOCUMENT_ID,
-                              ds.ORGANIZATION_LOGO,
-                              ds.ORGANIZATION_LOGO_FILE,
-                              ds.ROOT_ORGANIZATION_ID,
-                              ds.ORGANIZATION_ORDER_NUMBER,
-                              ds.DELETED,
-                              ds.DELETED_SCRIPT
-                          }).Distinct();
-            if (result != null)
-            {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
-            }
-            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
-        }
-
-        [HttpPost]
         [Route("api/ListConferenceSession")]
         public HttpResponseMessage ConferenceSession(int conference_id)
         {
             var result = from ds in db.CONFERENCE_SESSION
                          join conference_session_topic in db.CONFERENCE_SESSION_TOPIC on ds.CONFERENCE_SESSION_TOPIC_ID equals conference_session_topic.CONFERENCE_SESSION_TOPIC_ID
-                         //join conference_session_chair in db.CONFERENCE_SESSION_CHAIR on ds.CONFERENCE_ID equals conference_session_chair.CONFERENCE_ID
                          where ds.CONFERENCE_ID == conference_id
                          select new
                          {
@@ -274,19 +151,15 @@ namespace CoMS.Controllers
                              conference_session_topic.DESCRIPTION,
                              conference_session_topic.DESCRIPTION_EN,
                              conference_session_topic.CONFERENCE_MAIN_THEME,
-                             conference_session_topic.CONFERENCE_MAIN_THEME_EN,
-                             //conference_session_chair.CURRENT_FIRST_NAME,
-                             //conference_session_chair.CURRENT_MIDDLE_NAME,
-                             //conference_session_chair.CURRENT_LAST_NAME,
-                             //conference_session_chair.CURRENT_PERSONAL_TITLE,
-                             //conference_session_chair.CURRENT_SUFFIX
+                             conference_session_topic.CONFERENCE_MAIN_THEME_EN
                          };
             if (result != null)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
+                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result.Distinct()));
             }
             else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
         }
+
         [HttpPost]
         [Route("api/PresentationSlotInSession")]
         public HttpResponseMessage PresentationSlotInSession(int conference_session_id)
@@ -334,40 +207,56 @@ namespace CoMS.Controllers
         }
 
         [HttpPost]
-        [Route("api/ListAttendee")]
-        public HttpResponseMessage ListAttendee(int conference_id, decimal personId)
+        [Route("api/PresentationSlotInConference")]
+        public HttpResponseMessage PresentationSlotInConference(int conference_id)
         {
-            var result = (from ac_con in db.ACCOUNT_FOR_CONFERENCE
-                          join ac in db.ACCOUNTs on ac_con.UserName equals ac.UserName
-                          join per in db.People on ac.PERSON_ID equals per.PERSON_ID
-                          where ac_con.CONFERENCE_ID == conference_id && ac_con.CONFERENCE_ATTENDEE_RIGHT == true && ac.PERSON_ID != personId
-                          select new
-                           Presenter()
-                          {
-                              PERSON_ID = ac.PERSON_ID,
-                              CURRENT_LAST_NAME = ac.CURRENT_LAST_NAME,
-                              CURRENT_FIRST_NAME = ac.CURRENT_FIRST_NAME,
-                              CURRENT_MIDDLE_NAME = ac.CURRENT_MIDDLE_NAME,
-                              UserName = ac.UserName,
-                              Email = ac.Email,
-                              Image = ac.Image,
-                              CURRENT_HOME_ORGANIZATION_ID = ac.CURRENT_HOME_ORGANIZATION_ID,
-                              CURRENT_HOME_ORGANIZATION_NAME = ac.CURRENT_HOME_ORGANIZATION_NAME,
-                              CURRENT_HOME_ORGANIZATION_NAME_EN = ac.CURRENT_HOME_ORGANIZATION_NAME_EN,
-                              CURRENT_PHONE_NUMBER = per.CURRENT_PHONE_NUMBER,
-                              BIRTH_DATE = per.BIRTH_DATE,
-                              CURRENT_GENDER = per.CURRENT_GENDER,
-                              CONFERENCE_ADMIN_RIGHT = ac_con.CONFERENCE_ADMIN_RIGHT,
-                              REVIEWER_RIGHT = ac_con.REVIEWER_RIGHT,
-                              CONFERENCE_BOARD_OF_REVIEW_CHAIR_RIGHT = ac_con.CONFERENCE_BOARD_OF_REVIEW_CHAIR_RIGHT,
-                              AUTHOR_RIGHT = ac_con.AUTHOR_RIGHT,
-                              PRESENTER_RIGHT = ac_con.PRESENTER_RIGHT,
-                              CONFERENCE_ATTENDEE_RIGHT = ac_con.CONFERENCE_ATTENDEE_RIGHT,
-                              SUPPORT_STAFF_RIGHT = ac_con.SUPPORT_STAFF_RIGHT,
-                              CONFERENCE_ID = ac_con.CONFERENCE_ID,
-                              CONFERENCE_NAME = ac_con.CONFERENCE_NAME,
-                              FULL_NAME = ac.CURRENT_LAST_NAME + " " + ac.CURRENT_MIDDLE_NAME + " " + ac.CURRENT_FIRST_NAME
-                          }).Distinct().ToList();
+            var result = from con_sess in db.CONFERENCE_SESSION
+                         join slot in db.CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT on con_sess.CONFERENCE_SESSION_ID equals slot.CONFERENCE_SESSION_ID
+                         join paper in db.PAPER_TEXT on slot.PAPER_ID equals paper.PAPER_ID
+                         where con_sess.CONFERENCE_ID == conference_id
+                         select new
+                         {
+                             slot.PAPER_ID,
+                             slot.PRESENTATION_SLOT_NUMBER,
+                             slot.ON_SCHEDULE_OR_CANCELLED_OR_MOVED_PRESENTATION_SLOT,
+                             slot.PRESENTATION_SLOT_ACTUAL_START_DATETIME,
+                             slot.PRESENTATION_SLOT_ACTUAL_END_DATETIME,
+                             slot.ON_TIME_START_OR_EARLY_START_OR_LATE_START,
+                             slot.ON_TIME_END_OR_EARLY_END_OR_LATE_END,
+                             slot.MOVED_TO_CONFERENCE_SESSION_ID,
+                             slot.MOVED_TO_PRESENTATION_SLOT_NUMBER,
+                             slot.NOTE,
+
+                             paper.PAPER_TEXT_TITLE_1,
+                             paper.PAPER_TEXT_TITLE_EN_1,
+                             paper.PAPER_TEXT_TITLE_2,
+                             paper.PAPER_TEXT_TITLE_EN_2,
+                             paper.PAPER_TEXT_TITLE_3,
+                             paper.PAPER_TEXT_TITLE_EN_3,
+                             paper.PAPER_TEXT_TITLE_4,
+                             paper.PAPER_TEXT_TITLE_EN_4,
+                             paper.PAPER_TEXT_TITLE_5,
+                             paper.PAPER_TEXT_TITLE_EN_5,
+
+                             con_sess.CONFERENCE_SESSION_ID,
+                             con_sess.CONFERENCE_SESSION_NAME,
+                             con_sess.CONFERENCE_SESSION_NAME_EN,
+                             con_sess.FACILITY_ID,
+                             con_sess.FACILITY_NAME,
+                             con_sess.FACILITY_NAME_EN
+                         };
+            if (result != null)
+            {
+                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result.Distinct()));
+            }
+            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
+        }
+
+        [HttpPost]
+        [Route("api/ListAttendee")]
+        public HttpResponseMessage ListAttendee(int conference_id, int personId)
+        {
+            var result = new ChannelModel().getListAttendee(personId, conference_id);
             if (result != null)
             {
                 var bookmarkModel = new BookmarkModel();
@@ -383,43 +272,15 @@ namespace CoMS.Controllers
 
         [HttpPost]
         [Route("api/ListPresenter")]
-        public HttpResponseMessage ListPresenter(int conference_id, decimal personId)
+        public HttpResponseMessage ListPresenter(int conference_id, int personId)
         {
-            var result = (from ac_con in db.ACCOUNT_FOR_CONFERENCE
-                          join ac in db.ACCOUNTs on ac_con.UserName equals ac.UserName
-                          join per in db.People on ac.PERSON_ID equals per.PERSON_ID
-                          where ac_con.CONFERENCE_ID == conference_id && ac_con.PRESENTER_RIGHT == true && ac.PERSON_ID != personId
-                          select new
-                           Presenter(){
-                              PERSON_ID = ac.PERSON_ID,
-                              CURRENT_LAST_NAME = ac.CURRENT_LAST_NAME,
-                              CURRENT_FIRST_NAME = ac.CURRENT_FIRST_NAME,
-                              CURRENT_MIDDLE_NAME = ac.CURRENT_MIDDLE_NAME,
-                              UserName = ac.UserName,
-                              Email = ac.Email,
-                              Image = ac.Image,
-                              CURRENT_HOME_ORGANIZATION_ID = ac.CURRENT_HOME_ORGANIZATION_ID,
-                              CURRENT_HOME_ORGANIZATION_NAME = ac.CURRENT_HOME_ORGANIZATION_NAME,
-                              CURRENT_HOME_ORGANIZATION_NAME_EN = ac.CURRENT_HOME_ORGANIZATION_NAME_EN,
-                              CURRENT_PHONE_NUMBER = per.CURRENT_PHONE_NUMBER,
-                              BIRTH_DATE = per.BIRTH_DATE,
-                              CURRENT_GENDER = per.CURRENT_GENDER,
-                              CONFERENCE_ADMIN_RIGHT = ac_con.CONFERENCE_ADMIN_RIGHT,
-                              REVIEWER_RIGHT = ac_con.REVIEWER_RIGHT,
-                              CONFERENCE_BOARD_OF_REVIEW_CHAIR_RIGHT = ac_con.CONFERENCE_BOARD_OF_REVIEW_CHAIR_RIGHT,
-                              AUTHOR_RIGHT = ac_con.AUTHOR_RIGHT,
-                              PRESENTER_RIGHT = ac_con.PRESENTER_RIGHT,
-                              CONFERENCE_ATTENDEE_RIGHT = ac_con.CONFERENCE_ATTENDEE_RIGHT,
-                              SUPPORT_STAFF_RIGHT = ac_con.SUPPORT_STAFF_RIGHT,
-                              CONFERENCE_ID = ac_con.CONFERENCE_ID,
-                              CONFERENCE_NAME = ac_con.CONFERENCE_NAME,
-                              FULL_NAME = ac.CURRENT_LAST_NAME + " " + ac.CURRENT_MIDDLE_NAME + " " + ac.CURRENT_FIRST_NAME
-                          }).Distinct().ToList();
+            var result = new ChannelModel().getListPresenter(personId, conference_id);
             if (result != null)
             {
                 var bookmarkModel = new BookmarkModel();
 
-                foreach (Presenter item in result) {
+                foreach (Presenter item in result)
+                {
                     item.IS_BOOKMARK = bookmarkModel.CheckBookmark(personId, item.PERSON_ID.Value);
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
@@ -428,211 +289,84 @@ namespace CoMS.Controllers
         }
 
         [HttpPost]
-        [Route("api/ListPaperText")]
-        public HttpResponseMessage ListPaperText(int conference_session_id)
+        [Route("api/ListPaperTextInConferenceSession")]
+        public HttpResponseMessage ListPaperTextInConferenceSession(int conference_session_id)
         {
-            var result = (from reviewer_text_relationship in db.REVIEWER_PAPER_TEXT_RELATIONSHIP
-                          join ds in db.PAPER_TEXT on reviewer_text_relationship.PAPER_ID equals ds.PAPER_ID
-                          join reviewer in db.REVIEWERs on reviewer_text_relationship.PERSON_ID equals reviewer.PERSON_ID
-                          where ds.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID == conference_session_id
+            var result = (from slot in db.CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT
 
+                          join paper in db.PAPER_TEXT on slot.PAPER_ID equals paper.PAPER_ID
+                          join reviewer in db.REVIEWERs on paper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_REVIEWER_PERSON_ID equals reviewer.PERSON_ID
+
+                          join relationship in db.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP on paper.PAPER_ID equals relationship.PAPER_ID
+                          join author in db.AUTHORs on relationship.PERSON_ID equals author.PERSON_ID
+                          join acc in db.ACCOUNTs on author.PERSON_ID equals acc.PERSON_ID
+                          where slot.PAPER_ID == paper.PAPER_ID
+                          where paper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_REVIEWER_PERSON_ID == reviewer.PERSON_ID
+                          where relationship.PAPER_ID == paper.PAPER_ID
+                          where relationship.PERSON_ID == author.PERSON_ID
+
+                          where slot.CONFERENCE_SESSION_ID == conference_session_id
                           select new
                           {
-                              ds.PAPER_ID,
-                              ds.PAPER_NUMBER_OR_CODE,
-                              ds.PAPER_TEXT_TITLE_1,
-                              ds.PAPER_TEXT_TITLE_EN_1,
-                              ds.PAPER_TEXT_1,
-                              ds.PAPER_TEXT_EN_1,
-                              ds.PAPER_TEXT_ATTACHED_FILENAME_1,
-                              ds.NUMBER_OF_PAGES_OF_PAPER_TEXT_1,
-                              ds.FIRST_SUBMITTED_DATE_1,
-                              ds.LAST_REVISED_DATE_1,
+                              slot.PRESENTATION_SLOT_ACTUAL_START_DATETIME,
+                              slot.PRESENTATION_SLOT_ACTUAL_END_DATETIME,
 
-                              ds.PAPER_TEXT_TITLE_2,
-                              ds.PAPER_TEXT_TITLE_EN_2,
-                              ds.PAPER_TEXT_2,
-                              ds.PAPER_TEXT_EN_2,
-                              ds.PAPER_TEXT_ATTACHED_FILENAME_2,
-                              ds.NUMBER_OF_PAGES_OF_PAPER_TEXT_2,
-                              ds.FIRST_SUBMITTED_DATE_2,
-                              ds.LAST_REVISED_DATE_2,
+                              paper.PAPER_ID,
+                              paper.PAPER_NUMBER_OR_CODE,
+                              paper.PAPER_TEXT_1,
+                              paper.PAPER_TEXT_2,
+                              paper.PAPER_TEXT_3,
+                              paper.PAPER_TEXT_4,
+                              paper.PAPER_TEXT_5,
 
-                              ds.PAPER_TEXT_TITLE_3,
-                              ds.PAPER_TEXT_TITLE_EN_3,
-                              ds.PAPER_TEXT_3,
-                              ds.PAPER_TEXT_EN_3,
-                              ds.PAPER_TEXT_ATTACHED_FILENAME_3,
-                              ds.NUMBER_OF_PAGES_OF_PAPER_TEXT_3,
-                              ds.FIRST_SUBMITTED_DATE_3,
-                              ds.LAST_REVISED_DATE_3,
+                              paper.PAPER_TEXT_TITLE_1,
+                              paper.PAPER_TEXT_TITLE_EN_1,
+                              paper.PAPER_TEXT_ATTACHED_FILENAME_1,
+                              paper.NUMBER_OF_PAGES_OF_PAPER_TEXT_1,
 
-                              ds.PAPER_TEXT_TITLE_4,
-                              ds.PAPER_TEXT_TITLE_EN_4,
-                              ds.PAPER_TEXT_4,
-                              ds.PAPER_TEXT_EN_4,
-                              ds.PAPER_TEXT_ATTACHED_FILENAME_4,
-                              ds.NUMBER_OF_PAGES_OF_PAPER_TEXT_4,
-                              ds.FIRST_SUBMITTED_DATE_4,
-                              ds.LAST_REVISED_DATE_4,
+                              paper.PAPER_TEXT_TITLE_2,
+                              paper.PAPER_TEXT_TITLE_EN_2,
+                              paper.PAPER_TEXT_ATTACHED_FILENAME_2,
+                              paper.NUMBER_OF_PAGES_OF_PAPER_TEXT_2,
 
-                              ds.PAPER_TEXT_TITLE_5,
-                              ds.PAPER_TEXT_TITLE_EN_5,
-                              ds.PAPER_TEXT_5,
-                              ds.PAPER_TEXT_EN_5,
-                              ds.PAPER_TEXT_ATTACHED_FILENAME_5,
-                              ds.NUMBER_OF_PAGES_OF_PAPER_TEXT_5,
-                              ds.FIRST_SUBMITTED_DATE_5,
-                              ds.LAST_REVISED_DATE_5,
+                              paper.PAPER_TEXT_TITLE_3,
+                              paper.PAPER_TEXT_TITLE_EN_3,
+                              paper.PAPER_TEXT_ATTACHED_FILENAME_3,
+                              paper.NUMBER_OF_PAGES_OF_PAPER_TEXT_3,
 
-                              ds.PAPER_TEXT_WITHDRAWN,
-                              ds.PAPER_TEXT_WITHDRAWN_SCRIPT,
-                              ds.PAPER_TEXT_WITHDRAWN_DATE,
-                              ds.PAPER_TEXT_WITHDRAWN_NOTE,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_SCRIPT,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_REVIEWER_PERSON_ID,
-                              ds.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID,
-                              ds.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME,
-                              ds.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN,
-                              ds.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS,
-                              ds.FINAL_APPROVED_TYPE_OF_STUDY_ID,
-                              ds.FINAL_APPROVED_TYPE_OF_STUDY_NAME,
-                              ds.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN,
-                              ds.FINAL_APPROVED_FOR_PRESENTATION,
-                              ds.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID,
-                              ds.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME,
-                              ds.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN,
+                              paper.PAPER_TEXT_TITLE_4,
+                              paper.PAPER_TEXT_TITLE_EN_4,
+                              paper.PAPER_TEXT_ATTACHED_FILENAME_4,
+                              paper.NUMBER_OF_PAGES_OF_PAPER_TEXT_4,
 
-                              reviewer.PERSON_ID,
-                              reviewer.CURRENT_LAST_NAME,
-                              reviewer.CURRENT_MIDDLE_NAME,
-                              reviewer.CURRENT_FIRST_NAME
+                              paper.PAPER_TEXT_TITLE_5,
+                              paper.PAPER_TEXT_TITLE_EN_5,
+                              paper.PAPER_TEXT_ATTACHED_FILENAME_5,
+                              paper.NUMBER_OF_PAGES_OF_PAPER_TEXT_5,
 
+                              paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME,
+                              paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN,
+                              paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME,
+                              paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN,
+                              paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME,
+                              paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN,
+
+                              REVIEWER_CURRENT_LAST_NAME = reviewer.CURRENT_LAST_NAME,
+                              REVIEWER_CURRENT_MIDDLE_NAME = reviewer.CURRENT_MIDDLE_NAME,
+                              REVIEWER_CURRENT_FIRTS_NAME = reviewer.CURRENT_FIRST_NAME,
+
+                              AUTHOR_CURRENT_LAST_NAME = author.CURRENT_LAST_NAME,
+                              AUTHOR_CURRENT_MIDDLE_NAME = author.CURRENT_MIDDLE_NAME,
+                              AUTHOR_CURRENT_FIRST_NAME = author.CURRENT_FIRST_NAME,
+                              AUTHOR_IMAGE = acc.Image
                           }).Distinct();
             if (result != null)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
+                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result.Distinct()));
             }
             else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
         }
 
-        [HttpPost]
-        [Route("api/ListPaperAbastract")]
-        public HttpResponseMessage ListPaperAbastract(int paper_id)
-        {
-            var result = (from reviewer_abstract_relationship in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                          join ds in db.PAPER_ABSTRACT on reviewer_abstract_relationship.PAPER_ID equals ds.PAPER_ID
-                          join reviewer in db.REVIEWERs on reviewer_abstract_relationship.PERSON_ID equals reviewer.PERSON_ID
-                          where ds.PAPER_ID == paper_id
-                          select new
-                          {
-                              ds.PAPER_ID,
-                              ds.PAPER_NUMBER_OR_CODE,
-                              ds.PAPER_ABSTRACT_TITLE_1,
-                              ds.PAPER_ABSTRACT_TITLE_EN_1,
-                              ds.CONFERENCE_SESSION_TOPIC_ID_1,
-                              ds.CONFERENCE_SESSION_TOPIC_NAME_1,
-                              ds.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
-                              ds.PAPER_ABSTRACT_TEXT_1,
-                              ds.PAPER_ABSTRACT_TEXT_EN_1,
-                              ds.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
-                              ds.WORD_COUNT_OF_PAPER_ABSTRACT_1,
-                              ds.KEYWORDS_1,
-                              ds.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
-                              ds.TYPE_OF_STUDY_ID_1,
-                              ds.TYPE_OF_STUDY_NAME_1,
-                              ds.TYPE_OF_STUDY_NAME_EN_1,
-                              ds.CONFERENCE_PRESENTATION_TYPE_ID_1,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_1,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
-                              ds.FIRST_SUBMITTED_DATE_1,
-                              ds.LAST_REVISED_DATE_1,
-                              ds.PAPER_ABSTRACT_TITLE_2,
-                              ds.PAPER_ABSTRACT_TITLE_EN_2,
-                              ds.CONFERENCE_SESSION_TOPIC_ID_2,
-                              ds.CONFERENCE_SESSION_TOPIC_NAME_2,
-                              ds.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-                              ds.PAPER_ABSTRACT_TEXT_2,
-                              ds.PAPER_ABSTRACT_TEXT_EN_2,
-                              ds.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
-                              ds.WORD_COUNT_OF_PAPER_ABSTRACT_2,
-                              ds.KEYWORDS_2,
-                              ds.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
-                              ds.TYPE_OF_STUDY_ID_2,
-                              ds.TYPE_OF_STUDY_NAME_2,
-                              ds.TYPE_OF_STUDY_NAME_EN_2,
-                              ds.CONFERENCE_PRESENTATION_TYPE_ID_2,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_2,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
-                              ds.FIRST_SUBMITTED_DATE_2,
-                              ds.LAST_REVISED_DATE_2,
-                              ds.LAST_REVISED_DATE_3,
-                              ds.PAPER_ABSTRACT_TEXT_3,
-                              ds.PAPER_ABSTRACT_TEXT_EN_3,
-                              ds.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
-                              ds.WORD_COUNT_OF_PAPER_ABSTRACT_3,
-                              ds.KEYWORDS_3,
-                              ds.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
-                              ds.TYPE_OF_STUDY_ID_3,
-                              ds.TYPE_OF_STUDY_NAME_3,
-                              ds.TYPE_OF_STUDY_NAME_EN_3,
-                              ds.CONFERENCE_PRESENTATION_TYPE_ID_3,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_3,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
-                              ds.FIRST_SUBMITTED_DATE_3,
-                              ds.LAST_REVISED_DATE_4,
-                              ds.PAPER_ABSTRACT_TEXT_4,
-                              ds.PAPER_ABSTRACT_TEXT_EN_4,
-                              ds.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
-                              ds.WORD_COUNT_OF_PAPER_ABSTRACT_4,
-                              ds.KEYWORDS_4,
-                              ds.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
-                              ds.TYPE_OF_STUDY_ID_4,
-                              ds.TYPE_OF_STUDY_NAME_4,
-                              ds.TYPE_OF_STUDY_NAME_EN_4,
-                              ds.CONFERENCE_PRESENTATION_TYPE_ID_4,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_4,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
-                              ds.FIRST_SUBMITTED_DATE_4,
-                              ds.LAST_REVISED_DATE_5,
-                              ds.PAPER_ABSTRACT_TEXT_5,
-                              ds.PAPER_ABSTRACT_TEXT_EN_5,
-                              ds.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
-                              ds.WORD_COUNT_OF_PAPER_ABSTRACT_5,
-                              ds.KEYWORDS_5,
-                              ds.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
-                              ds.TYPE_OF_STUDY_ID_5,
-                              ds.TYPE_OF_STUDY_NAME_5,
-                              ds.TYPE_OF_STUDY_NAME_EN_5,
-                              ds.CONFERENCE_PRESENTATION_TYPE_ID_5,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_5,
-                              ds.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
-                              ds.FIRST_SUBMITTED_DATE_5,
-                              ds.PAPER_ABSTRACT_WITHDRAWN,
-                              ds.PAPER_ABSTRACT_WITHDRAWN_SCRIPT,
-                              ds.PAPER_ABSTRACT_WITHDRAWN_DATE,
-                              ds.PAPER_ABSTRACT_WITHDRAWN_NOTE,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_SCRIPT,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
-                              ds.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_REVIEWER_PERSON_ID,
-                              ds.ASSIGNED_CONFERENCE_SESSION_TOPIC_ID,
-                              ds.ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME,
-                              ds.ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN,
-
-                              reviewer.PERSON_ID,
-                              reviewer.CURRENT_LAST_NAME,
-                              reviewer.CURRENT_MIDDLE_NAME,
-                              reviewer.CURRENT_FIRST_NAME
-                          }).Distinct();
-            if (result != null)
-            {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
-            }
-            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
-        }
 
         [HttpPost]
         [Route("api/ListSchedule")]
@@ -694,7 +428,8 @@ namespace CoMS.Controllers
             var result = from ac in db.ACCOUNT_FOR_CONFERENCE
                          join a in db.ACCOUNTs on ac.UserName equals a.UserName
                          where ac.CONFERENCE_ID == conferenceId && a.PERSON_ID == personId && ac.PRESENTER_RIGHT == true
-                         select new {
+                         select new
+                         {
                              ac.CONFERENCE_ID,
                              ac.UserName,
                              ac.CURRENT_FIRST_NAME,
@@ -711,7 +446,7 @@ namespace CoMS.Controllers
 
         [HttpGet]
         [Route("api/ListOrganizationForConference")]
-        public HttpResponseMessage ListOrganizationForConference (int conferenceId)
+        public HttpResponseMessage ListOrganizationForConference(int conferenceId)
         {
             var listOrganization = new List<ORGANIZATION>();
             var conference = db.CONFERENCEs.SingleOrDefault(x => x.CONFERENCE_ID == conferenceId);
@@ -809,7 +544,7 @@ namespace CoMS.Controllers
                 organization.ORGANIZATION_WEBSITE = item.ORGANIZATION_WEBSITE;
                 listResult.Add(organization);
             }
-            
+
 
             return ResponseSuccess(StringResource.Success, listOrganization);
         }
@@ -823,6 +558,7 @@ namespace CoMS.Controllers
                          join conference_ss in db.CONFERENCE_SESSION on presentation.CONFERENCE_SESSION_ID equals conference_ss.CONFERENCE_SESSION_ID
                          join con_ss_paper in db.CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT on paper.PAPER_ID equals con_ss_paper.PAPER_ID
                          where presentation.CONFERENCE_ID == conference_id && presentation.PERSON_ID == person_id
+                         where paper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT == true
                          select
                          new
                          {
@@ -872,8 +608,7 @@ namespace CoMS.Controllers
             var result = from authorPapaer in db.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP
 
                          join paperAbstract in db.PAPER_ABSTRACT on authorPapaer.PAPER_ID equals paperAbstract.PAPER_ID
-
-                         where authorPapaer.CONFERENCE_ID == conference_id
+                         where authorPapaer.CONFERENCE_ID == conference_id && paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true
 
                          select
                          new
@@ -890,7 +625,7 @@ namespace CoMS.Controllers
                          };
             var result2 = from authorPaper in db.AUTHOR_PAPER_TEXT_RELATIONSHIP
                           join paperText in db.PAPER_TEXT on authorPaper.PAPER_ID equals paperText.PAPER_ID
-                          where authorPaper.CONFERENCE_ID == conference_id
+                          where authorPaper.CONFERENCE_ID == conference_id && paperText.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT == true
                           select
                           new
                            PaperFileName()
@@ -905,25 +640,21 @@ namespace CoMS.Controllers
 
                           };
 
-            if (result != null && result2 != null)
+
+            var listResult = new List<PaperFileName>();
+            foreach (PaperFileName item in result)
             {
-                var listResult = new List<PaperFileName>();
-                foreach (PaperFileName item in result)
-                {
-                    listResult.Add(item);
-                }
-                foreach (PaperFileName item in result2)
-                {
-                    listResult.Add(item);
-                }
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult.Distinct()));
+                listResult.Add(item);
             }
-            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
+            foreach (PaperFileName item in result2)
+            {
+                listResult.Add(item);
+            }
+            return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult));
         }
     }
 
-  
-    class Presenter
+    public class Presenter
     {
         public decimal? PERSON_ID { get; set; }
         public string CURRENT_LAST_NAME { get; set; }
@@ -952,7 +683,7 @@ namespace CoMS.Controllers
         public bool IS_BOOKMARK { get; set; }
     }
 
-    class Organization
+    public class Organization
     {
         public decimal ORGANIZATION_ID { get; set; }
         public string ORGANIZATION_NAME { get; set; }
@@ -961,7 +692,7 @@ namespace CoMS.Controllers
         public string ORGANIZATION_WEBSITE { get; set; }
     }
 
-    class PaperFileName
+    public class PaperFileName
     {
         public decimal PAPER_ID { get; set; }
         public string PAPER_ABSTRACT_ATTACHED_FILENAME_1 { get; set; }

@@ -19,6 +19,9 @@ namespace CoMS.Entities_Framework
         public decimal CONFERENCE_MAP_ID { get; set; }
 
         [Column(TypeName = "numeric")]
+        public decimal FACILITY_ID { get; set; }
+
+        [Column(TypeName = "numeric")]
         public decimal CONFERENCE_ID { get; set; }
 
         public string CONFERENCE_NAME { get; set; }
@@ -29,6 +32,9 @@ namespace CoMS.Entities_Framework
         public string IMAGE { get; set; }
 
         public string DESCRIPTION { get; set; }
+
+        [StringLength(50)]
+        public string PLATFORM { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Conference_Location> Conference_Location { get; set; }

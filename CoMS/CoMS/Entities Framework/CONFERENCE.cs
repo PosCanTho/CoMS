@@ -21,7 +21,12 @@ namespace CoMS.Entities_Framework
             CONFERENCE_REGISTRATION_PACKAGE_OFFERING = new HashSet<CONFERENCE_REGISTRATION_PACKAGE_OFFERING>();
             CONFERENCE_SESSION_CHAIR = new HashSet<CONFERENCE_SESSION_CHAIR>();
             CONFERENCE_SESSION = new HashSet<CONFERENCE_SESSION>();
+            CONFERENCE_SURVEY = new HashSet<CONFERENCE_SURVEY>();
             CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP = new HashSet<CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP>();
+            FOLLOWER_RELATIONSHIP = new HashSet<FOLLOWER_RELATIONSHIP>();
+            MANDATORY_OR_REGISTED_CONFERENCE_SESSION = new HashSet<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>();
+            MESSAGE_FEED = new HashSet<MESSAGE_FEED>();
+            MESSAGING_GROUP = new HashSet<MESSAGING_GROUP>();
             MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE = new HashSet<MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE>();
             MOBILEFORM_GROUP_MENU_FOR_CONFERENCE = new HashSet<MOBILEFORM_GROUP_MENU_FOR_CONFERENCE>();
             PRESENTERs = new HashSet<PRESENTER>();
@@ -55,6 +60,52 @@ namespace CoMS.Entities_Framework
         public DateTime? FROM_DATE { get; set; }
 
         public DateTime? THRU_DATE { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_IMAGE { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_IMAGE_FILENAME { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_BANNER { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_BANNER_FILENAME { get; set; }
+
+        public string DESCRIPTION { get; set; }
+
+        public string DESCRIPTION_EN { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_DIRECTION_MAP_1 { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_DIRECTION_MAP_FILENAME_1 { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_DIRECTION_MAP_2 { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_DIRECTION_MAP_FILENAME_2 { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_DIRECTION_MAP_3 { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_DIRECTION_MAP_FILENAME_3 { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_DIRECTION_MAP_4 { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_DIRECTION_MAP_FILENAME_4 { get; set; }
+
+        [Column(TypeName = "image")]
+        public byte[] CONFERENCE_DIRECTION_MAP_5 { get; set; }
+
+        [StringLength(250)]
+        public string CONFERENCE_DIRECTION_MAP_FILENAME_5 { get; set; }
 
         [Column(TypeName = "numeric")]
         public decimal? ORGANIZING_ORGANIZATION_ID_1 { get; set; }
@@ -241,7 +292,22 @@ namespace CoMS.Entities_Framework
         public virtual ICollection<CONFERENCE_SESSION> CONFERENCE_SESSION { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CONFERENCE_SURVEY> CONFERENCE_SURVEY { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP> CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<FOLLOWER_RELATIONSHIP> FOLLOWER_RELATIONSHIP { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MANDATORY_OR_REGISTED_CONFERENCE_SESSION> MANDATORY_OR_REGISTED_CONFERENCE_SESSION { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MESSAGE_FEED> MESSAGE_FEED { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MESSAGING_GROUP> MESSAGING_GROUP { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE> MOBILEFORM_GROUP_FUNCTION_FOR_CONFERENCE { get; set; }

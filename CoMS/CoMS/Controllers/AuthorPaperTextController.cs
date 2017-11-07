@@ -24,56 +24,82 @@ namespace CoMS.Controllers
         public HttpResponseMessage RegisterPaperText([FromBody] SavePaperText paper)
         {
             var model = new AuthorPaperTextModel();
-            var result = model.GetPaperTextById(paper.PAPER_ID);
-            if (result == null)
+           // var result = model.GetPaperTextById(paper.PAPER_ID);
+           var result = db.PAPER_TEXT.SingleOrDefault(x => x.PAPER_ID == paper.PAPER_ID);
+            if (result != null)
             {
-                //insert
-                var item = new SavePaperText();
-                item.PAPER_ID = paper.PAPER_ID;
-                item.PAPER_TEXT_TITLE = paper.PAPER_TEXT_TITLE;
-                item.PAPER_TEXT_TITLE_EN = paper.PAPER_TEXT_TITLE_EN;
-                item.PAPER_TEXT = paper.PAPER_TEXT;
-                item.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID = paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID;
-                item.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME = paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME;
-                item.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN = paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN;
-                item.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS = paper.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS;
-                item.FINAL_APPROVED_TYPE_OF_STUDY_ID = paper.FINAL_APPROVED_TYPE_OF_STUDY_ID;
-                item.FINAL_APPROVED_TYPE_OF_STUDY_NAME = paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME;
-                item.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN = paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN;
-                item.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID = paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID;
-                item.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME = paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME;
-                item.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN = paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN;
-                item.POSITION = paper.POSITION;
 
-                var result2 = model.SavePaper(
-                    paper.PAPER_ID,
-                    paper.PAPER_TEXT_TITLE,
-                    paper.PAPER_TEXT_TITLE_EN,
-                    paper.PAPER_TEXT,
-                    paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID,
-                    paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME,
-                    paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN,
-                    paper.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS,
-                    paper.FINAL_APPROVED_TYPE_OF_STUDY_ID,
-                    paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME,
-                    paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN,
-                    paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID,
-                    paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME,
-                    paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN,
-                    1
-                    );
-                if (result2 == true)
+                switch (paper.POSITION)
                 {
-                    var t = new ResuleBoolean();
-                    t.result = result2;
-                    return ResponseSuccess(StringResource.Success, t);
+                    case 1:
+                        result.PAPER_ID = paper.PAPER_ID;
+                        result.PAPER_TEXT_TITLE_1 = paper.PAPER_TEXT_TITLE;
+                        result.PAPER_TEXT_TITLE_EN_1 = paper.PAPER_TEXT_TITLE_EN;
+                        result.PAPER_TEXT_1 = paper.PAPER_TEXT;
+                        result.PAPER_TEXT_ATTACHED_FILENAME_1 = paper.PAPER_TEXT_ATTACHED_FILENAME;
+                        result.PAPER_TEXT_EN_1 = paper.PAPER_TEXT_EN;
+                        result.FIRST_SUBMITTED_DATE_1 = DateTime.Now;
+                        result.LAST_REVISED_DATE_1 = DateTime.Now;
+                        break;
+                    case 2:
+                        result.PAPER_ID = paper.PAPER_ID;
+                        result.PAPER_TEXT_TITLE_2 = paper.PAPER_TEXT_TITLE;
+                        result.PAPER_TEXT_TITLE_EN_2 = paper.PAPER_TEXT_TITLE_EN;
+                        result.PAPER_TEXT_2 = paper.PAPER_TEXT;
+                        result.PAPER_TEXT_ATTACHED_FILENAME_2 = paper.PAPER_TEXT_ATTACHED_FILENAME;
+                        result.PAPER_TEXT_EN_2 = paper.PAPER_TEXT_EN;
+                        result.FIRST_SUBMITTED_DATE_2 = DateTime.Now;
+                        result.LAST_REVISED_DATE_2 = DateTime.Now;
+                        break;
+                    case 3:
+                        result.PAPER_ID = paper.PAPER_ID;
+                        result.PAPER_TEXT_TITLE_3 = paper.PAPER_TEXT_TITLE;
+                        result.PAPER_TEXT_TITLE_EN_3 = paper.PAPER_TEXT_TITLE_EN;
+                        result.PAPER_TEXT_3 = paper.PAPER_TEXT;
+                        result.PAPER_TEXT_ATTACHED_FILENAME_3 = paper.PAPER_TEXT_ATTACHED_FILENAME;
+                        result.PAPER_TEXT_EN_3 = paper.PAPER_TEXT_EN;
+                        result.FIRST_SUBMITTED_DATE_3 = DateTime.Now;
+                        result.LAST_REVISED_DATE_3 = DateTime.Now;
+                        break;
+                    case 4:
+                        result.PAPER_ID = paper.PAPER_ID;
+                        result.PAPER_TEXT_TITLE_4 = paper.PAPER_TEXT_TITLE;
+                        result.PAPER_TEXT_TITLE_EN_4 = paper.PAPER_TEXT_TITLE_EN;
+                        result.PAPER_TEXT_4 = paper.PAPER_TEXT;
+                        result.PAPER_TEXT_ATTACHED_FILENAME_4 = paper.PAPER_TEXT_ATTACHED_FILENAME;
+                        result.PAPER_TEXT_EN_4 = paper.PAPER_TEXT_EN;
+                        result.FIRST_SUBMITTED_DATE_4 = DateTime.Now;
+                        result.LAST_REVISED_DATE_4 = DateTime.Now;
+                        break;
+                    case 5:
+                        break;
                 }
-                else
-                {
-                    var t = new ResuleBoolean();
-                    t.result = result2;
-                    return ResponseSuccess(StringResource.Success, t);
-                }
+
+                
+                
+
+                result.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID = paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID;
+                result.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME = paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME;
+                result.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN = paper.FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN;
+                result.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS = paper.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS;
+                result.FINAL_APPROVED_TYPE_OF_STUDY_ID = paper.FINAL_APPROVED_TYPE_OF_STUDY_ID;
+                result.FINAL_APPROVED_TYPE_OF_STUDY_NAME = paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME;
+                result.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN = paper.FINAL_APPROVED_TYPE_OF_STUDY_NAME_EN;
+                result.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID = paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID;
+                result.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME = paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME;
+                result.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN = paper.FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN;
+                string value = paper.PAPER_ID + "-" + 0 + "-" + "PAPER_TEXT_WITHDRAWN";
+                string value2 = paper.PAPER_ID + "-" + 0 + "-" + "FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT";
+                result.PAPER_TEXT_WITHDRAWN_SCRIPT = Utils.EncryptMd5(value);
+                result.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_SCRIPT = Utils.EncryptMd5(value2);
+                //db.PAPER_TEXT.Add(newPAPER);
+                db.SaveChanges();
+
+                
+                var t = new ResuleBoolean();
+                t.result = true;
+                return ResponseSuccess(StringResource.Success, t);
+                
                 
             }
             else
@@ -84,6 +110,25 @@ namespace CoMS.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("api/getFileNamePaperText")]
+        public HttpResponseMessage getFileNamePaperText([FromBody] ItemPaper paper)
+        {
+            //var result = db.PAPER_TEXT.SingleOrDefault(x => x.PAPER_ID == paper.PAPER_ID);
+
+            var result = from item in db.PAPER_TEXT
+                         where item.PAPER_ID == paper.PAPER_ID
+                         select new
+                         {
+                             item.PAPER_TEXT_ATTACHED_FILENAME_1,
+                             item.PAPER_TEXT_ATTACHED_FILENAME_2,
+                             item.PAPER_TEXT_ATTACHED_FILENAME_3,
+                             item.PAPER_TEXT_ATTACHED_FILENAME_4,
+                             item.PAPER_TEXT_ATTACHED_FILENAME_5
+                         };
+                return ResponseSuccess(StringResource.Success, result);
+        }
+
         //Update paper text
         [HttpPost]
         [Route("api/Update_PaperText")]
@@ -91,8 +136,17 @@ namespace CoMS.Controllers
         {
             try
             {
-                var model = new AuthorPaperTextModel();
-                var result = model.UpdateItemPaperText(paper.PAPER_ID, paper.PAPER_TEXT_TITLE, paper.PAPER_TEXT_TITLE_EN, paper.CONFERENCE_ID);
+
+        var model = new AuthorPaperTextModel();
+                var result = model.UpdateItemPaperText(
+                    paper.PAPER_ID, 
+                    paper.PAPER_TEXT_TITLE, 
+                    paper.PAPER_TEXT_TITLE_EN,
+                    paper.CONFERENCE_ID,
+                    paper.PAPER_TEXT,
+                    paper.PAPER_TEXT_EN,
+                    paper.PAPER_TEXT_ATTACHED_FILENAME,
+                    paper.POSITION);
                 if (result == true)
                 {
                     var t = new ResuleBoolean();
@@ -230,8 +284,83 @@ namespace CoMS.Controllers
 
         }
 
-        
-        
+
+
+        [HttpPost]
+        [Route("api/ConfirmSendPaperText")]
+        public HttpResponseMessage ConfirmSendPaperText([FromBody] ConfirmSendPapertext param)
+        {
+            var kq = db.PAPER_TEXT.SingleOrDefault(x => x.PAPER_ID == param.PAPER_ID);
+            var t = new ResuleBoolean();
+            bool checkExit = true;// ton tai
+            if (kq != null)
+            {
+                switch (param.POSITION)
+                {
+                    case 1:
+                        if (kq.PAPER_TEXT_TITLE_1 != null)
+                        {
+                            checkExit = true;
+                        }
+                        else
+                        {
+                            checkExit = false;
+                        }
+                        break;
+                    case 2:
+                        if (kq.PAPER_TEXT_TITLE_2 != null)
+                        {
+                            checkExit = true;
+                        }
+                        else
+                        {
+                            checkExit = false;
+                        }
+                        break;
+                    case 3:
+                        if (kq.PAPER_TEXT_TITLE_3 != null)
+                        {
+                            checkExit = true;
+                        }
+                        else
+                        {
+                            checkExit = false;
+                        }
+                        break;
+                    case 4:
+                        if (kq.PAPER_TEXT_TITLE_4 != null)
+                        {
+                            checkExit = true;
+                        }
+                        else
+                        {
+                            checkExit = false;
+                        }
+                        break;
+                    case 5:
+                        if (kq.PAPER_TEXT_TITLE_5 != null)
+                        {
+                            checkExit = true;
+                        }
+                        else
+                        {
+                            checkExit = false;
+                        }
+                        break;
+                }
+                t.result = checkExit;
+                return ResponseSuccess(StringResource.Success, t);
+            }
+            else
+            {
+                //t.result = false;
+                return ResponseSuccess(StringResource.Success, null);
+            }
+
+
+        }
+
+
 
         //list paper text
         [HttpPost]
@@ -244,7 +373,8 @@ namespace CoMS.Controllers
                             join PAPER_ABSTRACT in db.PAPER_ABSTRACT on AUTHOR_PAPER_TEXT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
                             join confer in db.CONFERENCEs on AUTHOR_PAPER_TEXT_RELATIONSHIP.CONFERENCE_ID equals confer.CONFERENCE_ID
                             join paper_text in db.PAPER_TEXT on PAPER_ABSTRACT.PAPER_ID equals paper_text.PAPER_ID
-                            where AUTHOR_PAPER_TEXT_RELATIONSHIP.PERSON_ID == user.idAuthor
+                            where AUTHOR_PAPER_TEXT_RELATIONSHIP.PERSON_ID == user.PERSON_ID &&
+                            AUTHOR_PAPER_TEXT_RELATIONSHIP.CONFERENCE_ID == user.CONFERENCE_ID
                             select
                             new
                             {
@@ -275,6 +405,7 @@ namespace CoMS.Controllers
                                 PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
                                 PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
                                 paper_text.PAPER_TEXT_1,
+                                paper_text.PAPER_TEXT_EN_1,
                                 paper_text.FINAL_APPROVED_FULL_PAPER_OR_WORK_IN_PROGRESS,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
@@ -295,6 +426,7 @@ namespace CoMS.Controllers
                                 PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
                                 PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
                                 paper_text.PAPER_TEXT_2,
+                                paper_text.PAPER_TEXT_EN_2,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
@@ -309,6 +441,7 @@ namespace CoMS.Controllers
                                 CONFERENCE_NAME3 = confer.CONFERENCE_NAME + " - " + paper_text.PAPER_TEXT_TITLE_3,
                                 confer.PAPER_TEXT_DEADLINE_3,
                                 paper_text.PAPER_TEXT_3,
+                                paper_text.PAPER_TEXT_EN_3,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
@@ -327,6 +460,7 @@ namespace CoMS.Controllers
 
                                 confer.PAPER_TEXT_DEADLINE_4,
                                 paper_text.PAPER_TEXT_4,
+                                paper_text.PAPER_TEXT_EN_4,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
@@ -344,6 +478,7 @@ namespace CoMS.Controllers
                                 CONFERENCE_NAME5 = confer.CONFERENCE_NAME + " - " + paper_text.PAPER_TEXT_TITLE_EN_5,
                                 confer.PAPER_TEXT_DEADLINE_5,
                                 paper_text.PAPER_TEXT_5,
+                                paper_text.PAPER_TEXT_EN_5,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
                                 PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
@@ -390,6 +525,7 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_1),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_1),
+                                            new JProperty("PAPER_TEXT_EN", q.PAPER_TEXT_EN_1),
                                             new JProperty("TYPE_OF_STUDY_ID", q.TYPE_OF_STUDY_ID_1),
                                             new JProperty("TYPE_OF_STUDY_NAME", q.TYPE_OF_STUDY_NAME_1),
                                             new JProperty("TYPE_OF_STUDY_NAME_EN", q.TYPE_OF_STUDY_NAME_EN_1),
@@ -404,6 +540,12 @@ namespace CoMS.Controllers
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
                                             new JProperty("PAPER_TEXT_WITHDRAWN_DATE", q.PAPER_TEXT_WITHDRAWN_DATE),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_1", q.PAPER_TEXT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_2", q.PAPER_TEXT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
+
                                             new JProperty("POSITION", 1)
                                             );
                             jsonArray.Add(json1);
@@ -429,6 +571,7 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_2),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_2),
+                                            new JProperty("PAPER_TEXT_EN", q.PAPER_TEXT_EN_2),
                                             new JProperty("TYPE_OF_STUDY_ID", q.TYPE_OF_STUDY_ID_2),
                                             new JProperty("TYPE_OF_STUDY_NAME", q.TYPE_OF_STUDY_NAME_2),
                                             new JProperty("TYPE_OF_STUDY_NAME_EN", q.TYPE_OF_STUDY_NAME_EN_2),
@@ -443,6 +586,11 @@ namespace CoMS.Controllers
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
                                             new JProperty("PAPER_TEXT_WITHDRAWN_DATE", q.PAPER_TEXT_WITHDRAWN_DATE),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_1", q.PAPER_TEXT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_2", q.PAPER_TEXT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
                                             new JProperty("POSITION", 2)
                                             );
                             jsonArray.Add(json2);
@@ -463,6 +611,7 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME3),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_3),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_3),
+                                            new JProperty("PAPER_TEXT_EN", q.PAPER_TEXT_EN_3),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_3),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_3),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
@@ -480,6 +629,11 @@ namespace CoMS.Controllers
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
                                             new JProperty("PAPER_TEXT_WITHDRAWN_DATE", q.PAPER_TEXT_WITHDRAWN_DATE),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_1", q.PAPER_TEXT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_2", q.PAPER_TEXT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
                                             new JProperty("POSITION", 3)
                                             );
                             jsonArray.Add(json3);
@@ -500,6 +654,7 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME4),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_4),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_4),
+                                            new JProperty("PAPER_TEXT_EN", q.PAPER_TEXT_EN_4),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_4),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_4),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
@@ -517,6 +672,11 @@ namespace CoMS.Controllers
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
                                             new JProperty("PAPER_TEXT_WITHDRAWN_DATE", q.PAPER_TEXT_WITHDRAWN_DATE),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_1", q.PAPER_TEXT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_2", q.PAPER_TEXT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
                                             new JProperty("POSITION", 4)
                                             );
                             jsonArray.Add(json4);
@@ -537,6 +697,7 @@ namespace CoMS.Controllers
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME5),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_5),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_5),
+                                            new JProperty("PAPER_TEXT_EN", q.PAPER_TEXT_EN_5),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_ID", q.CONFERENCE_SESSION_TOPIC_ID_5),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME", q.CONFERENCE_SESSION_TOPIC_NAME_5),
                                             new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", q.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
@@ -554,6 +715,11 @@ namespace CoMS.Controllers
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
                                             new JProperty("PAPER_TEXT_WITHDRAWN_DATE", q.PAPER_TEXT_WITHDRAWN_DATE),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_1", q.PAPER_TEXT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_2", q.PAPER_TEXT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
                                             new JProperty("POSITION", 5)
                                             );
                             jsonArray.Add(json5);
@@ -587,6 +753,8 @@ namespace CoMS.Controllers
             public String PAPER_TEXT_TITLE { get; set; }
             public String PAPER_TEXT_TITLE_EN { get; set; }
             public String PAPER_TEXT { get; set; }
+            public String PAPER_TEXT_EN { get; set; }
+            public String PAPER_TEXT_ATTACHED_FILENAME { get; set; }
             public int FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_ID { get; set; }
             public String FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME { get; set; }
             public String FINAL_ASSIGNED_CONFERENCE_SESSION_TOPIC_NAME_EN { get; set; }
@@ -597,6 +765,8 @@ namespace CoMS.Controllers
             public int FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_ID { get; set; }
             public String FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME { get; set; }
             public String FINAL_APPROVED_CONFERENCE_PRESENTATION_TYPE_NAME_EN { get; set; }
+            public int CONFERENCE_ID { get; set; }
+
             public int POSITION { get; set; }
         }
 
@@ -607,7 +777,8 @@ namespace CoMS.Controllers
 
         public class InfoUserAuthor
         {
-            public int idAuthor { get; set; }
+            public int PERSON_ID { get; set; }
+            public int CONFERENCE_ID { get; set; }
         }
 
         public class See_Paper
@@ -622,6 +793,10 @@ namespace CoMS.Controllers
             public String PAPER_TEXT_TITLE { get; set; }
             public String PAPER_TEXT_TITLE_EN { get; set; }
             public int CONFERENCE_ID { get; set; }
+            public String PAPER_TEXT { get; set; }
+            public String PAPER_TEXT_EN { get; set; }
+            public String PAPER_TEXT_ATTACHED_FILENAME { get; set; }
+            public int POSITION { get; set; }
         }
 
         public class WithDrawnAbs
@@ -629,6 +804,20 @@ namespace CoMS.Controllers
             public int Id { get; set; }
         }
 
-        
+
+        public class ConfirmSendPapertext
+        {
+            public int PAPER_ID { get; set; }
+            public int POSITION { get; set; }
+
+        }
+
+        public class ItemPaper
+        {
+            public int PAPER_ID { get; set; }
+            
+        }
+
+
     }
 }

@@ -115,6 +115,42 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not create new channel.
+        /// </summary>
+        public static string Can_not_create_new_channel {
+            get {
+                return ResourceManager.GetString("Can_not_create_new_channel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t follow.
+        /// </summary>
+        public static string Can_not_follow {
+            get {
+                return ResourceManager.GetString("Can_not_follow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t unfollow.
+        /// </summary>
+        public static string Can_not_unfollow {
+            get {
+                return ResourceManager.GetString("Can_not_unfollow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conference do not exist..
+        /// </summary>
+        public static string Conference_do_not_exist {
+            get {
+                return ResourceManager.GetString("Conference_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chưa nhận được dữ liệu..
         /// </summary>
         public static string Data_not_received {
@@ -178,11 +214,29 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Follow is exist.
+        /// </summary>
+        public static string Follow_is_exist {
+            get {
+                return ResourceManager.GetString("Follow_is_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Khôi phục mật khẩu..
         /// </summary>
         public static string Forgot_password {
             get {
                 return ResourceManager.GetString("Forgot_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Get list for new channel error.
+        /// </summary>
+        public static string Get_list_for_new_channel_error {
+            get {
+                return ResourceManager.GetString("Get_list_for_new_channel_error", resourceCulture);
             }
         }
         
@@ -210,6 +264,15 @@ namespace CoMS.Resources {
         public static string Months_ago {
             get {
                 return ResourceManager.GetString("Months_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not_found.
+        /// </summary>
+        public static string Not_found {
+            get {
+                return ResourceManager.GetString("Not_found", resourceCulture);
             }
         }
         

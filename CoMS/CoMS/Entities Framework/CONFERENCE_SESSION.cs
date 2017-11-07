@@ -14,6 +14,7 @@ namespace CoMS.Entities_Framework
             CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION = new HashSet<CONFERENCE_ATTENDEE_IN_REGISTERED_CONFERENCE_SESSION>();
             CONFERENCE_SESSION_CHAIR_CONFERENCE_SESSION_RELATIONSHIP = new HashSet<CONFERENCE_SESSION_CHAIR_CONFERENCE_SESSION_RELATIONSHIP>();
             CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT = new HashSet<CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT>();
+            MANDATORY_OR_REGISTED_CONFERENCE_SESSION = new HashSet<MANDATORY_OR_REGISTED_CONFERENCE_SESSION>();
             PRESENTER_CONFERENCE_SESSION_RELATIONSHIP = new HashSet<PRESENTER_CONFERENCE_SESSION_RELATIONSHIP>();
             REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE = new HashSet<REGISTERED_CONFERENCE_SESSION_IN_CONFERENCE_REGISTRATION_PACKAGE>();
             SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE = new HashSet<SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE>();
@@ -116,6 +117,10 @@ namespace CoMS.Entities_Framework
         [Column(TypeName = "numeric")]
         public decimal? PRESENTATION_REVIEW_RATING_SCALE_END_POINT { get; set; }
 
+        public string DESCRIPTION { get; set; }
+
+        public string DESCRIPTION_EN { get; set; }
+
         public virtual CONFERENCE CONFERENCE { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -128,6 +133,9 @@ namespace CoMS.Entities_Framework
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT> CONFERENCE_SESSION_PAPER_PRESENTATION_SLOT { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<MANDATORY_OR_REGISTED_CONFERENCE_SESSION> MANDATORY_OR_REGISTED_CONFERENCE_SESSION { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PRESENTER_CONFERENCE_SESSION_RELATIONSHIP> PRESENTER_CONFERENCE_SESSION_RELATIONSHIP { get; set; }

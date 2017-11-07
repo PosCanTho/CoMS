@@ -9,11 +9,16 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using CoMS.Entities_Framework;
+using CoMS.Resources;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace CoMS.Controllers
 {
     public class BaseController : ApiController
     {
+        public DB db = new DB();
        
         protected HttpResponseMessage ResponseFail(string msg)
         {

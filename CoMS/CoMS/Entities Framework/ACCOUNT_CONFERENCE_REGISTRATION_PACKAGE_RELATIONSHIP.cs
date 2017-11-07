@@ -10,7 +10,7 @@ namespace CoMS.Entities_Framework
     {
         [Key]
         [Column(Order = 0)]
-        [StringLength(500)]
+        [StringLength(250)]
         public string UserName { get; set; }
 
         [Key]
