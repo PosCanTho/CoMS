@@ -69,14 +69,22 @@ namespace CoMS.Models
         public bool UpdateAbstractById(int PAPER_ID, String PAPER_ABSTRACT_TITLE, String PAPER_ABSTRACT_TITLE_EN, int CONFERENCE_SESSION_TOPIC_ID,
             String CONFERENCE_SESSION_TOPIC_NAME, String CONFERENCE_SESSION_TOPIC_NAME_EN, String PAPER_ABSTRACT_TEXT, String PAPER_ABSTRACT_TEXT_EN, String FULL_PAPER_OR_WORK_IN_PROGRESS,
             int TYPE_OF_STUDY_ID, String TYPE_OF_STUDY_NAME, String TYPE_OF_STUDY_NAME_EN, int CONFERENCE_PRESENTATION_TYPE_ID, String CONFERENCE_PRESENTATION_TYPE_NAME,
-            String CONFERENCE_PRESENTATION_TYPE_NAME_EN, int POSITION, String PAPER_ABSTRACT_ATTACHED_FILENAME)
+            String CONFERENCE_PRESENTATION_TYPE_NAME_EN, int POSITION, String PAPER_ABSTRACT_ATTACHED_FILENAME, int TRANGTHAI)
         {
             try
             {
-
+                int vitri = POSITION;
+                if (TRANGTHAI == 2)
+                {
+                    vitri = POSITION + 1; // rút bài
+                }
+                else
+                {
+                    vitri = POSITION;
+                }
 
                 var paperAbstract = GetPaperAbstractById(PAPER_ID);
-                switch (POSITION)
+                switch (vitri)
                 {
                     case 1:
                         paperAbstract.PAPER_ABSTRACT_TITLE_1 = PAPER_ABSTRACT_TITLE;
@@ -93,7 +101,14 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_1 = CONFERENCE_PRESENTATION_TYPE_ID;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_1 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
-                        paperAbstract.LAST_REVISED_DATE_1 = DateTime.Now;
+                        if (TRANGTHAI == 2)
+                        {
+                            paperAbstract.FIRST_SUBMITTED_DATE_1 = DateTime.Now;
+                        }else
+                        {
+                            paperAbstract.LAST_REVISED_DATE_1 = DateTime.Now;
+                        }
+                        
                         paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_1 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 2:
@@ -111,7 +126,15 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_2 = CONFERENCE_PRESENTATION_TYPE_ID;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_2 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
-                        paperAbstract.LAST_REVISED_DATE_2 = DateTime.Now;
+                        if (TRANGTHAI == 2)
+                        {
+                            paperAbstract.FIRST_SUBMITTED_DATE_2 = DateTime.Now;
+                        }
+                        else
+                        {
+                            paperAbstract.LAST_REVISED_DATE_2 = DateTime.Now;
+                        }
+                        
                         paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_2 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 3:
@@ -130,7 +153,16 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_3 = CONFERENCE_PRESENTATION_TYPE_ID;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_3 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
-                        paperAbstract.LAST_REVISED_DATE_3 = DateTime.Now;
+                        if (TRANGTHAI == 2)
+                        {
+                            paperAbstract.FIRST_SUBMITTED_DATE_3 = DateTime.Now;
+                        }
+                        else
+                        {
+                            paperAbstract.LAST_REVISED_DATE_3 = DateTime.Now;
+                        }
+
+                        
                         paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_3 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 4:
@@ -149,7 +181,15 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_4 = CONFERENCE_PRESENTATION_TYPE_ID;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_4 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
-                        paperAbstract.LAST_REVISED_DATE_4 = DateTime.Now;
+                        if (TRANGTHAI == 2)
+                        {
+                            paperAbstract.FIRST_SUBMITTED_DATE_4 = DateTime.Now;
+                        }
+                        else
+                        {
+                            paperAbstract.LAST_REVISED_DATE_4 = DateTime.Now;
+                        }
+                        
                         paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_4 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                     case 5:
@@ -168,7 +208,15 @@ namespace CoMS.Models
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_5 = CONFERENCE_PRESENTATION_TYPE_ID;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_5 = CONFERENCE_PRESENTATION_TYPE_NAME;
                         paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5 = CONFERENCE_PRESENTATION_TYPE_NAME_EN;
-                        paperAbstract.LAST_REVISED_DATE_5 = DateTime.Now;
+                        if (TRANGTHAI == 2)
+                        {
+                            paperAbstract.FIRST_SUBMITTED_DATE_5 = DateTime.Now;
+                        }
+                        else
+                        {
+                            paperAbstract.LAST_REVISED_DATE_5 = DateTime.Now;
+                        }
+                        
                         paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_5 = PAPER_ABSTRACT_ATTACHED_FILENAME;
                         break;
                 }

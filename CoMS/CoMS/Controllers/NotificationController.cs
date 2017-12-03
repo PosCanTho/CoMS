@@ -15,88 +15,88 @@ namespace CoMS.Controllers
 {
     public class NotificationController : BaseController
     {
-        [HttpPost]
-        [Route("api/SendNotification")]
-        public HttpResponseMessage SendMessage([FromBody]NotificationRequest notificationData)
-        {
-            if (notificationData != null)
-            {
-                try
-                {
-                    var result = "-1";
-                    var webAddr = "https://fcm.googleapis.com/fcm/send";
-                    string DeviceId = new ManageDeviceModel().GetDeviceByPersonId(notificationData.PersonIdTo).DEVICE_TOKEN;
+        //[HttpPost]
+        //[Route("api/SendNotification")]
+        //public HttpResponseMessage SendMessage([FromBody]NotificationRequest notificationData)
+        //{
+        //    if (notificationData != null)
+        //    {
+        //        try
+        //        {
+        //            var result = "-1";
+        //            var webAddr = "https://fcm.googleapis.com/fcm/send";
+        //            string DeviceId = new ManageDeviceModel().GetDeviceByPersonId(notificationData.PersonIdTo).DEVICE_TOKEN;
 
-                    var httpWebRequest = (HttpWebRequest)WebRequest.Create(webAddr);
-                    httpWebRequest.ContentType = "application/json";
-                    httpWebRequest.Headers.Add("Authorization:key=" + StringResource.Server_fcm_key);
-                    httpWebRequest.Method = "POST";
-                    /*Thêm vào CSDL*/
-                    var notificationModel = new NotificationModel();
-                    var notifi = new CoMS.Entities_Framework.Notification();
-                    notifi.PERSON_ID_FROM = notificationData.PersonIdFrom;
-                    notifi.PERSON_ID_TO = notificationData.PersonIdTo;
-                    notifi.MESSAGE = notificationData.Message;
-                    notifi.CREATE_DATE = DateTime.Now;
-                    notifi.READED = false;
-                    notifi.TITLE = notificationData.Title;
+        //            var httpWebRequest = (HttpWebRequest)WebRequest.Create(webAddr);
+        //            httpWebRequest.ContentType = "application/json";
+        //            httpWebRequest.Headers.Add("Authorization:key=" + StringResource.Server_fcm_key);
+        //            httpWebRequest.Method = "POST";
+        //            /*Thêm vào CSDL*/
+        //            var notificationModel = new NotificationModel();
+        //            var notifi = new CoMS.Entities_Framework.Notification();
+        //            notifi.PERSON_ID_FROM = notificationData.PersonIdFrom;
+        //            notifi.PERSON_ID_TO = notificationData.PersonIdTo;
+        //            notifi.MESSAGE = notificationData.Message;
+        //            notifi.CREATE_DATE = DateTime.Now;
+        //            notifi.READED = false;
+        //            notifi.TITLE = notificationData.Title;
 
-                    notificationModel.AddNotification(notifi);
+        //            notificationModel.AddNotification(notifi);
 
-                    /*Tạo dữ liệu trả về*/
-                    var notificationResponse = new NotificationResponse();
-                    notificationResponse.NotificationId = notifi.NOTIFICATION_ID;
-                    notificationResponse.Title = notifi.TITLE;
-                    notificationResponse.Message = notifi.MESSAGE;
-                    notificationResponse.Image = notifi.IMAGE;
-                    notificationResponse.PersonIdFrom = notifi.PERSON_ID_FROM;
-                    notificationResponse.PersonIdTo = notifi.PERSON_ID_TO;
-                    notificationResponse.Readed = notifi.READED.Value;
-                    notificationResponse.CreateDate = notifi.CREATE_DATE.Value;
-                    notificationResponse.NumberUnread = notificationModel.GetNumberUnread(notifi.PERSON_ID_TO);
+        //            /*Tạo dữ liệu trả về*/
+        //            var notificationResponse = new NotificationResponse();
+        //            notificationResponse.NotificationId = notifi.NOTIFICATION_ID;
+        //            notificationResponse.Title = notifi.TITLE;
+        //            notificationResponse.Message = notifi.MESSAGE;
+        //            notificationResponse.Image = notifi.IMAGE;
+        //            notificationResponse.PersonIdFrom = notifi.PERSON_ID_FROM;
+        //            notificationResponse.PersonIdTo = notifi.PERSON_ID_TO;
+        //            notificationResponse.Readed = notifi.READED.Value;
+        //            notificationResponse.CreateDate = notifi.CREATE_DATE.Value;
+        //            notificationResponse.NumberUnread = notificationModel.GetNumberUnread(notifi.PERSON_ID_TO);
 
-                    using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-                    {
+        //            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+        //            {
 
-                        /*Tạo dữ liệu trả về*/
-                        var notification = new Notification();
-                        notification.body = notificationData.Message;
-                        notification.title = notificationData.Title;
-                        notification.sound = notificationData.Sound;
-                        notification.priority = notificationData.Priority;
+        //                /*Tạo dữ liệu trả về*/
+        //                var notification = new Notification();
+        //                notification.body = notificationData.Message;
+        //                notification.title = notificationData.Title;
+        //                notification.sound = notificationData.Sound;
+        //                notification.priority = notificationData.Priority;
 
-                        JsonData data = new JsonData();
-                        data.Data = JsonConvert.SerializeObject(notificationResponse);
+        //                JsonData data = new JsonData();
+        //                data.Data = JsonConvert.SerializeObject(notificationResponse);
 
-                        var json = new DataJson();
-                        json.notification = notification;
-                        json.data = data;
-                        json.to = DeviceId;
+        //                var json = new DataJson();
+        //                json.notification = notification;
+        //                json.data = data;
+        //                json.to = DeviceId;
 
 
-                        streamWriter.Write(JsonConvert.SerializeObject(json));
-                        streamWriter.Flush();
-                    }
+        //                streamWriter.Write(JsonConvert.SerializeObject(json));
+        //                streamWriter.Flush();
+        //            }
 
-                    var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                    using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                    {
-                        result = streamReader.ReadToEnd();
-                    }
+        //            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+        //            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+        //            {
+        //                result = streamReader.ReadToEnd();
+        //            }
 
-                    return ResponseSuccess(StringResource.Success, notificationResponse);
-                }
-                catch (Exception)
-                {
-                    return ResponseFail(StringResource.Sorry_an_error_has_occurred);
-                }
+        //            return ResponseSuccess(StringResource.Success, notificationResponse);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            return ResponseFail(StringResource.Sorry_an_error_has_occurred);
+        //        }
 
-            }
-            else
-            {
-                return ResponseFail(StringResource.Data_not_received);
-            }
-        }
+        //    }
+        //    else
+        //    {
+        //        return ResponseFail(StringResource.Data_not_received);
+        //    }
+        //}
 
         [HttpPost]
         [Route("api/ListNotification")]

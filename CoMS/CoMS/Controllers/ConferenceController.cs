@@ -12,10 +12,12 @@ using PagedList;
 
 namespace CoMS.Controllers
 {
+
     public class ConferenceController : BaseController
     {
         private DB db = new DB();
         private MYDB myDB = new MYDB();
+
 
         [HttpPost]
         [Route("api/ConferenceUser")]
@@ -32,6 +34,7 @@ namespace CoMS.Controllers
                              ds.CONFERENCE_TYPE_ID,
                              ds.CONFERENCE_TYPE_NAME,
                              ds.CONFERENCE_TYPE_NAME_EN,
+                             ds.CONFERENCE_IMAGE_FILENAME,
                              ds.FROM_DATE,
                              ds.THRU_DATE,
                              ds.ORGANIZING_ORGANIZATION_ID_1,
@@ -256,36 +259,43 @@ namespace CoMS.Controllers
         [Route("api/ListAttendee")]
         public HttpResponseMessage ListAttendee(int conference_id, int personId)
         {
-            var result = new ChannelModel().getListAttendee(personId, conference_id);
-            if (result != null)
+            var account = db.ACCOUNTs.SingleOrDefault(x => x.PERSON_ID == personId);
+            var conference = db.CONFERENCEs.SingleOrDefault(x => x.CONFERENCE_ID == conference_id);
+            if (account == null)
             {
-                var bookmarkModel = new BookmarkModel();
-
-                foreach (Presenter item in result)
-                {
-                    item.IS_BOOKMARK = bookmarkModel.CheckBookmark(personId, item.PERSON_ID.Value);
-                }
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
+                return ResponseFail(StringResource.Account_does_not_exist);
             }
-            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
+            else if (conference == null)
+            {
+                return ResponseFail(StringResource.Conference_do_not_exist);
+            }
+            else
+            {
+                var result = new ChannelModel().getListAttendee(personId, conference_id);
+                return ResponseSuccess(StringResource.Success, result);
+            }
         }
 
         [HttpPost]
         [Route("api/ListPresenter")]
         public HttpResponseMessage ListPresenter(int conference_id, int personId)
         {
-            var result = new ChannelModel().getListPresenter(personId, conference_id);
-            if (result != null)
-            {
-                var bookmarkModel = new BookmarkModel();
 
-                foreach (Presenter item in result)
-                {
-                    item.IS_BOOKMARK = bookmarkModel.CheckBookmark(personId, item.PERSON_ID.Value);
-                }
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
+            var account = db.ACCOUNTs.SingleOrDefault(x => x.PERSON_ID == personId);
+            var conference = db.CONFERENCEs.SingleOrDefault(x => x.CONFERENCE_ID == conference_id);
+            if (account == null)
+            {
+                return ResponseFail(StringResource.Account_does_not_exist);
             }
-            else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
+            else if (conference == null)
+            {
+                return ResponseFail(StringResource.Conference_do_not_exist);
+            }
+            else
+            {
+                var result = new ChannelModel().getListPresenter(personId, conference_id);
+                return ResponseSuccess(StringResource.Success, result);
+            }
         }
 
         [HttpPost]
@@ -404,6 +414,8 @@ namespace CoMS.Controllers
                          && ac.UserName == user_name
                          && ac.CONFERENCE_ID == conference_id
                          && menu.MOBILE_PLATFORM_NAME.ToLower() == "iOS".ToLower()
+                         && gro.THRU_DATE == null
+                         && gro.UPDATED_DATETIME == null
                          select new
                          {
                              menu.MENU_ID,
@@ -652,6 +664,7 @@ namespace CoMS.Controllers
             }
             return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult));
         }
+       
     }
 
     public class Presenter
@@ -681,6 +694,7 @@ namespace CoMS.Controllers
         public string CONFERENCE_NAME_EN { get; set; }
         public string FULL_NAME { get; set; }
         public bool IS_BOOKMARK { get; set; }
+        public bool IS_FOLLOW { get; set; }
     }
 
     public class Organization

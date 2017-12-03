@@ -115,6 +115,33 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account has not been logged.
+        /// </summary>
+        public static string Account_has_not_been_logged {
+            get {
+                return ResourceManager.GetString("Account_has_not_been_logged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Activity feed do not exist.
+        /// </summary>
+        public static string Activity_feed_do_not_exist {
+            get {
+                return ResourceManager.GetString("Activity_feed_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add device token success.
+        /// </summary>
+        public static string Add_device_token_success {
+            get {
+                return ResourceManager.GetString("Add_device_token_success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not create new channel.
         /// </summary>
         public static string Can_not_create_new_channel {
@@ -124,11 +151,56 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not delete message.
+        /// </summary>
+        public static string Can_not_delete_message {
+            get {
+                return ResourceManager.GetString("Can_not_delete_message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t follow.
         /// </summary>
         public static string Can_not_follow {
             get {
                 return ResourceManager.GetString("Can_not_follow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not get list followers.
+        /// </summary>
+        public static string Can_not_get_list_followers {
+            get {
+                return ResourceManager.GetString("Can_not_get_list_followers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not get list following.
+        /// </summary>
+        public static string Can_not_get_list_following {
+            get {
+                return ResourceManager.GetString("Can_not_get_list_following", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not like.
+        /// </summary>
+        public static string Can_not_like {
+            get {
+                return ResourceManager.GetString("Can_not_like", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not load detail.
+        /// </summary>
+        public static string Can_not_load_detail {
+            get {
+                return ResourceManager.GetString("Can_not_load_detail", resourceCulture);
             }
         }
         
@@ -147,6 +219,24 @@ namespace CoMS.Resources {
         public static string Conference_do_not_exist {
             get {
                 return ResourceManager.GetString("Conference_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conference session do not exist.
+        /// </summary>
+        public static string Conference_session_do_not_exist {
+            get {
+                return ResourceManager.GetString("Conference_session_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conference survey question do not exist.
+        /// </summary>
+        public static string Conference_survey_question_do_not_exist {
+            get {
+                return ResourceManager.GetString("Conference_survey_question_do_not_exist", resourceCulture);
             }
         }
         
@@ -241,11 +331,83 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GROUP ASSIGNED.
+        /// </summary>
+        public static string GROUP_ASSIGNED {
+            get {
+                return ResourceManager.GetString("GROUP_ASSIGNED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GROUP JOIN REQUEST.
+        /// </summary>
+        public static string GROUP_JOIN_REQUEST {
+            get {
+                return ResourceManager.GetString("GROUP_JOIN_REQUEST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GROUP JOIN REQUEST APPROVED.
+        /// </summary>
+        public static string GROUP_JOIN_REQUEST_APPROVED {
+            get {
+                return ResourceManager.GetString("GROUP_JOIN_REQUEST_APPROVED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to giờ trước.
         /// </summary>
         public static string Hours_ago {
             get {
                 return ResourceManager.GetString("Hours_ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Load list channel error.
+        /// </summary>
+        public static string Load_list_channel_error {
+            get {
+                return ResourceManager.GetString("Load_list_channel_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Load my channel error.
+        /// </summary>
+        public static string Load_my_channel_error {
+            get {
+                return ResourceManager.GetString("Load_my_channel_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member do not exist.
+        /// </summary>
+        public static string Member_do_not_exist {
+            get {
+                return ResourceManager.GetString("Member_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message do not exist.
+        /// </summary>
+        public static string Message_do_not_exist {
+            get {
+                return ResourceManager.GetString("Message_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message group do not exist.
+        /// </summary>
+        public static string Message_group_do_not_exist {
+            get {
+                return ResourceManager.GetString("Message_group_do_not_exist", resourceCulture);
             }
         }
         
@@ -340,6 +502,24 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to PRIVATE MESSAGE.
+        /// </summary>
+        public static string PRIVATE_MESSAGE {
+            get {
+                return ResourceManager.GetString("PRIVATE_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PUBLIC MESSAGE.
+        /// </summary>
+        public static string PUBLIC_MESSAGE {
+            get {
+                return ResourceManager.GetString("PUBLIC_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to seconds ago.
         /// </summary>
         public static string Seconds_ago {
@@ -372,6 +552,42 @@ namespace CoMS.Resources {
         public static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Survey do not exist.
+        /// </summary>
+        public static string Survey_do_not_exist {
+            get {
+                return ResourceManager.GetString("Survey_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The list of members is empty.
+        /// </summary>
+        public static string The_list_of_members_is_empty {
+            get {
+                return ResourceManager.GetString("The_list_of_members_is_empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Token is not empty.
+        /// </summary>
+        public static string Token_is_not_empty {
+            get {
+                return ResourceManager.GetString("Token_is_not_empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update token success.
+        /// </summary>
+        public static string Update_token_success {
+            get {
+                return ResourceManager.GetString("Update_token_success", resourceCulture);
             }
         }
         
@@ -439,11 +655,56 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You are not a member of the group.
+        /// </summary>
+        public static string You_are_not_a_member_of_the_group {
+            get {
+                return ResourceManager.GetString("You_are_not_a_member_of_the_group", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can not follow yourself.
+        /// </summary>
+        public static string You_can_not_follow_yourself {
+            get {
+                return ResourceManager.GetString("You_can_not_follow_yourself", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You do not have permission to add members.
+        /// </summary>
+        public static string You_do_not_have_permission_to_add_members {
+            get {
+                return ResourceManager.GetString("You_do_not_have_permission_to_add_members", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have bookmark this person..
         /// </summary>
         public static string You_have_bookmark_this_person {
             get {
                 return ResourceManager.GetString("You_have_bookmark_this_person", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have submitted your request and are awaiting approval.
+        /// </summary>
+        public static string You_have_submitted_your_request {
+            get {
+                return ResourceManager.GetString("You_have_submitted_your_request", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You joined the group.
+        /// </summary>
+        public static string You_joined_the_group {
+            get {
+                return ResourceManager.GetString("You_joined_the_group", resourceCulture);
             }
         }
     }

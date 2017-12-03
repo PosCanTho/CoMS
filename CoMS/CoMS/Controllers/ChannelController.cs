@@ -159,7 +159,7 @@ namespace CoMS.Controllers
                         member.START_DATETIME = DateTime.Now;
                         member.CREATED_UserName = channel.CREATED_UserName;
                         member.MESSAGING_GROUP_MODERATOR = item.UserName == channel.CREATED_UserName ? true : false;
-                        member.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED = "GROUP_ASSIGNED";
+                        member.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED = "GROUP ASSIGNED";
                         db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP.Add(member);
                         db.SaveChanges();
                     }
@@ -176,6 +176,58 @@ namespace CoMS.Controllers
         [HttpPost]
         [Route("api/ListChannel")]
         public HttpResponseMessage ListChannel(string userName, int conferenceId, int page, int pageSize)
+        {
+            var result = new AccountMessagingGroupMemberModel().getListOfUserName(userName);
+            var listChannel = new List<Group>();
+            foreach (ACCOUNT_MESSAGING_GROUP_MEMBERSHIP item in result)
+            {
+                var groups = db.MESSAGING_GROUP.Where(x => (x.MESSAGING_GROUP_ID == item.MESSAGING_GROUP_ID || x.PUBLIC_OR_PRIVATE_GROUP == "PUBLIC GROUP") && x.CONFERENCE_ID == conferenceId && (x.DELETED == null || x.DELETED == false)).OrderByDescending(x => x.CREATED_DATETIME).ToPagedList(page, pageSize);
+                foreach (MESSAGING_GROUP messageGroup in groups)
+                {
+                    var members = from g in db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP
+                                  join a in db.ACCOUNTs on g.UserName equals a.UserName
+                                  where g.MESSAGING_GROUP_ID == messageGroup.MESSAGING_GROUP_ID && (g.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED == "GROUP ASSIGNED" || g.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED == "GROUP JOIN REQUEST APPROVED")
+                                  && (g.DELETED == false || g.DELETED == null)
+                                  select new
+                                  {
+                                      a.Image,
+                                      a.CURRENT_FIRST_NAME,
+                                      a.CURRENT_LAST_NAME,
+                                      a.CURRENT_MIDDLE_NAME,
+
+                                      g.UserName,
+                                      g.MESSAGING_GROUP_ID,
+                                      g.START_DATETIME,
+                                      g.MESSAGING_GROUP_MODERATOR,
+                                      g.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED,
+                                      g.NOTE,
+                                      g.NOTE_EN,
+                                      g.CREATED_UserName,
+                                      g.DELETED
+                                  };
+                    if (members != null)
+                    {
+                        var group = new Group();
+                        group.MESSAGING_GROUP_ID = messageGroup.MESSAGING_GROUP_ID;
+                        group.MESSAGING_GROUP_NAME = messageGroup.MESSAGING_GROUP_NAME;
+                        group.MESSAGING_GROUP_NAME_EN = messageGroup.MESSAGING_GROUP_NAME_EN;
+                        group.AVATAR_PICTURE_FILENAME = messageGroup.AVATAR_PICTURE_FILENAME;
+                        group.CREATED_DATETIME = messageGroup.CREATED_DATETIME;
+                        group.CREATED_UserName = messageGroup.CREATED_UserName;
+                        group.MEMBERS = members.ToList();
+                        if (!listChannel.Any(x => x.MESSAGING_GROUP_ID == group.MESSAGING_GROUP_ID))
+                        {
+                            listChannel.Add(group);
+                        }
+                    }
+                }
+            }
+            return ResponseSuccess(StringResource.Success, listChannel);
+        }
+
+        [HttpPost]
+        [Route("api/ListMyChannel")]
+        public HttpResponseMessage ListMyChannel(string userName, int conferenceId, int page, int pageSize)
         {
             try
             {
@@ -220,7 +272,26 @@ namespace CoMS.Controllers
             }
             catch
             {
-                return ResponseFail(StringResource.Can_not_create_new_channel);
+                return ResponseFail(StringResource.Load_my_channel_error);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/DeleteChannel")]
+        public HttpResponseMessage DeleteChannel(string userName, int MESSAGING_GROUP_ID, int CONFERENCE_ID)
+        {
+            var group = db.MESSAGING_GROUP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && x.CONFERENCE_ID == CONFERENCE_ID && x.CREATED_UserName == userName);
+            if (group == null)
+            {
+                return ResponseFail(StringResource.Message_group_do_not_exist);
+            }
+            else
+            {
+                group.DELETED = true;
+                group.DELETED_DATETIME = DateTime.Now;
+                group.DELETED_UserName = userName;
+                db.SaveChanges();
+                return ResponseSuccess(StringResource.Success);
             }
         }
 

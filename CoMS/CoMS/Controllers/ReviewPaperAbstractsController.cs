@@ -23,164 +23,194 @@ namespace CoMS.Controllers
         [Route("api/Review/ListReviewAbstractPending")]
         public HttpResponseMessage ListReviewAbstractPending([FromBody] PERSON person)
         {
-            // tìm ngu?i reviewer trong h?i d?ng
-            var query_PERSON_ID = (from reviewer in db.REVIEWERs
-                                   where reviewer.PERSON_ID == person.Id && reviewer.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true
-                                   select
-                                   new
-                                   {
-                                       reviewer.PERSON_ID,
-                                       reviewer.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
-                                   }).Distinct().Take(1);
-            var jsonArray = new JArray();
-            var json1 = new JObject();
-            var json2 = new JObject();
-            var json3 = new JObject();
-            var json4 = new JObject();
-            var json5 = new JObject();
-            if (query_PERSON_ID.Count() >= 0)
+            try
             {
 
-                foreach (var item in query_PERSON_ID)
+
+                var jsonArray = new JArray();
+
+                //B1: Xet ton tai 1 trong 2 quyen
+
+                var query_REVIEWER = from REVIEWER in db.REVIEWERs
+                                     where REVIEWER.PERSON_ID == person.Id &&
+                                     (REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true || REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true)
+                                     select new
+                                     {
+                                         REVIEWER.PERSON_ID,
+                                         REVIEWER.CONFERENCE_ID,
+                                         REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
+                                     };
+                //return ResponseSuccess(StringResource.Success, query_REVIEWER);
+
+                if (query_REVIEWER.Count() > 0)
                 {
-                    // tìm paper_id du?c reivewer dó dánh giá, và dã phân công
-                    var query_REVIEWER = (from reviewer in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                                          where reviewer.PERSON_ID == item.PERSON_ID && reviewer.CONFERENCE_ID == person.CONFERENCE_ID
-                                          group reviewer by reviewer.PAPER_ID into g
-                                          select
-                                          new
-                                          {
-                                              PAPER_ID = g.Key,
-                                              PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
-                                          }
-                                          ).Distinct();
-
-
-
-                    if (query_REVIEWER.Count() > 0)
+                    foreach (var item_REVIEWER in query_REVIEWER)
                     {
-                        foreach (var item_REVIEWER in query_REVIEWER)
+                        // Xet co dc phan cong đanh gia khong
+                        var query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP =
+                                     (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER.PERSON_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER.CONFERENCE_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == person.CONFERENCE_ID
+                                     group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new
+                                     {
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID
+                                     } into g
+                                     let PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
+
+                                     select new
+                                     {
+                                         g.Key.PAPER_ID,
+                                         item_REVIEWER.PERSON_ID,
+                                         item_REVIEWER.CONFERENCE_ID,
+                                         PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                         item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                     }).Distinct();
+
+
+                        foreach (var item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
                         {
-                            // ki?m tra, l?y thông tin paper dã duy?t
-                            var query_infoPaper = (from author_paperabstract_relationship in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                                                   join paper_abstract in db.PAPER_ABSTRACT on author_paperabstract_relationship.PAPER_ID equals paper_abstract.PAPER_ID
-                                                   join conferen in db.CONFERENCEs on author_paperabstract_relationship.CONFERENCE_ID equals conferen.CONFERENCE_ID
-                                                   where author_paperabstract_relationship.PERSON_ID == person.Id &&
-                                                     paper_abstract.PAPER_ID == item_REVIEWER.PAPER_ID
-                                                     && author_paperabstract_relationship.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER
 
-                                                   select
-                                                   new
+                            var query_infoPaper = (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                                   join PAPER_ABSTRACT in db.PAPER_ABSTRACT on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
+                                                   join CONFERENCE in db.CONFERENCEs on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID equals CONFERENCE.CONFERENCE_ID
+                                                   join CONFERENCE_BOARD_OF_REVIEW in db.CONFERENCE_BOARD_OF_REVIEW on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID equals CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_ID
+                                                   where
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID &&
+
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null
+
+                                                   
+                                                   select new
                                                    {
-                                                       conferen.CONFERENCE_ID,
-                                                       paper_abstract.PAPER_ID,
-                                                       author_paperabstract_relationship.PERSON_ID,
-                                                       conferen.FROM_DATE,
-                                                       conferen.THRU_DATE,
-                                                       author_paperabstract_relationship.REVIEWED_DATE,
-                                                       author_paperabstract_relationship.REVIEW_TEXT,
-                                                       author_paperabstract_relationship.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
-                                                       paper_abstract.PAPER_ABSTRACT_WITHDRAWN,
-                                                       paper_abstract.PAPER_ABSTRACT_WITHDRAWN_DATE,
-                                                       author_paperabstract_relationship.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                                                       paper_abstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                                                       paper_abstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID,
+                                                       item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                                       item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                                       item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
 
-                                                       CONFERENCE_NAME1 = (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_1),
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_1,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_1,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_EN_1,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_1,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_1,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_1,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_1,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_1,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_1,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_1,
-                                                       paper_abstract.LAST_REVISED_DATE_1,
+                                                       CONFERENCE.FROM_DATE,
+                                                       CONFERENCE.THRU_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEWED_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEW_TEXT,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                       PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                       PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
 
-
-                                                       CONFERENCE_NAME2 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_2,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_2,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_EN_2,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_2,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_2,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_2,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_2,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_2,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_2,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_2,
-                                                       paper_abstract.LAST_REVISED_DATE_2,
+                                                       CONFERENCE_NAME1 = (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_1,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_1,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_1,
 
 
-                                                       CONFERENCE_NAME3 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_3,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_3,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_3,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_3,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_3,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_3,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_3,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_3,
-                                                       paper_abstract.LAST_REVISED_DATE_3,
-                                                       CONFERENCE_NAME4 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                       CONFERENCE_SESSION_TOPIC_ID_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_4,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_4,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_4,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_4,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_4,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_4,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_4,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_4,
-                                                       paper_abstract.LAST_REVISED_DATE_4,
-                                                       CONFERENCE_SESSION_TOPIC_ID_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       CONFERENCE_NAME2 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_2,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_2,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_2,
 
 
-                                                       CONFERENCE_NAME5 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_5,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_5,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_5,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_5,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_5,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_5,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_5,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_5,
-                                                       paper_abstract.LAST_REVISED_DATE_5,
-                                                       CONFERENCE_SESSION_TOPIC_ID_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       CONFERENCE_NAME3 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
 
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
-                                                       item.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
-                                                   }).Distinct();
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_3,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_3,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_3,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_3,
+                                                       CONFERENCE_NAME4 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE_SESSION_TOPIC_ID_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_4,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_4,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_4,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_4,
+                                                       CONFERENCE_SESSION_TOPIC_ID_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+
+                                                       CONFERENCE_NAME5 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_5,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_5,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_5,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_5,
+                                                       CONFERENCE_SESSION_TOPIC_ID_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
+                                                       CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                                       CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_1,
+                                                       CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_2
+                                                   }).Take(1);
+
 
 
                             if (query_infoPaper.Count() > 0)// tìm th?y PAPER_ID dã duy?t
@@ -189,51 +219,59 @@ namespace CoMS.Controllers
                                 foreach (var item_infoPaper in query_infoPaper)
                                 {
                                     int k = 0;
-                                    json1 = new JObject();
-                                    json2 = new JObject();
-                                    json3 = new JObject();
-                                    json4 = new JObject();
-                                    json5 = new JObject();
+                                    var json1 = new JObject();
+                                    var json2 = new JObject();
+                                    var json3 = new JObject();
+                                    var json4 = new JObject();
+                                    var json5 = new JObject();
+
                                     if ((item_infoPaper.PAPER_ABSTRACT_TITLE_1 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_1 != null)
                                         && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json1 = new JObject(
-                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
-                                            new JProperty("POSITION", 1)
-                                            );
-
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                           new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 1)
+                                           );
                                         k++;
+
                                     }
 
 
@@ -241,40 +279,47 @@ namespace CoMS.Controllers
                                         && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json2 = new JObject(
-                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
-                                            new JProperty("POSITION", 2)
-                                            );
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                           new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 2)
+                                           );
                                         k++;
                                     }
 
@@ -283,40 +328,47 @@ namespace CoMS.Controllers
                                     if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json3 = new JObject(
-                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
-                                            new JProperty("POSITION", 3)
-                                                       );
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 3)
+                                                      );
                                         k++;
                                     }
 
@@ -324,40 +376,47 @@ namespace CoMS.Controllers
                                     if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json4 = new JObject(
-                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
-                                            new JProperty("POSITION", 4)
-                                                       );
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 4)
+                                                      );
                                         k++;
                                     }
 
@@ -366,45 +425,49 @@ namespace CoMS.Controllers
                                     if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json5 = new JObject(
-                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
-                                            new JProperty("POSITION", 5)
-                                                       );
+                                                     new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 5)
+                                                      );
                                         k++;
                                     }
-
-
-                                    // l?y paper n?p g?n nh?t
 
                                     if (k > 0)
                                     {
@@ -428,35 +491,23 @@ namespace CoMS.Controllers
                                         }
                                     }
 
-
                                 }
 
                             }
-                            else // không tìm th?y PAPER
-                            {
-                                return ResponseSuccess(StringResource.Success, query_infoPaper);
-                            }
-
 
                         }
-
-
-                        return ResponseSuccess(StringResource.Success, jsonArray);
-
-                    }
-                    else
-                    {
-                        return ResponseSuccess(StringResource.Success, jsonArray);
                     }
 
+
+                    return ResponseSuccess(StringResource.Success, jsonArray);
+                }
+                else
+                {
+                    return ResponseFail(StringResource.Data_not_received);
                 }
 
-                return ResponseFail(StringResource.Data_not_received);
-
-
-
             }
-            else
+            catch (Exception ex)
             {
                 return ResponseFail(StringResource.Data_not_received);
             }
@@ -468,174 +519,182 @@ namespace CoMS.Controllers
         [Route("api/Review/ListReviewAbstractReject")]
         public HttpResponseMessage ListReviewAbstractReject([FromBody] PERSON person)
         {
-            // tìm ngu?i reviewer trong h?i d?ng
-            var query_PERSON_ID = (from reviewer in db.REVIEWERs
-                                   where reviewer.PERSON_ID == person.Id
-                                   select
-                                   new
-                                   {
-                                       reviewer.PERSON_ID
-                                   }
-                                   ).Distinct();
-
-            var jsonArray = new JArray();
-            var json1 = new JObject();
-            var json2 = new JObject();
-            var json3 = new JObject();
-            var json4 = new JObject();
-            var json5 = new JObject();
-
-
-
-            if (query_PERSON_ID.Count() >= 0)
+            try
             {
 
-                foreach (var item in query_PERSON_ID)
+
+                var jsonArray = new JArray();
+
+                //B1: Xet ton tai 1 trong 2 quyen
+
+                var query_REVIEWER = from REVIEWER in db.REVIEWERs
+                                     where REVIEWER.PERSON_ID == person.Id &&
+                                     (REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true || REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true)
+                                     select new
+                                     {
+                                         REVIEWER.PERSON_ID,
+                                         REVIEWER.CONFERENCE_ID,
+                                         REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
+                                     };
+                if (query_REVIEWER.Count() > 0)
                 {
-                    // tìm paper_id du?c reivewer dó dánh giá, và dã phân công
-                    var query_REVIEWER = (from reviewer in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                                          where reviewer.PERSON_ID == item.PERSON_ID && reviewer.CONFERENCE_ID == person.CONFERENCE_ID
-                                          group reviewer by reviewer.PAPER_ID into g
-                                          select
-
-                                          new
-                                          {
-                                              PAPER_ID = g.Key,
-                                              PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
-                                          }
-                                          ).Distinct();
-
-
-
-                    //return ResponseSuccess(StringResource.Success, query_REVIEWER);
-
-                    if (query_REVIEWER.Count() > 0)
+                    foreach (var item_REVIEWER in query_REVIEWER)
                     {
-                        foreach (var item_REVIEWER in query_REVIEWER)
+                        // Xet co dc phan cong đanh gia khong
+                        var query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP =
+                                     (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER.PERSON_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER.CONFERENCE_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == person.CONFERENCE_ID
+                                     group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new { REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID } into g
+                                     let PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
+
+                                     select new
+                                     {
+                                         g.Key.PAPER_ID,
+                                         item_REVIEWER.PERSON_ID,
+                                         item_REVIEWER.CONFERENCE_ID,
+                                         PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                         item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                     }).Distinct();
+
+                        foreach (var item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
                         {
-                            // ki?m tra, l?y thông tin paper 
-                            var query_infoPaper = (from author_paperabstract_relationship in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                                                   join paper_abstract in db.PAPER_ABSTRACT on author_paperabstract_relationship.PAPER_ID equals paper_abstract.PAPER_ID
-                                                   join conferen in db.CONFERENCEs on author_paperabstract_relationship.CONFERENCE_ID equals conferen.CONFERENCE_ID
-                                                   where author_paperabstract_relationship.PERSON_ID == person.Id &&
-                                                     paper_abstract.PAPER_ID == item_REVIEWER.PAPER_ID &&
-                                                     author_paperabstract_relationship.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER
 
-                                                   select
-                                                  new
-                                                  {
-                                                      conferen.CONFERENCE_ID,
-                                                      paper_abstract.PAPER_ID,
-                                                      author_paperabstract_relationship.PERSON_ID,
-                                                      conferen.FROM_DATE,
-                                                      conferen.THRU_DATE,
-                                                      author_paperabstract_relationship.REVIEWED_DATE,
-                                                      author_paperabstract_relationship.REVIEW_TEXT,
-                                                      author_paperabstract_relationship.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
-                                                      paper_abstract.PAPER_ABSTRACT_WITHDRAWN,
-                                                      paper_abstract.PAPER_ABSTRACT_WITHDRAWN_DATE,
-                                                      author_paperabstract_relationship.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                                                      paper_abstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                                                      paper_abstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+                            var query_infoPaper = (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                                   join PAPER_ABSTRACT in db.PAPER_ABSTRACT on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
+                                                   join CONFERENCE in db.CONFERENCEs on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID equals CONFERENCE.CONFERENCE_ID
+                                                   join CONFERENCE_BOARD_OF_REVIEW in db.CONFERENCE_BOARD_OF_REVIEW on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID equals CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_ID
+                                                   where
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID &&
 
+                                                   (REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false || PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                                   select new
+                                                   {
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID,
+                                                       item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                                       item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                                       item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
 
-                                                      CONFERENCE_NAME1 = (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_1),
-                                                      conferen.PAPER_ABSTRACT_DEADLINE_1,
-                                                      paper_abstract.PAPER_ABSTRACT_TITLE_1,
-                                                      paper_abstract.PAPER_ABSTRACT_TITLE_EN_1,
-                                                      paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1,
-                                                      paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1,
-                                                      paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
-                                                      paper_abstract.PAPER_ABSTRACT_TEXT_1,
-                                                      paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
-                                                      paper_abstract.TYPE_OF_STUDY_ID_1,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_1,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_EN_1,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_1,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_1,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
-                                                      paper_abstract.FIRST_SUBMITTED_DATE_1,
-                                                      paper_abstract.LAST_REVISED_DATE_1,
+                                                       CONFERENCE.FROM_DATE,
+                                                       CONFERENCE.THRU_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEWED_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEW_TEXT,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                       PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                       PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
 
-
-                                                      CONFERENCE_NAME2 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                      conferen.PAPER_ABSTRACT_DEADLINE_2,
-                                                      paper_abstract.PAPER_ABSTRACT_TITLE_2,
-                                                      paper_abstract.PAPER_ABSTRACT_TITLE_EN_2,
-                                                      paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                      paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                      paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-                                                      paper_abstract.PAPER_ABSTRACT_TEXT_2,
-                                                      paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
-                                                      paper_abstract.TYPE_OF_STUDY_ID_2,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_2,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_EN_2,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_2,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_2,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
-                                                      paper_abstract.FIRST_SUBMITTED_DATE_2,
-                                                      paper_abstract.LAST_REVISED_DATE_2,
+                                                       CONFERENCE_NAME1 = (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_1,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_1,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_1,
 
 
-                                                      CONFERENCE_NAME3 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-
-                                                      conferen.PAPER_ABSTRACT_DEADLINE_3,
-                                                      paper_abstract.PAPER_ABSTRACT_TEXT_3,
-                                                      paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
-                                                      paper_abstract.TYPE_OF_STUDY_ID_3,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_3,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_EN_3,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_3,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_3,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
-                                                      paper_abstract.FIRST_SUBMITTED_DATE_3,
-                                                      paper_abstract.LAST_REVISED_DATE_3,
-                                                      CONFERENCE_NAME4 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                      CONFERENCE_SESSION_TOPIC_ID_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                      CONFERENCE_SESSION_TOPIC_NAME_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-
-                                                      conferen.PAPER_ABSTRACT_DEADLINE_4,
-                                                      paper_abstract.PAPER_ABSTRACT_TEXT_4,
-                                                      paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
-                                                      paper_abstract.TYPE_OF_STUDY_ID_4,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_4,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_EN_4,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_4,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_4,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
-                                                      paper_abstract.FIRST_SUBMITTED_DATE_4,
-                                                      paper_abstract.LAST_REVISED_DATE_4,
-                                                      CONFERENCE_SESSION_TOPIC_ID_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                      CONFERENCE_SESSION_TOPIC_NAME_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       CONFERENCE_NAME2 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_2,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_2,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_2,
 
 
-                                                      CONFERENCE_NAME5 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                      conferen.PAPER_ABSTRACT_DEADLINE_5,
-                                                      paper_abstract.PAPER_ABSTRACT_TEXT_5,
-                                                      paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
-                                                      paper_abstract.TYPE_OF_STUDY_ID_5,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_5,
-                                                      paper_abstract.TYPE_OF_STUDY_NAME_EN_5,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_5,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_5,
-                                                      paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
-                                                      paper_abstract.FIRST_SUBMITTED_DATE_5,
-                                                      paper_abstract.LAST_REVISED_DATE_5,
-                                                      CONFERENCE_SESSION_TOPIC_ID_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                      CONFERENCE_SESSION_TOPIC_NAME_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       CONFERENCE_NAME3 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
 
-                                                      paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
-                                                      paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
-                                                      paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
-                                                      paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
-                                                      paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_5
-                                                  }).Distinct();
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_3,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_3,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_3,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_3,
+                                                       CONFERENCE_NAME4 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE_SESSION_TOPIC_ID_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_4,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_4,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_4,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_4,
+                                                       CONFERENCE_SESSION_TOPIC_ID_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
 
 
+                                                       CONFERENCE_NAME5 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_5,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_5,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_5,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_5,
+                                                       CONFERENCE_SESSION_TOPIC_ID_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
 
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
+                                                       CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                                       CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_1,
+                                                       CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_2
+                                                   }).Take(1);
 
 
 
@@ -645,222 +704,245 @@ namespace CoMS.Controllers
                                 foreach (var item_infoPaper in query_infoPaper)
                                 {
                                     int k = 0;
-                                    json1 = new JObject();
-                                    json2 = new JObject();
-                                    json3 = new JObject();
-                                    json4 = new JObject();
-                                    json5 = new JObject();
+                                    var json1 = new JObject();
+                                    var json2 = new JObject();
+                                    var json3 = new JObject();
+                                    var json4 = new JObject();
+                                    var json5 = new JObject();
+
                                     if ((item_infoPaper.PAPER_ABSTRACT_TITLE_1 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_1 != null)
-                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json1 = new JObject(
-                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("POSITION", 1)
-                                            );
-
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 1)
+                                           );
                                         k++;
+
                                     }
 
 
                                     if ((item_infoPaper.PAPER_ABSTRACT_TITLE_2 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_2 != null)
-                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json2 = new JObject(
-                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("POSITION", 2)
-                                            );
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 2)
+                                           );
                                         k++;
                                     }
 
 
 
-                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json3 = new JObject(
-                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("POSITION", 3)
-                                                       );
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 3)
+                                                      );
                                         k++;
                                     }
 
 
-                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json4 = new JObject(
-                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("POSITION", 4)
-                                                       );
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 4)
+                                                      );
                                         k++;
                                     }
 
 
 
-                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json5 = new JObject(
-                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("POSITION", 5)
-                                                       );
+                                                     new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 5)
+                                                      );
                                         k++;
                                     }
-
-
-                                    // l?y paper n?p g?n nh?t
 
                                     if (k > 0)
                                     {
@@ -881,41 +963,26 @@ namespace CoMS.Controllers
                                             case 5:
                                                 jsonArray.Add(json5);
                                                 break;
-                                            default:
-                                                k = 0;
-                                                break;
                                         }
                                     }
-
 
                                 }
 
                             }
-                            else // không tìm th?y PAPER
-                            {
-                                return ResponseSuccess(StringResource.Success, query_infoPaper);
-                            }
-
 
                         }
-
-
-                        return ResponseSuccess(StringResource.Success, jsonArray);
-
-                    }
-                    else
-                    {
-                        return ResponseSuccess(StringResource.Success, jsonArray);
                     }
 
+
+                    return ResponseSuccess(StringResource.Success, jsonArray);
+                }
+                else
+                {
+                    return ResponseFail(StringResource.Data_not_received);
                 }
 
-                return ResponseFail(StringResource.Data_not_received);
-
-
-
             }
-            else
+            catch (Exception ex)
             {
                 return ResponseFail(StringResource.Data_not_received);
             }
@@ -926,165 +993,194 @@ namespace CoMS.Controllers
 
 
         [HttpPost]
-        //Danh sách d?ng ý
+        //Danh sách dong ý
         [Route("api/Review/ListReviewAbstractApproved")]
         public HttpResponseMessage ListReviewAbstractApproved([FromBody] PERSON person)
         {
-            // tìm ngu?i reviewer trong h?i d?ng
-            var query_PERSON_ID = (from reviewer in db.REVIEWERs
-                                   where reviewer.PERSON_ID == person.Id
-                                   select
-                                   new
-                                   {
-                                       reviewer.PERSON_ID
-                                   }).Distinct();
-            var jsonArray = new JArray();
-            var json1 = new JObject();
-            var json2 = new JObject();
-            var json3 = new JObject();
-            var json4 = new JObject();
-            var json5 = new JObject();
-            if (query_PERSON_ID.Count() >= 0)
+            try
             {
 
-                foreach (var item in query_PERSON_ID)
+
+                var jsonArray = new JArray();
+
+                //B1: Xet ton tai 1 trong 2 quyen
+
+                var query_REVIEWER = from REVIEWER in db.REVIEWERs
+                                     where REVIEWER.PERSON_ID == person.Id &&
+                                     (REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true || REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true)
+                                     select new
+                                     {
+                                         REVIEWER.PERSON_ID,
+                                         REVIEWER.CONFERENCE_ID,
+                                         REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
+                                     };
+                if (query_REVIEWER.Count() > 0)
                 {
-                    // tìm paper_id du?c reivewer dó dánh giá, và dã phân công
-                    var query_REVIEWER = (from reviewer in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                                          where reviewer.PERSON_ID == item.PERSON_ID && reviewer.CONFERENCE_ID == person.CONFERENCE_ID
-                                          group reviewer by reviewer.PAPER_ID into g
-                                          select
-                                          new
-                                          {
-                                              PAPER_ID = g.Key,
-                                              PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
-                                          }
-                                          ).Distinct();
-
-                    if (query_REVIEWER.Count() > 0)
+                    //return ResponseSuccess(StringResource.Success, query_REVIEWER);
+                    foreach (var item_REVIEWER in query_REVIEWER)
                     {
-                        foreach (var item_REVIEWER in query_REVIEWER)
+                        // Xet co dc phan cong đanh gia khong
+                        var query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP =
+                                     (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER.PERSON_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER.CONFERENCE_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == person.CONFERENCE_ID
+                                     group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new
+                                     {
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID
+                                     } into g
+                                     let PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
+
+                                     select new
+                                     {
+                                         g.Key.PAPER_ID,
+                                         item_REVIEWER.PERSON_ID,
+                                         item_REVIEWER.CONFERENCE_ID,
+                                         PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                         item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                     }).Distinct();
+
+
+
+                        foreach (var item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
                         {
-                            // ki?m tra, l?y thông tin paper dã duy?t
-                            var query_infoPaper = (from author_paperabstract_relationship in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
-                                                   join paper_abstract in db.PAPER_ABSTRACT on author_paperabstract_relationship.PAPER_ID equals paper_abstract.PAPER_ID
-                                                   join conferen in db.CONFERENCEs on author_paperabstract_relationship.CONFERENCE_ID equals conferen.CONFERENCE_ID
-                                                   where author_paperabstract_relationship.PERSON_ID == person.Id &&
-                                                     paper_abstract.PAPER_ID == item_REVIEWER.PAPER_ID &&
-                                                     author_paperabstract_relationship.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER
 
-                                                   select
-                                                   new
+                            var query_infoPaper = (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                                   join PAPER_ABSTRACT in db.PAPER_ABSTRACT on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
+                                                   join CONFERENCE in db.CONFERENCEs on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID equals CONFERENCE.CONFERENCE_ID
+                                                   join CONFERENCE_BOARD_OF_REVIEW in db.CONFERENCE_BOARD_OF_REVIEW on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID equals CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_ID
+                                                   where
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER &&
+                                                   REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID &&
+
+                                                   (REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true || PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+
+                                                   select new
                                                    {
-                                                       conferen.CONFERENCE_ID,
-                                                       paper_abstract.PAPER_ID,
-                                                       author_paperabstract_relationship.PERSON_ID,
-                                                       conferen.FROM_DATE,
-                                                       conferen.THRU_DATE,
-                                                       author_paperabstract_relationship.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                                                       author_paperabstract_relationship.REVIEWED_DATE,
-                                                       author_paperabstract_relationship.REVIEW_TEXT,
-                                                       author_paperabstract_relationship.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
-                                                       paper_abstract.PAPER_ABSTRACT_WITHDRAWN,
-                                                       paper_abstract.PAPER_ABSTRACT_WITHDRAWN_DATE,
-                                                       paper_abstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                                                       paper_abstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID,
+                                                       item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                                       item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                                       item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                                       CONFERENCE.FROM_DATE,
+                                                       CONFERENCE.THRU_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEWED_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEW_TEXT,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN_DATE,
+                                                       REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                       PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                       PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+
+                                                       CONFERENCE_NAME1 = (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_1,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_1,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_1,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_1,
 
 
-                                                       CONFERENCE_NAME1 = (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_1),
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_1,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_1,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_EN_1,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_1,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_1,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_1,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_1,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_1,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_1,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_1,
-                                                       paper_abstract.LAST_REVISED_DATE_1,
+                                                       CONFERENCE_NAME2 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_2,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_2,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_2,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_2,
 
 
-                                                       CONFERENCE_NAME2 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_2,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_2,
-                                                       paper_abstract.PAPER_ABSTRACT_TITLE_EN_2,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_2,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_2,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_2,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_2,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_2,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_2,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_2,
-                                                       paper_abstract.LAST_REVISED_DATE_2,
+                                                       CONFERENCE_NAME3 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_3,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_3,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_3,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_3,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_3,
+                                                       CONFERENCE_NAME4 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE_SESSION_TOPIC_ID_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_4,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_4,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_4,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_4,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_4,
+                                                       CONFERENCE_SESSION_TOPIC_ID_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
 
 
-                                                       CONFERENCE_NAME3 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE_NAME5 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                       CONFERENCE.PAPER_ABSTRACT_DEADLINE_5,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_5,
+                                                       PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
+                                                       PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_5,
+                                                       PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
+                                                       PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_5,
+                                                       PAPER_ABSTRACT.LAST_REVISED_DATE_5,
+                                                       CONFERENCE_SESSION_TOPIC_ID_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
 
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_3,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_3,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_3,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_3,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_3,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_3,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_3,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_3,
-                                                       paper_abstract.LAST_REVISED_DATE_3,
-                                                       CONFERENCE_NAME4 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                       CONFERENCE_SESSION_TOPIC_ID_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_3 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                                                       PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
+                                                       CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                                       CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_1,
+                                                       CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_2
+                                                   }).Take(1);
 
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_4,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_4,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_4,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_4,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_4,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_4,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_4,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_4,
-                                                       paper_abstract.LAST_REVISED_DATE_4,
-                                                       CONFERENCE_SESSION_TOPIC_ID_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_4 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-
-
-                                                       CONFERENCE_NAME5 = paper_abstract.PAPER_ABSTRACT_TITLE_2 == null ? null : (conferen.CONFERENCE_NAME + " - " + paper_abstract.PAPER_ABSTRACT_TITLE_2),
-                                                       conferen.PAPER_ABSTRACT_DEADLINE_5,
-                                                       paper_abstract.PAPER_ABSTRACT_TEXT_5,
-                                                       paper_abstract.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
-                                                       paper_abstract.TYPE_OF_STUDY_ID_5,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_5,
-                                                       paper_abstract.TYPE_OF_STUDY_NAME_EN_5,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_ID_5,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_5,
-                                                       paper_abstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
-                                                       paper_abstract.FIRST_SUBMITTED_DATE_5,
-                                                       paper_abstract.LAST_REVISED_DATE_5,
-                                                       CONFERENCE_SESSION_TOPIC_ID_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_ID_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_ID_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_2,
-                                                       CONFERENCE_SESSION_TOPIC_NAME_EN_5 = paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : paper_abstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
-
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
-                                                       paper_abstract.PAPER_ABSTRACT_ATTACHED_FILENAME_5
-                                                   }).Distinct();
 
 
                             if (query_infoPaper.Count() > 0)// tìm th?y PAPER_ID dã duy?t
@@ -1093,217 +1189,255 @@ namespace CoMS.Controllers
                                 foreach (var item_infoPaper in query_infoPaper)
                                 {
                                     int k = 0;
-                                    json1 = new JObject();
-                                    json2 = new JObject();
-                                    json3 = new JObject();
-                                    json4 = new JObject();
-                                    json5 = new JObject();
+                                    var json1 = new JObject();
+                                    var json2 = new JObject();
+                                    var json3 = new JObject();
+                                    var json4 = new JObject();
+                                    var json5 = new JObject();
+
                                     if ((item_infoPaper.PAPER_ABSTRACT_TITLE_1 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_1 != null)
-                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json1 = new JObject(
-                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("POSITION", 1)
-                                            );
-
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                           new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 1)
+                                           );
                                         k++;
+
                                     }
 
 
                                     if ((item_infoPaper.PAPER_ABSTRACT_TITLE_2 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_2 != null)
-                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json2 = new JObject(
-                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("POSITION", 2)
-                                            );
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                           new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 2)
+                                           );
                                         k++;
                                     }
 
 
 
-                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json3 = new JObject(
-                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("POSITION", 3)
-                                                       );
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 3)
+                                                      );
                                         k++;
                                     }
 
 
-                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json4 = new JObject(
-                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("POSITION", 4)
-                                                       );
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 4)
+                                                      );
                                         k++;
                                     }
 
 
 
-                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
                                     {
                                         json5 = new JObject(
-                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
-                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
-                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
-                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
-                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
-                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
-                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
-                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
-                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
-                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
-                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
-                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
-                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
-                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
-                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
-                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
-                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
-                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
-                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
-                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
-                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
-                                            new JProperty("POSITION", 5)
-                                                       );
+                                                     new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 5)
+                                                      );
                                         k++;
                                     }
-
-
-                                    // l?y paper n?p g?n nh?t
 
                                     if (k > 0)
                                     {
@@ -1327,39 +1461,26 @@ namespace CoMS.Controllers
                                         }
                                     }
 
-
                                 }
 
                             }
-                            else // không tìm th?y PAPER
-                            {
-                                return ResponseSuccess(StringResource.Success, query_infoPaper);
-                            }
-
 
                         }
-
-
-                        return ResponseSuccess(StringResource.Success, jsonArray);
-
-                    }
-                    else
-                    {
-                        return ResponseSuccess(StringResource.Success, jsonArray);
                     }
 
+
+                    return ResponseSuccess(StringResource.Success, jsonArray);
+                }
+                else
+                {
+                    return ResponseFail(StringResource.Data_not_received);
                 }
 
-                return ResponseFail(StringResource.Data_not_received);
-
-
-
             }
-            else
+            catch (Exception ex)
             {
                 return ResponseFail(StringResource.Data_not_received);
             }
-
         }
 
 
@@ -1580,6 +1701,1490 @@ namespace CoMS.Controllers
 
         }
 
+        // Bo sung api Review 20/11
+
+        [HttpPost]
+        [Route("api/Review/Danhsachchoduyet")]
+        public HttpResponseMessage Danhsachchoduyet(int PERSON_ID, int CONFERENCE_ID)
+        {
+            try
+            {
+
+
+                var jsonArray = new JArray();
+                
+                //B1: Xet ton tai 1 trong 2 quyen
+
+                var query_REVIEWER = from REVIEWER in db.REVIEWERs
+                                     where REVIEWER.PERSON_ID == PERSON_ID &&
+                                     (REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true || REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true)
+                                     select new
+                                     {
+                                         REVIEWER.PERSON_ID,
+                                         REVIEWER.CONFERENCE_ID,
+                                         REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
+                                     };
+                if (query_REVIEWER.Count() > 0)
+                {
+                    foreach (var item_REVIEWER in query_REVIEWER)
+                    {
+                        // Xet co dc phan cong đanh gia khong
+                        var query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP =
+                                     from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER.PERSON_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER.CONFERENCE_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == CONFERENCE_ID
+                                     group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new {
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID
+                                     } into g
+                                     let PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
+
+                                     select new
+                                     {
+                                         g.Key.PAPER_ID,
+                                         item_REVIEWER.PERSON_ID,
+                                         item_REVIEWER.CONFERENCE_ID,
+                                         PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                         item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                     };
+
+                        
+                        foreach (var item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
+                        {
+
+                            var query_infoPaper = (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                                  join PAPER_ABSTRACT in db.PAPER_ABSTRACT on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
+                                                  join CONFERENCE in db.CONFERENCEs on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID equals CONFERENCE.CONFERENCE_ID
+                                                  join CONFERENCE_BOARD_OF_REVIEW in db.CONFERENCE_BOARD_OF_REVIEW on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID equals CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_ID
+                                                  where
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID &&
+                                                  
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null
+                                                  select new
+                                                  {
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID,
+                                                      item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                                      item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                                      item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                                      CONFERENCE.FROM_DATE,
+                                                      CONFERENCE.THRU_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEWED_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEW_TEXT,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                      PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                      PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+
+                                                      CONFERENCE_NAME1 = (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_1,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_1,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_1,
+
+
+                                                      CONFERENCE_NAME2 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_2,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_2,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_2,
+
+
+                                                      CONFERENCE_NAME3 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_3,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_3,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_3,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_3,
+                                                      CONFERENCE_NAME4 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE_SESSION_TOPIC_ID_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_4,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_4,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_4,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_4,
+                                                      CONFERENCE_SESSION_TOPIC_ID_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+
+                                                      CONFERENCE_NAME5 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_5,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_5,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_5,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_5,
+                                                      CONFERENCE_SESSION_TOPIC_ID_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
+                                                      CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                                      CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_1,
+                                                      CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_2
+                                                  }).Take(1);
+
+
+
+                            if (query_infoPaper.Count() > 0)// tìm th?y PAPER_ID dã duy?t
+                            {
+                                // load thông tin PAPER dó
+                                foreach (var item_infoPaper in query_infoPaper)
+                                {
+                                    int k = 0;
+                                    var json1 = new JObject();
+                                    var json2 = new JObject();
+                                    var json3 = new JObject();
+                                    var json4 = new JObject();
+                                    var json5 = new JObject();
+
+                                    if ((item_infoPaper.PAPER_ABSTRACT_TITLE_1 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_1 != null)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                         json1 = new JObject(
+                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
+                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
+                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
+                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
+                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
+                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
+                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
+                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
+                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
+                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
+                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
+                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                            new JProperty("POSITION", 1)
+                                            );
+                                        k++;
+
+                                    }
+
+
+                                    if ((item_infoPaper.PAPER_ABSTRACT_TITLE_2 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_2 != null)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                         json2 = new JObject(
+                                            new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                            new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
+                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
+                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
+                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
+                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
+                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
+                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
+                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
+                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
+                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
+                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                            new JProperty("POSITION", 2)
+                                            );
+                                        k++;
+                                    }
+
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                         json3 = new JObject(
+                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
+                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
+                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
+                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
+                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
+                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
+                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
+                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
+                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
+                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
+                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                            new JProperty("POSITION", 3)
+                                                       );
+                                        k++;
+                                    }
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                         json4 = new JObject(
+                                                       new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
+                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
+                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
+                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
+                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
+                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
+                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
+                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
+                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
+                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
+                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                            new JProperty("POSITION", 4)
+                                                       );
+                                        k++;
+                                    }
+
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                         json5 = new JObject(
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                       new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                       new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                            new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
+                                            new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
+                                            new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                            new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
+                                            new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
+                                            new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
+                                            new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
+                                            new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
+                                            new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
+                                            new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
+                                            new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
+                                            new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
+                                            new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
+                                            new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                            new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                            new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                            new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                            new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                            new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                            new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                            new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                            new JProperty("POSITION", 5)
+                                                       );
+                                        k++;
+                                    }
+
+                                    if (k > 0)
+                                    {
+                                        switch (k)
+                                        {
+                                            case 1:
+                                                jsonArray.Add(json1);
+                                                break;
+                                            case 2:
+                                                jsonArray.Add(json2);
+                                                break;
+                                            case 3:
+                                                jsonArray.Add(json3);
+                                                break;
+                                            case 4:
+                                                jsonArray.Add(json4);
+                                                break;
+                                            case 5:
+                                                jsonArray.Add(json5);
+                                                break;
+                                        }
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+
+
+                    return ResponseSuccess(StringResource.Success, jsonArray);
+                }
+                else
+                {
+                    return ResponseFail(StringResource.Data_not_received);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return ResponseFail(StringResource.Data_not_received);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/Review/Danhsachtuchoi")]
+        public HttpResponseMessage Danhsachtuchoi(int PERSON_ID, int CONFERENCE_ID)
+        {
+            try
+            {
+
+
+                var jsonArray = new JArray();
+
+                //B1: Xet ton tai 1 trong 2 quyen
+
+                var query_REVIEWER = from REVIEWER in db.REVIEWERs
+                                     where REVIEWER.PERSON_ID == PERSON_ID &&
+                                     (REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true || REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true)
+                                     select new
+                                     {
+                                         REVIEWER.PERSON_ID,
+                                         REVIEWER.CONFERENCE_ID,
+                                         REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
+                                     };
+                if (query_REVIEWER.Count() > 0)
+                {
+                    foreach (var item_REVIEWER in query_REVIEWER)
+                    {
+                        // Xet co dc phan cong đanh gia khong
+                        var query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP =
+                                     from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER.PERSON_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER.CONFERENCE_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == CONFERENCE_ID
+                                     group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new { REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID } into g
+                                     let PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
+
+                                     select new
+                                     {
+                                         g.Key.PAPER_ID,
+                                         item_REVIEWER.PERSON_ID,
+                                         item_REVIEWER.CONFERENCE_ID,
+                                         PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                         item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                     };
+
+                        foreach (var item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
+                        {
+
+                            var query_infoPaper = (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                                  join PAPER_ABSTRACT in db.PAPER_ABSTRACT on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
+                                                  join CONFERENCE in db.CONFERENCEs on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID equals CONFERENCE.CONFERENCE_ID
+                                                  join CONFERENCE_BOARD_OF_REVIEW in db.CONFERENCE_BOARD_OF_REVIEW on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID equals CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_ID
+                                                  where
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID &&
+                                                  
+                                                  (REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false || PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == false)
+                                                  select new
+                                                  {
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID,
+                                                      item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                                      item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                                      item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                                      CONFERENCE.FROM_DATE,
+                                                      CONFERENCE.THRU_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEWED_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEW_TEXT,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                      PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                      PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+
+                                                      CONFERENCE_NAME1 = (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_1,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_1,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_1,
+
+
+                                                      CONFERENCE_NAME2 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_2,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_2,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_2,
+
+
+                                                      CONFERENCE_NAME3 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_3,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_3,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_3,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_3,
+                                                      CONFERENCE_NAME4 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE_SESSION_TOPIC_ID_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_4,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_4,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_4,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_4,
+                                                      CONFERENCE_SESSION_TOPIC_ID_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+
+                                                      CONFERENCE_NAME5 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_5,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_5,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_5,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_5,
+                                                      CONFERENCE_SESSION_TOPIC_ID_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
+                                                      CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                                      CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_1,
+                                                      CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_2
+                                                  }).Take(1);
+
+
+
+                            if (query_infoPaper.Count() > 0)// tìm th?y PAPER_ID dã duy?t
+                            {
+                                // load thông tin PAPER dó
+                                foreach (var item_infoPaper in query_infoPaper)
+                                {
+                                    int k = 0;
+                                    var json1 = new JObject();
+                                    var json2 = new JObject();
+                                    var json3 = new JObject();
+                                    var json4 = new JObject();
+                                    var json5 = new JObject();
+
+                                    if ((item_infoPaper.PAPER_ABSTRACT_TITLE_1 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_1 != null)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json1 = new JObject(
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 1)
+                                           );
+                                        k++;
+
+                                    }
+
+
+                                    if ((item_infoPaper.PAPER_ABSTRACT_TITLE_2 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_2 != null)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json2 = new JObject(
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 2)
+                                           );
+                                        k++;
+                                    }
+
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json3 = new JObject(
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 3)
+                                                      );
+                                        k++;
+                                    }
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json4 = new JObject(
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 4)
+                                                      );
+                                        k++;
+                                    }
+
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json5 = new JObject(
+                                                     new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 5)
+                                                      );
+                                        k++;
+                                    }
+
+                                    if (k > 0)
+                                    {
+                                        switch (k)
+                                        {
+                                            case 1:
+                                                jsonArray.Add(json1);
+                                                break;
+                                            case 2:
+                                                jsonArray.Add(json2);
+                                                break;
+                                            case 3:
+                                                jsonArray.Add(json3);
+                                                break;
+                                            case 4:
+                                                jsonArray.Add(json4);
+                                                break;
+                                            case 5:
+                                                jsonArray.Add(json5);
+                                                break;
+                                        }
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+
+
+                    return ResponseSuccess(StringResource.Success, jsonArray);
+                }
+                else
+                {
+                    return ResponseFail(StringResource.Data_not_received);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return ResponseFail(StringResource.Data_not_received);
+            }
+        }
+
+
+
+        [HttpPost]
+        [Route("api/Review/ListConferenceReview")]
+        public HttpResponseMessage ListConferenceReview(int PERSON_ID)
+        {
+            var query = from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                        where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == PERSON_ID
+                        group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new { REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID } into g
+                        select new {
+                            CONFERENCE_ID = g.Key.CONFERENCE_ID
+                        };
+            var jsonArray = new JArray();
+            foreach (var item in query)
+            {
+                var query_ = from CONFERENCE in db.CONFERENCEs
+                             where CONFERENCE.CONFERENCE_ID == item.CONFERENCE_ID
+                             select new
+                             {
+                                 PERSON_ID,
+                                 CONFERENCE.CONFERENCE_ID,
+                                 CONFERENCE.CONFERENCE_NAME,
+                                 CONFERENCE.FROM_DATE,
+                                 CONFERENCE.THRU_DATE
+                             };
+                foreach (var i in query_)
+                {
+                    var json = new JObject(
+                                           new JProperty("PERSON_ID", i.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", i.CONFERENCE_ID),
+                                           new JProperty("CONFERENCE_NAME", i.CONFERENCE_NAME),
+                                           new JProperty("FROM_DATE", i.FROM_DATE),
+                                           new JProperty("THRU_DATE", i.THRU_DATE)
+                                           );
+
+                    jsonArray.Add(json);
+                }
+            }
+            return ResponseSuccess(StringResource.Success, jsonArray);
+        }
+
+
+        [HttpPost]
+        [Route("api/Review/Danhsachdaduyet")]
+        public HttpResponseMessage Danhsachdaduyet(int PERSON_ID, int CONFERENCE_ID)
+        {
+            try
+            {
+
+
+                var jsonArray = new JArray();
+
+                //B1: Xet ton tai 1 trong 2 quyen
+
+                var query_REVIEWER = from REVIEWER in db.REVIEWERs
+                                     where REVIEWER.PERSON_ID == PERSON_ID &&
+                                     (REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true || REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT == true)
+                                     select new
+                                     {
+                                         REVIEWER.PERSON_ID,
+                                         REVIEWER.CONFERENCE_ID,
+                                         REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT
+                                     };
+                if (query_REVIEWER.Count() > 0)
+                {
+                    //return ResponseSuccess(StringResource.Success, query_REVIEWER);
+                    foreach (var item_REVIEWER in query_REVIEWER)
+                    {
+                        // Xet co dc phan cong đanh gia khong
+                        var query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP =
+                                     from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     where REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER.PERSON_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER.CONFERENCE_ID &&
+                                     REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == CONFERENCE_ID
+                                     group REVIEWER_PAPER_ABSTRACT_RELATIONSHIP by new {
+                                         REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID
+                                     } into g
+                                     let PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER = g.Max(z => z.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER)
+
+                                     select new
+                                     {
+                                         g.Key.PAPER_ID,
+                                         item_REVIEWER.PERSON_ID,
+                                         item_REVIEWER.CONFERENCE_ID,
+                                         PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                         item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                         item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                         item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                     };
+
+                        
+
+                        foreach (var item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in query_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP)
+                        {
+
+                            var query_infoPaper = (from REVIEWER_PAPER_ABSTRACT_RELATIONSHIP in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                                  join PAPER_ABSTRACT in db.PAPER_ABSTRACT on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID equals PAPER_ABSTRACT.PAPER_ID
+                                                  join CONFERENCE in db.CONFERENCEs on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID equals CONFERENCE.CONFERENCE_ID
+                                                  join CONFERENCE_BOARD_OF_REVIEW in db.CONFERENCE_BOARD_OF_REVIEW on REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID equals CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_ID
+                                                  where
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER &&
+                                                  REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID == item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID &&
+
+                                                  (REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true || PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == true)
+                                                  
+                                                  select new
+                                                  {
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ID,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_ID,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.PERSON_ID,
+                                                      item_REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                                      item_REVIEWER.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+                                                      item_REVIEWER.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT,
+
+                                                      CONFERENCE.FROM_DATE,
+                                                      CONFERENCE.THRU_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEWED_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.REVIEW_TEXT,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_WITHDRAWN_DATE,
+                                                      REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                      PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                                      PAPER_ABSTRACT.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+
+                                                      CONFERENCE_NAME1 = (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_1,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_1,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_1,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_1,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_1,
+
+
+                                                      CONFERENCE_NAME2 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_EN_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_2,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_2,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_2,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_2,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_2,
+
+
+                                                      CONFERENCE_NAME3 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_3,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_3,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_3,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_3,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_3,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_3,
+                                                      CONFERENCE_NAME4 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE_SESSION_TOPIC_ID_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_3 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_4,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_4,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_4,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_4,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_4,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_4,
+                                                      CONFERENCE_SESSION_TOPIC_ID_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_4 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+
+                                                      CONFERENCE_NAME5 = PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2 == null ? null : (CONFERENCE.CONFERENCE_NAME + " - " + PAPER_ABSTRACT.PAPER_ABSTRACT_TITLE_2),
+                                                      CONFERENCE.PAPER_ABSTRACT_DEADLINE_5,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_TEXT_5,
+                                                      PAPER_ABSTRACT.FULL_PAPER_OR_WORK_IN_PROGRESS_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_ID_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_5,
+                                                      PAPER_ABSTRACT.TYPE_OF_STUDY_NAME_EN_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_ID_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_5,
+                                                      PAPER_ABSTRACT.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5,
+                                                      PAPER_ABSTRACT.FIRST_SUBMITTED_DATE_5,
+                                                      PAPER_ABSTRACT.LAST_REVISED_DATE_5,
+                                                      CONFERENCE_SESSION_TOPIC_ID_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_ID_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_2,
+                                                      CONFERENCE_SESSION_TOPIC_NAME_EN_5 = PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2 == null ? PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_1 : PAPER_ABSTRACT.CONFERENCE_SESSION_TOPIC_NAME_EN_2,
+
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_1,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_2,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_3,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_4,
+                                                      PAPER_ABSTRACT.PAPER_ABSTRACT_ATTACHED_FILENAME_5,
+                                                      CONFERENCE_BOARD_OF_REVIEW.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                                      CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_1,
+                                                      CONFERENCE_BOARD_OF_REVIEW.PAPER_ABSTRACT_REVIEW_DEADLINE_2
+                                                  }).Take(1);
+
+
+
+                            if (query_infoPaper.Count() > 0)// tìm th?y PAPER_ID dã duy?t
+                            {
+                                // load thông tin PAPER dó
+                                foreach (var item_infoPaper in query_infoPaper)
+                                {
+                                    int k = 0;
+                                    var json1 = new JObject();
+                                    var json2 = new JObject();
+                                    var json3 = new JObject();
+                                    var json4 = new JObject();
+                                    var json5 = new JObject();
+
+                                    if ((item_infoPaper.PAPER_ABSTRACT_TITLE_1 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_1 != null)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json1 = new JObject(
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                           new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME1),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_1),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_1),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_1),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_1),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_1),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_1),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_1),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_1),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_1),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 1)
+                                           );
+                                        k++;
+
+                                    }
+
+
+                                    if ((item_infoPaper.PAPER_ABSTRACT_TITLE_2 != null || item_infoPaper.PAPER_ABSTRACT_DEADLINE_2 != null)
+                                        && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json2 = new JObject(
+                                           new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                           new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                           new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                           new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME2),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_2),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_2),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_2),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_2),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_2),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_2),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_2),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 2)
+                                           );
+                                        k++;
+                                    }
+
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_3 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json3 = new JObject(
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME3),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_3),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_3),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_3),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_3),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_3),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_3),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_3),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_3),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_3),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 3)
+                                                      );
+                                        k++;
+                                    }
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_4 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json4 = new JObject(
+                                                      new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME4),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_4),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_4),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_4),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_4),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_4),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_4),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_4),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_4),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_4),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 4)
+                                                      );
+                                        k++;
+                                    }
+
+
+
+                                    if (item_infoPaper.PAPER_ABSTRACT_DEADLINE_5 != null && item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT == null)
+                                    {
+                                        json5 = new JObject(
+                                                     new JProperty("PERSON_ID", item_infoPaper.PERSON_ID),
+                                                      new JProperty("CONFERENCE_ID", item_infoPaper.CONFERENCE_ID),
+                                                      new JProperty("PAPER_ID", item_infoPaper.PAPER_ID),
+                                                      new JProperty("CONFERENCE_BOARD_OF_REVIEW_ID", item_REVIEWER.CONFERENCE_BOARD_OF_REVIEW_ID),
+                                                      new JProperty("PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER", item_infoPaper.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER),
+                                           new JProperty("CONFERENCE_NAME", item_infoPaper.CONFERENCE_NAME5),
+                                           new JProperty("PAPER_ABSTRACT_DEADLINE", item_infoPaper.PAPER_ABSTRACT_DEADLINE_5),
+                                           new JProperty("PAPER_ABSTRACT_TITLE", item_infoPaper.PAPER_ABSTRACT_TITLE_2),
+                                           new JProperty("PAPER_ABSTRACT_TITLE_EN", item_infoPaper.PAPER_ABSTRACT_TITLE_EN_2),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_ID", item_infoPaper.CONFERENCE_SESSION_TOPIC_ID_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_5),
+                                           new JProperty("CONFERENCE_SESSION_TOPIC_NAME_EN", item_infoPaper.CONFERENCE_SESSION_TOPIC_NAME_EN_5),
+                                           new JProperty("PAPER_ABSTRACT_TEXT", item_infoPaper.PAPER_ABSTRACT_TEXT_5),
+                                           new JProperty("FULL_PAPER_OR_WORK_IN_PROGRESS", item_infoPaper.FULL_PAPER_OR_WORK_IN_PROGRESS_5),
+                                           new JProperty("TYPE_OF_STUDY_ID", item_infoPaper.TYPE_OF_STUDY_ID_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME", item_infoPaper.TYPE_OF_STUDY_NAME_5),
+                                           new JProperty("TYPE_OF_STUDY_NAME_EN", item_infoPaper.TYPE_OF_STUDY_NAME_EN_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_ID", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_ID_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_5),
+                                           new JProperty("CONFERENCE_PRESENTATION_TYPE_NAME_EN", item_infoPaper.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5),
+                                           new JProperty("FIRST_SUBMITTED_DATE", item_infoPaper.FIRST_SUBMITTED_DATE_5),
+                                           new JProperty("LAST_REVISED_DATE", item_infoPaper.LAST_REVISED_DATE_5),
+                                           new JProperty("FROM_DATE", item_infoPaper.FROM_DATE),
+                                           new JProperty("THRU_DATE", item_infoPaper.THRU_DATE),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN),
+                                           new JProperty("PAPER_ABSTRACT_WITHDRAWN_DATE", item_infoPaper.PAPER_ABSTRACT_WITHDRAWN_DATE),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE", item_infoPaper.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_1", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_1),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_2", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_2),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_3", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_3),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_4", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_4),
+                                           new JProperty("PAPER_ABSTRACT_ATTACHED_FILENAME_5", item_infoPaper.PAPER_ABSTRACT_ATTACHED_FILENAME_5),
+                                           new JProperty("APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT", item_infoPaper.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT),
+                                           new JProperty("PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT", item_infoPaper.FINAL_PAPER_ABSTRACT_APPROVAL_OR_REJECTION_RIGHT),
+                                           new JProperty("CONFERENCE_BOARD_OF_REVIEW_NAME", item_infoPaper.CONFERENCE_BOARD_OF_REVIEW_NAME),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_1", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_1),
+                                           new JProperty("PAPER_ABSTRACT_REVIEW_DEADLINE_2", item_infoPaper.PAPER_ABSTRACT_REVIEW_DEADLINE_2),
+                                           new JProperty("POSITION", 5)
+                                                      );
+                                        k++;
+                                    }
+
+                                    if (k > 0)
+                                    {
+                                        switch (k)
+                                        {
+                                            case 1:
+                                                jsonArray.Add(json1);
+                                                break;
+                                            case 2:
+                                                jsonArray.Add(json2);
+                                                break;
+                                            case 3:
+                                                jsonArray.Add(json3);
+                                                break;
+                                            case 4:
+                                                jsonArray.Add(json4);
+                                                break;
+                                            case 5:
+                                                jsonArray.Add(json5);
+                                                break;
+                                        }
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+
+
+                    return ResponseSuccess(StringResource.Success, jsonArray);
+                }
+                else
+                {
+                    return ResponseFail(StringResource.Data_not_received);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return ResponseFail(StringResource.Data_not_received);
+            }
+        }
+
+
 
 
 
@@ -1612,11 +3217,14 @@ namespace CoMS.Controllers
 
 
 
+
+
         public class UPDATE_ABSTRACT_REVIEW
         {
             public int PAPER_ID { get; set; }
             public bool APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT { get; set; }
             public int PERSON_ID { get; set; }
+            public bool FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT { get; set; }
         }
 
         public class PERSON

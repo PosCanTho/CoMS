@@ -389,6 +389,7 @@ namespace CoMS.Controllers
         }
 
 
+        [Authorize]
         [HttpPost]
         [Route("api/GetProfile")]
         [ResponseType(typeof(Profile))]
@@ -402,6 +403,7 @@ namespace CoMS.Controllers
             else
             {
                 var user = new UserMyProfile();
+                user.PersonId = account.PERSON_ID;
                 user.FirstName = account.CURRENT_FIRST_NAME;
                 user.MidleName = account.CURRENT_MIDDLE_NAME;
                 user.LastName = account.CURRENT_LAST_NAME;
@@ -462,7 +464,7 @@ namespace CoMS.Controllers
 
         public class UserMyProfile
         {
-            public decimal PersonId { get; set; }
+            public decimal? PersonId { get; set; }
             public string FirstName { get; set; }
             public string MidleName { get; set; }
             public string LastName { get; set; }

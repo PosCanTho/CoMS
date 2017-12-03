@@ -80,7 +80,6 @@ namespace CoMS.Entities_Framework
         public virtual DbSet<SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE> SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE { get; set; }
         public virtual DbSet<SUPPORT_STAFF> SUPPORT_STAFF { get; set; }
         public virtual DbSet<SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP> SUPPORT_STAFF_CONFERENCE_SESSION_RELATIONSHIP { get; set; }
-        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<TYPE_OF_STUDY> TYPE_OF_STUDY { get; set; }
         public virtual DbSet<WEBFORM_FUNCTION> WEBFORM_FUNCTION { get; set; }
         public virtual DbSet<WEBFORM_FUNCTION_FOR_WEBFORM_MENU> WEBFORM_FUNCTION_FOR_WEBFORM_MENU { get; set; }

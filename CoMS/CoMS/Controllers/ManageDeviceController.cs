@@ -12,42 +12,43 @@ namespace CoMS.Controllers
 {
     public class ManageDeviceController : BaseController
     {
+        private DB db = new DB();
+
         [HttpPost]
         [Route("api/AddDevice")]
-        public HttpResponseMessage AddDevice([FromBody]DeviceRequest request)
+        public HttpResponseMessage AddDevice(string UserName, string DEVICE_TOKEN)
         {
-            if (request == null)
+            var account = db.ACCOUNTs.SingleOrDefault(x => x.UserName == UserName);
+            if (account == null)
             {
-                return ResponseFail(StringResource.Data_not_received);
+                return ResponseFail(StringResource.Account_does_not_exist);
+            }
+            else if (String.IsNullOrEmpty(DEVICE_TOKEN))
+            {
+                return ResponseFail(StringResource.Token_is_not_empty);
             }
             else
             {
-                var model = new ManageDeviceModel();
-                bool isExist = model.CheckPersonIdExist(request.PersonId);
-                var device = new Manage_Device();
-                if (isExist)
+                var device = db.ACCOUNT_DEVICE_RELATIONSHIP.SingleOrDefault(x => x.UserName == UserName);
+                if (device != null)
                 {
-                    device.DEVICE_TOKEN = request.DeviceToken;
-                    device.PERSON_ID = request.PersonId;
-                    device.UPDATE_DATE = DateTime.Now;
-                    model.UpdateDevice(device);
-                    return ResponseSuccess(StringResource.Success, device);
+                    device.DEVICE_TOKEN = DEVICE_TOKEN;
+                    device.LAST_REVISED_DATE = DateTime.Now;
+                    db.SaveChanges();
+                    return ResponseSuccess(StringResource.Update_token_success);
                 }
                 else
                 {
-                    device.DEVICE_TOKEN = request.DeviceToken;
-                    device.PERSON_ID = request.PersonId;
-                    device.CREATE_DATE = DateTime.Now;
-                    model.AddDevice(device);
-                    return ResponseSuccess(StringResource.Success, device);
+                    var newDevice = new ACCOUNT_DEVICE_RELATIONSHIP();
+                    newDevice.DEVICE_TOKEN = DEVICE_TOKEN;
+                    newDevice.UserName = UserName;
+                    newDevice.PERSON_ID = account.PERSON_ID.Value;
+                    newDevice.FIRST_LOGINED_DATE = DateTime.Now;
+                    db.ACCOUNT_DEVICE_RELATIONSHIP.Add(newDevice);
+                    db.SaveChanges();
+                    return ResponseSuccess(StringResource.Add_device_token_success);
                 }
             }
         }
-    }
-
-    public class DeviceRequest
-    {
-        public decimal PersonId { get; set; }
-        public string DeviceToken { get; set; }
     }
 }

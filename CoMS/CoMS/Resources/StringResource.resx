@@ -246,4 +246,91 @@
   <data name="Can_not_create_new_channel" xml:space="preserve">
     <value>Can not create new channel</value>
   </data>
+  <data name="Load_list_channel_error" xml:space="preserve">
+    <value>Load list channel error</value>
+  </data>
+  <data name="Load_my_channel_error" xml:space="preserve">
+    <value>Load my channel error</value>
+  </data>
+  <data name="Activity_feed_do_not_exist" xml:space="preserve">
+    <value>Activity feed do not exist</value>
+  </data>
+  <data name="Can_not_get_list_followers" xml:space="preserve">
+    <value>Can not get list followers</value>
+  </data>
+  <data name="Can_not_get_list_following" xml:space="preserve">
+    <value>Can not get list following</value>
+  </data>
+  <data name="Can_not_like" xml:space="preserve">
+    <value>Can not like</value>
+  </data>
+  <data name="You_can_not_follow_yourself" xml:space="preserve">
+    <value>You can not follow yourself</value>
+  </data>
+  <data name="Add_device_token_success" xml:space="preserve">
+    <value>Add device token success</value>
+  </data>
+  <data name="Token_is_not_empty" xml:space="preserve">
+    <value>Token is not empty</value>
+  </data>
+  <data name="Update_token_success" xml:space="preserve">
+    <value>Update token success</value>
+  </data>
+  <data name="Account_has_not_been_logged" xml:space="preserve">
+    <value>Account has not been logged</value>
+  </data>
+  <data name="Can_not_load_detail" xml:space="preserve">
+    <value>Can not load detail</value>
+  </data>
+  <data name="Message_group_do_not_exist" xml:space="preserve">
+    <value>Message group do not exist</value>
+  </data>
+  <data name="GROUP_ASSIGNED" xml:space="preserve">
+    <value>GROUP ASSIGNED</value>
+  </data>
+  <data name="GROUP_JOIN_REQUEST" xml:space="preserve">
+    <value>GROUP JOIN REQUEST</value>
+  </data>
+  <data name="GROUP_JOIN_REQUEST_APPROVED" xml:space="preserve">
+    <value>GROUP JOIN REQUEST APPROVED</value>
+  </data>
+  <data name="PRIVATE_MESSAGE" xml:space="preserve">
+    <value>PRIVATE MESSAGE</value>
+  </data>
+  <data name="PUBLIC_MESSAGE" xml:space="preserve">
+    <value>PUBLIC MESSAGE</value>
+  </data>
+  <data name="The_list_of_members_is_empty" xml:space="preserve">
+    <value>The list of members is empty</value>
+  </data>
+  <data name="Can_not_delete_message" xml:space="preserve">
+    <value>Can not delete message</value>
+  </data>
+  <data name="Message_do_not_exist" xml:space="preserve">
+    <value>Message do not exist</value>
+  </data>
+  <data name="You_do_not_have_permission_to_add_members" xml:space="preserve">
+    <value>You do not have permission to add members</value>
+  </data>
+  <data name="You_have_submitted_your_request" xml:space="preserve">
+    <value>You have submitted your request and are awaiting approval</value>
+  </data>
+  <data name="You_joined_the_group" xml:space="preserve">
+    <value>You joined the group</value>
+  </data>
+  <data name="Member_do_not_exist" xml:space="preserve">
+    <value>Member do not exist</value>
+  </data>
+  <data name="You_are_not_a_member_of_the_group" xml:space="preserve">
+    <value>You are not a member of the group</value>
+  </data>
+  <data name="Conference_session_do_not_exist" xml:space="preserve">
+    <value>Conference session do not exist</value>
+  </data>
+  <data name="Conference_survey_question_do_not_exist" xml:space="preserve">
+    <value>Conference survey question do not exist</value>
+  </data>
+  <data name="Survey_do_not_exist" xml:space="preserve">
+    <value>Survey do not exist</value>
+  </data>
 </root>

@@ -8,56 +8,15 @@ namespace CoMS.Models
 {
     public class ManageDeviceModel
     {
-        private MYDB myDB;
+        private DB db;
         public ManageDeviceModel()
         {
-            myDB = new MYDB();
+            db = new DB();
         }
 
-        public Manage_Device GetDeviceByPersonId(decimal deviceId)
+        public ACCOUNT_DEVICE_RELATIONSHIP GetDeviceUserName(string UserName)
         {
-            return myDB.Manage_Device.SingleOrDefault(x => x.PERSON_ID == deviceId);
-        }
-
-        public bool CheckPersonIdExist(decimal personId)
-        {
-            var result = myDB.Manage_Device.Where(x => x.PERSON_ID == personId).Count();
-            if (result > 0)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool AddDevice(Manage_Device device)
-        {
-            try
-            {
-                myDB.Manage_Device.Add(device);
-                myDB.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public bool UpdateDevice(Manage_Device device)
-        {
-            try
-            {
-                var deviceUpdate = GetDeviceByPersonId(device.PERSON_ID);
-                deviceUpdate.PERSON_ID = device.PERSON_ID;
-                deviceUpdate.DEVICE_TOKEN = device.DEVICE_TOKEN;
-                deviceUpdate.UPDATE_DATE = device.UPDATE_DATE;
-                myDB.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return db.ACCOUNT_DEVICE_RELATIONSHIP.SingleOrDefault(x => x.UserName == UserName);
         }
     }
 }

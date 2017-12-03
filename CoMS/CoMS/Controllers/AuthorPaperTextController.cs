@@ -175,12 +175,12 @@ namespace CoMS.Controllers
             {
                 int value;
                 var model = new AuthorPaperTextModel();
-                var paperText = model.WithdrawnPaperText(paper.Id);
+                var paperText = model.WithdrawnPaperText(paper.PAPER_ID);
                 if (paperText == null)
                 {
                     return ResponseFail(StringResource.Data_not_received);
                 }
-                else if(int.TryParse(paper.Id + "", out value))
+                else if(int.TryParse(paper.PAPER_ID + "", out value))
                 {
                     if (paperText == true)
                     {
@@ -224,10 +224,10 @@ namespace CoMS.Controllers
         [Route("api/See_PaperText")]
         public HttpResponseMessage See_PaperText([FromBody] See_Paper paper)
         {
-            if (paper.Id > 0 && paper.position >= 0)
+            if (paper.PAPER_ID > 0 && paper.position >= 0)
             {
                 var papertext = new AuthorPaperTextModel();
-                var paperAbs = papertext.GetPaperTextById(paper.Id);
+                var paperAbs = papertext.GetPaperTextById(paper.PAPER_ID);
                 var jsonArray = new JArray();
                 try
                 {
@@ -236,35 +236,45 @@ namespace CoMS.Controllers
                         case 1:
                             var json1 = new JObject(
                                                 new JProperty("PAPER_TEXT_TITLE", paperAbs.PAPER_TEXT_TITLE_1),
-                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_1)
+                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_1),
+                                                new JProperty("PAPER_TEXT", paperAbs.PAPER_TEXT_1),
+                                                new JProperty("PAPER_TEXT_EN", paperAbs.PAPER_TEXT_EN_1)
                                                 );
                             jsonArray.Add(json1);
                             break;
                         case 2:
                             var json2 = new JObject(
                                                 new JProperty("PAPER_TEXT_TITLE", paperAbs.PAPER_TEXT_TITLE_2),
-                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_2)
+                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_2),
+                                                new JProperty("PAPER_TEXT", paperAbs.PAPER_TEXT_2),
+                                                new JProperty("PAPER_TEXT_EN", paperAbs.PAPER_TEXT_EN_2)
                                                 );
                             jsonArray.Add(json2);
                             break;
                         case 3:
                             var json3 = new JObject(
                                                 new JProperty("PAPER_TEXT_TITLE", paperAbs.PAPER_TEXT_TITLE_3),
-                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_3)
+                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_3),
+                                                new JProperty("PAPER_TEXT", paperAbs.PAPER_TEXT_3),
+                                                new JProperty("PAPER_TEXT_EN", paperAbs.PAPER_TEXT_EN_3)
                                                 );
                             jsonArray.Add(json3);
                             break;
                         case 4:
                             var json4 = new JObject(
                                                 new JProperty("PAPER_TEXT_TITLE", paperAbs.PAPER_TEXT_TITLE_4),
-                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_4)
+                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_4),
+                                                new JProperty("PAPER_TEXT", paperAbs.PAPER_TEXT_4),
+                                                new JProperty("PAPER_TEXT_EN", paperAbs.PAPER_TEXT_EN_4)
                                                 );
                             jsonArray.Add(json4);
                             break;
                         case 5:
                             var json5 = new JObject(
                                                 new JProperty("PAPER_TEXT_TITLE", paperAbs.PAPER_TEXT_TITLE_5),
-                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_5)
+                                                new JProperty("PAPER_TEXT_TITLE_EN", paperAbs.PAPER_TEXT_TITLE_EN_5),
+                                                new JProperty("PAPER_TEXT", paperAbs.PAPER_TEXT_5),
+                                                new JProperty("PAPER_TEXT_EN", paperAbs.PAPER_TEXT_EN_5)
                                                 );
                             jsonArray.Add(json5);
                             break;
@@ -360,6 +370,10 @@ namespace CoMS.Controllers
 
         }
 
+        
+
+
+
 
 
         //list paper text
@@ -375,6 +389,7 @@ namespace CoMS.Controllers
                             join paper_text in db.PAPER_TEXT on PAPER_ABSTRACT.PAPER_ID equals paper_text.PAPER_ID
                             where AUTHOR_PAPER_TEXT_RELATIONSHIP.PERSON_ID == user.PERSON_ID &&
                             AUTHOR_PAPER_TEXT_RELATIONSHIP.CONFERENCE_ID == user.CONFERENCE_ID
+                            orderby paper_text.PAPER_ID descending
                             select
                             new
                             {
@@ -496,6 +511,7 @@ namespace CoMS.Controllers
                                 paper_text.PAPER_TEXT_WITHDRAWN,
                                 paper_text.PAPER_TEXT_WITHDRAWN_DATE,
                                 paper_text.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT,
+                                paper_text.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE
                                 //paper_text.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_REVIEWER_PERSON_ID
                             };
 
@@ -505,18 +521,25 @@ namespace CoMS.Controllers
 
                     foreach (var q in query)
                     {
-                        if (q.PAPER_TEXT_TITLE_1 != null || q.PAPER_TEXT_DEADLINE_1 != null)
+                        var json1 = new JObject();
+                        var json2 = new JObject();
+                        var json3 = new JObject();
+                        var json4 = new JObject();
+                        var json5 = new JObject();
+                        int k = 0;
+
+                        if (q.PAPER_TEXT_TITLE_1 != null && q.FIRST_SUBMITTED_DATE_1 != null)
                         {
-                            var json1 = new JObject(
+                            json1 = new JObject(
                                             new JProperty("PERSON_ID", q.PERSON_ID),
                                             new JProperty("CONFERENCE_ID", q.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("ORGANIZATION_NAME_1", q.ORGANIZATION_NAME_1),
                                             new JProperty("ORGANIZATION_NAME_2", q.ORGANIZATION_NAME_2),
                                             new JProperty("ORGANIZATION_NAME_3", q.ORGANIZATION_NAME_3),
                                             new JProperty("ORGANIZATION_NAME_4", q.ORGANIZATION_NAME_4),
                                             new JProperty("ORGANIZATION_NAME_5", q.ORGANIZATION_NAME_5),
                                             new JProperty("CORRESPONDING_AUTHOR", q.CORRESPONDING_AUTHOR),
-                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME1),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_1),
                                             new JProperty("PAPER_TEXT_TITLE", q.PAPER_TEXT_TITLE_1),
@@ -536,6 +559,7 @@ namespace CoMS.Controllers
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_1),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME", q.PAPER_TEXT_ATTACHED_FILENAME_1),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
@@ -545,24 +569,23 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
-
                                             new JProperty("POSITION", 1)
                                             );
-                            jsonArray.Add(json1);
+                            k++;
                         }
 
-                        if (q.PAPER_TEXT_TITLE_2 != null || q.PAPER_TEXT_DEADLINE_2 != null)
+                        if (q.PAPER_TEXT_TITLE_2 != null && q.FIRST_SUBMITTED_DATE_2 != null)
                         {
-                            var json2 = new JObject(
+                             json2 = new JObject(
                                             new JProperty("PERSON_ID", q.PERSON_ID),
                                             new JProperty("CONFERENCE_ID", q.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("ORGANIZATION_NAME_1", q.ORGANIZATION_NAME_1),
                                             new JProperty("ORGANIZATION_NAME_2", q.ORGANIZATION_NAME_2),
                                             new JProperty("ORGANIZATION_NAME_3", q.ORGANIZATION_NAME_3),
                                             new JProperty("ORGANIZATION_NAME_4", q.ORGANIZATION_NAME_4),
                                             new JProperty("ORGANIZATION_NAME_5", q.ORGANIZATION_NAME_5),
                                             new JProperty("CORRESPONDING_AUTHOR", q.CORRESPONDING_AUTHOR),
-                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME2),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_2),
                                             new JProperty("PAPER_TEXT_TITLE", q.PAPER_TEXT_TITLE_2),
@@ -582,6 +605,7 @@ namespace CoMS.Controllers
                                             new JProperty("LAST_REVISED_DATE", q.LAST_REVISED_DATE_2),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME", q.PAPER_TEXT_ATTACHED_FILENAME_2),
                                             new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE),
                                             new JProperty("FROM_DATE", q.FROM_DATE),
                                             new JProperty("THRU_DATE", q.THRU_DATE),
                                             new JProperty("PAPER_TEXT_WITHDRAWN", q.PAPER_TEXT_WITHDRAWN),
@@ -593,21 +617,21 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
                                             new JProperty("POSITION", 2)
                                             );
-                            jsonArray.Add(json2);
+                            k++;
                         }
 
-                        if (q.PAPER_TEXT_DEADLINE_3 != null)
+                        if (q.FIRST_SUBMITTED_DATE_3 != null)
                         {
-                            var json3 = new JObject(
+                             json3 = new JObject(
                                             new JProperty("PERSON_ID", q.PERSON_ID),
                                             new JProperty("CONFERENCE_ID", q.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("ORGANIZATION_NAME_1", q.ORGANIZATION_NAME_1),
                                             new JProperty("ORGANIZATION_NAME_2", q.ORGANIZATION_NAME_2),
                                             new JProperty("ORGANIZATION_NAME_3", q.ORGANIZATION_NAME_3),
                                             new JProperty("ORGANIZATION_NAME_4", q.ORGANIZATION_NAME_4),
                                             new JProperty("ORGANIZATION_NAME_5", q.ORGANIZATION_NAME_5),
                                             new JProperty("CORRESPONDING_AUTHOR", q.CORRESPONDING_AUTHOR),
-                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME3),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_3),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_3),
@@ -634,23 +658,24 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE),
                                             new JProperty("POSITION", 3)
                                             );
-                            jsonArray.Add(json3);
+                            k++;
                         }
 
-                        if (q.PAPER_TEXT_DEADLINE_4 != null)
+                        if (q.FIRST_SUBMITTED_DATE_4 != null)
                         {
-                            var json4 = new JObject(
+                             json4 = new JObject(
                                             new JProperty("PERSON_ID", q.PERSON_ID),
                                             new JProperty("CONFERENCE_ID", q.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("ORGANIZATION_NAME_1", q.ORGANIZATION_NAME_1),
                                             new JProperty("ORGANIZATION_NAME_2", q.ORGANIZATION_NAME_2),
                                             new JProperty("ORGANIZATION_NAME_3", q.ORGANIZATION_NAME_3),
                                             new JProperty("ORGANIZATION_NAME_4", q.ORGANIZATION_NAME_4),
                                             new JProperty("ORGANIZATION_NAME_5", q.ORGANIZATION_NAME_5),
                                             new JProperty("CORRESPONDING_AUTHOR", q.CORRESPONDING_AUTHOR),
-                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME4),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_4),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_4),
@@ -677,23 +702,24 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE),
                                             new JProperty("POSITION", 4)
                                             );
-                            jsonArray.Add(json4);
+                            k++;
                         }
 
-                        if (q.PAPER_TEXT_DEADLINE_5 != null)
+                        if (q.FIRST_SUBMITTED_DATE_5 != null)
                         {
-                            var json5 = new JObject(
+                             json5 = new JObject(
                                             new JProperty("PERSON_ID", q.PERSON_ID),
                                             new JProperty("CONFERENCE_ID", q.CONFERENCE_ID),
+                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("ORGANIZATION_NAME_1", q.ORGANIZATION_NAME_1),
                                             new JProperty("ORGANIZATION_NAME_2", q.ORGANIZATION_NAME_2),
                                             new JProperty("ORGANIZATION_NAME_3", q.ORGANIZATION_NAME_3),
                                             new JProperty("ORGANIZATION_NAME_4", q.ORGANIZATION_NAME_4),
                                             new JProperty("ORGANIZATION_NAME_5", q.ORGANIZATION_NAME_5),
                                             new JProperty("CORRESPONDING_AUTHOR", q.CORRESPONDING_AUTHOR),
-                                            new JProperty("PAPER_ID", q.PAPER_ID),
                                             new JProperty("CONFERENCE_NAME", q.CONFERENCE_NAME5),
                                             new JProperty("PAPER_TEXT_DEADLINE", q.PAPER_TEXT_DEADLINE_5),
                                             new JProperty("PAPER_TEXT", q.PAPER_TEXT_5),
@@ -720,12 +746,34 @@ namespace CoMS.Controllers
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_3", q.PAPER_TEXT_ATTACHED_FILENAME_3),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_4", q.PAPER_TEXT_ATTACHED_FILENAME_4),
                                             new JProperty("PAPER_TEXT_ATTACHED_FILENAME_5", q.PAPER_TEXT_ATTACHED_FILENAME_5),
+                                            new JProperty("FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE", q.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE),
                                             new JProperty("POSITION", 5)
                                             );
-                            jsonArray.Add(json5);
+                           k++;
                         }
 
-
+                        if (k > 0)
+                        {
+                            switch (k)
+                            {
+                                case 1:
+                                    jsonArray.Add(json1);
+                                    break;
+                                case 2:
+                                    jsonArray.Add(json2);
+                                    break;
+                                case 3:
+                                    jsonArray.Add(json3);
+                                    break;
+                                case 4:
+                                    jsonArray.Add(json4);
+                                    break;
+                                case 5:
+                                    jsonArray.Add(json5);
+                                    break;
+                            }
+                        }
+                        //end for
                     }
 
                     return ResponseSuccess(StringResource.Success, jsonArray);
@@ -783,7 +831,7 @@ namespace CoMS.Controllers
 
         public class See_Paper
         {
-            public int Id { get; set; }
+            public int PAPER_ID { get; set; }
             public int position { get; set; }
         }
 
@@ -801,7 +849,7 @@ namespace CoMS.Controllers
 
         public class WithDrawnAbs
         {
-            public int Id { get; set; }
+            public int PAPER_ID { get; set; }
         }
 
 

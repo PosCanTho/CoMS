@@ -21,8 +21,8 @@ namespace CoMS.Models
 
         public bool CheckFollow(string FOLLOWED_UserName, string FOLLOWING_UserName, int conferenceId)
         {
-            var result = db.FOLLOWER_RELATIONSHIP.SingleOrDefault(x => x.FOLLOWED_UserName == FOLLOWED_UserName && x.FOLLOWING_UserName == FOLLOWING_UserName && x.CONFERENCE_ID == conferenceId);
-            if (result != null)
+            var result = db.FOLLOWER_RELATIONSHIP.Where(x => x.FOLLOWED_UserName == FOLLOWED_UserName && x.FOLLOWING_UserName == FOLLOWING_UserName && x.CONFERENCE_ID == conferenceId).ToList();
+            if (result.Count > 0)
             {
                 return true;
             }
