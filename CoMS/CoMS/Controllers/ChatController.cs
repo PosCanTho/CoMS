@@ -142,7 +142,7 @@ namespace CoMS.Controllers
         [Route("api/ListMessage")]
         public HttpResponseMessage ListMessage(string UserName, string RECIPIENT_UserName_1, int conferenceId, int page, int pageSize)
         {
-            var accountSend = db.ACCOUNTs.SingleOrDefault(x => x.UserName == UserName);
+            
             var list = db.MESSAGE_FEED.Where(x => (x.UserName == UserName && x.RECIPIENT_UserName_1 == RECIPIENT_UserName_1) || (x.UserName == RECIPIENT_UserName_1 && x.RECIPIENT_UserName_1 == UserName) && x.CONFERENCE_ID == conferenceId && (x.DELETED == false || x.DELETED == null))
                 .Where(x => x.DELETED_UserName != UserName)
                 .OrderByDescending(x => x.FROM_DATE)
@@ -157,12 +157,14 @@ namespace CoMS.Controllers
                 DateTime? dtLater = itemLater.FROM_DATE;
                 if (dt.HasValue && dtLater.HasValue)
                 {
+                    var accountSend = db.ACCOUNTs.SingleOrDefault(x => x.UserName == item.UserName);
                     var msg = new MessageResponse();
                     msg.MESSAGE_FEED_ID = item.MESSAGE_FEED_ID;
                     msg.MESSAGE_CONTENT = item.MESSAGE_CONTENT;
                     msg.IsToDay = DateTimeFormater.CheckIsToday(dt.Value);
                     msg.TimeFormat = DateTimeFormater.GetTimeAgo(dt.Value);
                     msg.Time = dt;
+                    msg.Image = accountSend.Image;
                     msg.UserName = item.UserName;
                     msg.PERSON_ID_SEND = accountSend.PERSON_ID;
                     msg.ORGANIZATION_SEND = accountSend.CURRENT_HOME_ORGANIZATION_NAME;
@@ -229,7 +231,7 @@ namespace CoMS.Controllers
             else
             {
                 var list = from f in db.MESSAGE_FEED
-                                       where (f.UserName == UserName || f.RECIPIENT_UserName_1 == UserName) && f.PUBLIC_OR_PRIVATE_MESSAGE == "PRIVATE" && f.CONFERENCE_ID == conferenceId && f.DELETED_UserName != UserName
+                                       where (f.UserName == UserName || f.RECIPIENT_UserName_1 == UserName) && f.PUBLIC_OR_PRIVATE_MESSAGE == "PRIVATE" && f.CONFERENCE_ID == conferenceId && f.DELETED_UserName != UserName && (f.DELETED == null || f.DELETED == false)
                                        group f by new { f.UserName, f.RECIPIENT_UserName_1} into x
                                        select new Conversation() {
                                            UserName = x.Key.UserName,
