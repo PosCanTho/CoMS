@@ -181,7 +181,7 @@ namespace CoMS.Controllers
             var listChannel = new List<Group>();
             foreach (ACCOUNT_MESSAGING_GROUP_MEMBERSHIP item in result)
             {
-                var groups = db.MESSAGING_GROUP.Where(x => (x.MESSAGING_GROUP_ID == item.MESSAGING_GROUP_ID || x.PUBLIC_OR_PRIVATE_GROUP == "PUBLIC GROUP") && x.CONFERENCE_ID == conferenceId && (x.DELETED == null || x.DELETED == false)).OrderByDescending(x => x.CREATED_DATETIME).ToPagedList(page, pageSize);
+                var groups = db.MESSAGING_GROUP.Where(x => (x.MESSAGING_GROUP_ID == item.MESSAGING_GROUP_ID || x.PUBLIC_OR_PRIVATE_GROUP == "PUBLIC GROUP" || x.CREATED_UserName == userName) && x.CONFERENCE_ID == conferenceId && (x.DELETED == null || x.DELETED == false)).OrderByDescending(x => x.CREATED_DATETIME).ToPagedList(page, pageSize);
                 foreach (MESSAGING_GROUP messageGroup in groups)
                 {
                     var members = from g in db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP

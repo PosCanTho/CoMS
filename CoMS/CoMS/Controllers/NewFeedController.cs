@@ -100,6 +100,49 @@ namespace CoMS.Controllers
         }
 
         [HttpPost]
+        [Route("api/ListPhotoFeed")]
+        public HttpResponseMessage ListPhotoFeed(string userName, decimal conferenceId, int page, int pageSize)
+        {
+            var model = new NewFeedModel();
+            var photoFeeds = model.getListPhotoFeed(conferenceId, page, pageSize);
+            var result = new List<PhotoResponse>();
+            foreach (PhotoFeed item in photoFeeds)
+            {
+                var itemFeed = new PhotoResponse();
+                itemFeed.Date = item.Date;
+                itemFeed.ListFeed = new List<ActivityFeed>();
+                foreach (MESSAGE_FEED feed in item.ListFeed)
+                {
+                    var account = new AccountModel().GetUserByUserName(feed.UserName);
+                    var f = new ActivityFeed();
+                    f.MESSAGE_FEED_ID = feed.MESSAGE_FEED_ID;
+                    f.UserName = feed.UserName;
+                    f.PERSON_ID = account.PERSON_ID;
+                    f.CURRENT_LAST_NAME = feed.CURRENT_LAST_NAME;
+                    f.CURRENT_MIDDLE_NAME = feed.CURRENT_MIDDLE_NAME;
+                    f.CURRENT_FIRST_NAME = feed.CURRENT_FIRST_NAME;
+                    f.REPLYING_TO_MESSAGE_FEED_ID = feed.REPLYING_TO_MESSAGE_FEED_ID;
+                    f.MESSAGE_CONTENT = feed.MESSAGE_CONTENT;
+                    f.ATTACHED_PHOTO_FILENAME = feed.ATTACHED_PHOTO_FILENAME;
+                    f.ATTACHED_PHOTO_NOTE = feed.ATTACHED_PHOTO_NOTE;
+                    f.ATTACHED_PHOTO_LONGITUDE = feed.ATTACHED_PHOTO_LONGITUDE;
+                    f.ATTACHED_PHOTO_LATITUDE = feed.ATTACHED_PHOTO_LATITUDE;
+                    f.Image = account.Image;
+                    f.Time = DateTimeFormater.GetTimeAgo(feed.FROM_DATE.Value);
+                    f.FROM_DATE = feed.FROM_DATE;
+                    f.THRU_DATE = feed.THRU_DATE;
+                    f.ListComment = model.getListActivityFeedComment(feed.MESSAGE_FEED_ID);
+                    f.IS_LIKED = model.checkIsLiked(userName, feed.MESSAGE_FEED_ID);
+                    f.ListLike = model.listLike(feed.MESSAGE_FEED_ID);
+                    itemFeed.ListFeed.Add(f);
+                }
+                result.Add(itemFeed);
+            }
+
+            return ResponseSuccess(StringResource.Success, result);
+        }
+
+        [HttpPost]
         [Route("api/ListNewFeedOfUser")]
         public HttpResponseMessage ListNewFeedOfUser(string userNameLogin, string userName, decimal conferenceId, int page, int pageSize)
         {
@@ -128,12 +171,14 @@ namespace CoMS.Controllers
                         .Where(x => x.attendee.CONFERENCE_SESSION_ID == conference_session_id)
                         .AsEnumerable()
                         .ToList()
-                        .Select(x => new UserOfSession(){
+                        .Select(x => new UserOfSession()
+                        {
                             UserName = x.acc.UserName,
                             Image = x.acc.Image,
                             CURRENT_FIRST_NAME = x.acc.CURRENT_FIRST_NAME,
                             CURRENT_MIDDLE_NAME = x.acc.CURRENT_MIDDLE_NAME,
-                            CURRENT_LAST_NAME = x.acc.CURRENT_LAST_NAME });
+                            CURRENT_LAST_NAME = x.acc.CURRENT_LAST_NAME
+                        });
             var activityFeeds = new List<ActivityFeed>();
             var model = new NewFeedModel();
             foreach (UserOfSession item in listResult)
@@ -224,7 +269,8 @@ namespace CoMS.Controllers
                 if (account == null)
                 {
                     return ResponseFail(StringResource.Account_does_not_exist);
-                } else if (newFeed == null)
+                }
+                else if (newFeed == null)
                 {
                     return ResponseFail(StringResource.Activity_feed_do_not_exist);
                 }
@@ -317,11 +363,24 @@ namespace CoMS.Controllers
         public object ListLike { get; set; }
     }
 
-    public class UserOfSession{
+    public class UserOfSession
+    {
         public string UserName { get; set; }
         public string Image { get; set; }
         public string CURRENT_FIRST_NAME { get; set; }
         public string CURRENT_LAST_NAME { get; set; }
         public string CURRENT_MIDDLE_NAME { get; set; }
+    }
+
+    public class PhotoFeed
+    {
+        public string Date { get; set; }
+        public List<MESSAGE_FEED> ListFeed { get; set; }
+    }
+
+    public class PhotoResponse
+    {
+        public string Date { get; set; }
+        public List<ActivityFeed> ListFeed { get; set; }
     }
 }

@@ -268,6 +268,7 @@ namespace CoMS.Controllers
                     profile.Image = account.Image;
                     profile.CurrentHomeOrganizationName = account.CURRENT_HOME_ORGANIZATION_NAME;
                     profile.CurrentHomeOrganizationNameEn = account.CURRENT_HOME_ORGANIZATION_NAME_EN;
+                    profile.IsAdmin = account.IsAdmin;
                     return ResponseSuccess(StringResource.Success, profile);
                 }
             }
@@ -308,6 +309,7 @@ namespace CoMS.Controllers
                     profile.Image = account.Image;
                     profile.CurrentHomeOrganizationName = account.CURRENT_HOME_ORGANIZATION_NAME;
                     profile.CurrentHomeOrganizationNameEn = account.CURRENT_HOME_ORGANIZATION_NAME_EN;
+                    profile.IsAdmin = account.IsAdmin;
                     return ResponseSuccess(StringResource.Success, profile);
                 }
             }
@@ -477,6 +479,7 @@ namespace CoMS.Controllers
             public string Image { get; set; }
             public string CurrentHomeOrganizationName { get; set; }
             public string CurrentHomeOrganizationNameEn { get; set; }
+            public bool? IsAdmin { get; set; }
         }
 
         public class UserEditMyProfile

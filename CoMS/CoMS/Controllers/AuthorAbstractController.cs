@@ -18,7 +18,7 @@ namespace CoMS.Controllers
     {
         private DB db = new DB();
         [HttpPost]
-        [Route("api/ListPaperAbstract")]
+        [Route("api/List_PaperAbstract")]
         public HttpResponseMessage ListPaperAbstract([FromBody] UserAuthor user)
         {
             /*

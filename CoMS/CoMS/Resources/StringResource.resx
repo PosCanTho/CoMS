@@ -333,4 +333,55 @@
   <data name="Survey_do_not_exist" xml:space="preserve">
     <value>Survey do not exist</value>
   </data>
+  <data name="Conference_presentation_type_do_not_exist" xml:space="preserve">
+    <value>Conference presentation do not exist</value>
+  </data>
+  <data name="Conference_session_topic_do_not_exist" xml:space="preserve">
+    <value>Conference session topic do not exist</value>
+  </data>
+  <data name="Expired_submit_paper_abstract" xml:space="preserve">
+    <value>Expired submit paper abstract</value>
+  </data>
+  <data name="Type_of_study_do_not_exist" xml:space="preserve">
+    <value>Type of study do not exist</value>
+  </data>
+  <data name="Account_does_not_author" xml:space="preserve">
+    <value>Account does not author</value>
+  </data>
+  <data name="Expired_submit_paper_text" xml:space="preserve">
+    <value>Expired_submit_paper_text</value>
+  </data>
+  <data name="Expired_update_paper_abstract" xml:space="preserve">
+    <value>Expired update paper abstract</value>
+  </data>
+  <data name="Not_found_paper_abstract" xml:space="preserve">
+    <value>Not found paper abstract</value>
+  </data>
+  <data name="Paper_Abstract_accepted" xml:space="preserve">
+    <value>Paper Abstract accepted.</value>
+  </data>
+  <data name="Paper_abstract_do_not_exist" xml:space="preserve">
+    <value>Paper abstract do not exist</value>
+  </data>
+  <data name="Paper_Abstract_is_being_reviewed_please_wait_for_results" xml:space="preserve">
+    <value>Paper Abstract is being reviewed. Please wait for results.</value>
+  </data>
+  <data name="Paper_text_do_not_exist" xml:space="preserve">
+    <value>Paper text do not exist</value>
+  </data>
+  <data name="Person_do_not_exist" xml:space="preserve">
+    <value>Person do not exist</value>
+  </data>
+  <data name="The_number_of_submition_after_review_has_out" xml:space="preserve">
+    <value>The number of submition after review has out.</value>
+  </data>
+  <data name="Paper_Text_accepted" xml:space="preserve">
+    <value>Paper Text accepted.</value>
+  </data>
+  <data name="Paper_Text_is_being_reviewed_please_wait_for_results" xml:space="preserve">
+    <value>Paper Text is being reviewed please wait for results.</value>
+  </data>
+  <data name="Out_of_time" xml:space="preserve">
+    <value>Out of time</value>
+  </data>
 </root>

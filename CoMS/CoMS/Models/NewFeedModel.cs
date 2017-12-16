@@ -12,23 +12,23 @@ namespace CoMS.Models
     public class NewFeedModel
     {
         private DB db;
-        
+
         public NewFeedModel()
         {
             db = new DB();
         }
 
-        public List<ActivityFeed> getListActivityFeed(decimal conferenceId, int page = 0, int pageSize = 10)
+        public List<ActivityFeed> getListActivityFeed(decimal conferenceId, int page = 1, int pageSize = 10)
         {
             var activityFeeds = (from n in db.MESSAGE_FEED
                                  join a in db.ACCOUNTs on n.UserName equals a.UserName
                                  where n.CONFERENCE_ID == conferenceId && n.REPLYING_TO_MESSAGE_FEED_ID == null
                                  && n.PUBLIC_OR_PRIVATE_MESSAGE == "PUBLIC" && (n.DELETED == false || n.DELETED == null)
-                                 select new {n,a}
+                                 select new { n, a }
                                 ).AsEnumerable()
                                 .Select(x => new ActivityFeed()
                                 {
-                                   
+
                                     MESSAGE_FEED_ID = x.n.MESSAGE_FEED_ID,
                                     UserName = x.n.UserName,
                                     PERSON_ID = x.a.PERSON_ID,
@@ -48,6 +48,36 @@ namespace CoMS.Models
                                 });
 
             return activityFeeds.OrderByDescending(x => x.FROM_DATE).ToPagedList(page, pageSize).ToList();
+        }
+
+        public List<PhotoFeed> getListPhotoFeed(decimal conferenceId, int page = 1, int pageSize = 10)
+        {
+            var activityFeeds = (from n in db.MESSAGE_FEED
+                                 join a in db.ACCOUNTs on n.UserName equals a.UserName
+                                 where n.CONFERENCE_ID == conferenceId && n.REPLYING_TO_MESSAGE_FEED_ID == null
+                                 && n.PUBLIC_OR_PRIVATE_MESSAGE == "PUBLIC" && (n.DELETED == false || n.DELETED == null)
+                                 && n.ATTACHED_PHOTO_FILENAME != null && n.ATTACHED_PHOTO_FILENAME != ""
+                                 select new { n, a })
+                                 .AsEnumerable()
+                                 .GroupBy(x => x.n.FROM_DATE.Value.ToString("yyyy-MM-dd"), x =>  x.n)
+                                .Select(x => new PhotoFeed()
+                                {
+                                    Date = x.Key,
+                                    ListFeed = x.ToList()
+                                });
+
+            return activityFeeds.OrderByDescending(x => x.Date).ToPagedList(page, pageSize).ToList();
+        }
+
+        private static DateTime GetFirstDayInMonth(DateTime? dateTime)
+        {
+            if (dateTime.HasValue)
+            {
+                var result = dateTime.Value.ToString("");
+                return new DateTime(dateTime.Value.Date.Year, dateTime.Value.Date.Month, 1);
+            }
+
+            return DateTime.Now;
         }
 
         public List<ActivityFeed> getListActivityFeedOfUser(string userName, decimal conferenceId, int page = 1, int pageSize = 10)
@@ -86,7 +116,7 @@ namespace CoMS.Models
         {
             var activityFeeds = (from n in db.MESSAGE_FEED
                                  join a in db.ACCOUNTs on n.UserName equals a.UserName
-                                 where  n.PUBLIC_OR_PRIVATE_MESSAGE == "PUBLIC" && n.REPLYING_TO_MESSAGE_FEED_ID == replyToId && (n.DELETED == false || n.DELETED == null)
+                                 where n.PUBLIC_OR_PRIVATE_MESSAGE == "PUBLIC" && n.REPLYING_TO_MESSAGE_FEED_ID == replyToId && (n.DELETED == false || n.DELETED == null)
                                  select new { n, a }
                               ).AsEnumerable()
                               .Select(x => new ActivityFeed()
@@ -117,19 +147,20 @@ namespace CoMS.Models
         public object listLike(decimal MESSAGE_FEED_ID, int page = 1, int pageSize = 10)
         {
             var list = db.PERSON_LIKING_MESSAGE_FEED
-                .Join(db.ACCOUNTs, p => p.UserName, a => a.UserName,(p,a) => new { p, a})
+                .Join(db.ACCOUNTs, p => p.UserName, a => a.UserName, (p, a) => new { p, a })
                 .Where(x => x.p.MESSAGE_FEED_ID == MESSAGE_FEED_ID)
-                .Select(x => new{
-                MESSAGE_FEED_ID = x.p.MESSAGE_FEED_ID,
-                UserName = x.p.UserName,
-                PERSON_ID = x.p.PERSON_ID,
-                CURRENT_LAST_NAME = x.p.CURRENT_LAST_NAME,
-                CURRENT_FIRST_NAME = x.p.CURRENT_FIRST_NAME,
-                CURRENT_MIDDLE_NAME = x.p.CURRENT_MIDDLE_NAME,
-                LIKED_DATETIME = x.p.LIKED_DATETIME,
-                CURRENT_HOME_ORGANIZATION_NAME = x.a.CURRENT_HOME_ORGANIZATION_NAME,
-                CURRENT_HOME_ORGANIZATION_NAME_EN = x.a.CURRENT_HOME_ORGANIZATION_NAME_EN
-            }).OrderBy(x => x.LIKED_DATETIME).ToPagedList(page, pageSize);
+                .Select(x => new
+                {
+                    MESSAGE_FEED_ID = x.p.MESSAGE_FEED_ID,
+                    UserName = x.p.UserName,
+                    PERSON_ID = x.p.PERSON_ID,
+                    CURRENT_LAST_NAME = x.p.CURRENT_LAST_NAME,
+                    CURRENT_FIRST_NAME = x.p.CURRENT_FIRST_NAME,
+                    CURRENT_MIDDLE_NAME = x.p.CURRENT_MIDDLE_NAME,
+                    LIKED_DATETIME = x.p.LIKED_DATETIME,
+                    CURRENT_HOME_ORGANIZATION_NAME = x.a.CURRENT_HOME_ORGANIZATION_NAME,
+                    CURRENT_HOME_ORGANIZATION_NAME_EN = x.a.CURRENT_HOME_ORGANIZATION_NAME_EN
+                }).OrderBy(x => x.LIKED_DATETIME).ToPagedList(page, pageSize);
             return list;
         }
 

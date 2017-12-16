@@ -42,97 +42,95 @@ namespace CoMS.Controllers
                 var listMember = db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP.Where(x => x.MESSAGING_GROUP_ID == chat.data.MESSAGING_GROUP_ID
                 && (x.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED == "GROUP ASSIGNED" || x.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED == "GROUP JOIN REQUEST APPROVED")
                 && (x.DELETED == false || x.DELETED == null)).ToList();
-                if (listMember.Count <= 0)
-                {
-                    return ResponseFail(StringResource.The_list_of_members_is_empty);
-                }
-                else
-                {
-                    /*Thêm vào CSDL*/
-                    var messageFeed = new MESSAGE_FEED();
-                    messageFeed.FROM_DATE = DateTime.Now;
-                    messageFeed.UserName = chat.data.UserName;
-                    messageFeed.CURRENT_FIRST_NAME = accountSend.CURRENT_FIRST_NAME;
-                    messageFeed.CURRENT_MIDDLE_NAME = accountSend.CURRENT_MIDDLE_NAME;
-                    messageFeed.CURRENT_LAST_NAME = accountSend.CURRENT_LAST_NAME;
-                    messageFeed.CONFERENCE_ID = chat.data.CONFERENCE_ID;
-                    messageFeed.CONFERENCE_NAME = conference.CONFERENCE_NAME;
-                    messageFeed.CONFERENCE_NAME_EN = conference.CONFERENCE_NAME_EN;
-                    messageFeed.PUBLIC_OR_PRIVATE_MESSAGE = "PRIVATE";
-                    messageFeed.MESSAGE_CONTENT = chat.Body;
-                    messageFeed.RECIPIENT_MESSAGING_GROUP_ID_1 = group.MESSAGING_GROUP_ID;
-                    messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_1 = group.MESSAGING_GROUP_NAME;
-                    messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_EN_1 = group.MESSAGING_GROUP_NAME;
-                    new NewFeedModel().addNewFeed(messageFeed);
 
-                    /*Tạo dữ liệu trả về*/
-                    var msg = new MessageResponse();
-                    msg.MESSAGE_FEED_ID = messageFeed.MESSAGE_FEED_ID;
-                    msg.MESSAGE_CONTENT = messageFeed.MESSAGE_CONTENT;
-                    msg.IsMoreThanOneDay = false;
-                    msg.IsToDay = DateTimeFormater.CheckIsToday(messageFeed.FROM_DATE.Value);
-                    msg.TimeFormat = DateTimeFormater.GetTimeAgo(messageFeed.FROM_DATE.Value);
-                    msg.Time = messageFeed.FROM_DATE.Value;
-                    msg.UserName = messageFeed.UserName;
-                    msg.PERSON_ID_SEND = accountSend.PERSON_ID;
-                    msg.ORGANIZATION_SEND = accountSend.CURRENT_HOME_ORGANIZATION_NAME;
-                    msg.ORGANIZATION_EN_SEND = accountSend.CURRENT_HOME_ORGANIZATION_NAME_EN;
-                    msg.Image = accountSend.Image;
-                    msg.FULL_NAME_PERSON_SEND = Utils.GetFullName(messageFeed.CURRENT_FIRST_NAME, messageFeed.CURRENT_MIDDLE_NAME, messageFeed.CURRENT_LAST_NAME);
-                    msg.RECIPIENT_MESSAGING_GROUP_ID_1 = messageFeed.RECIPIENT_MESSAGING_GROUP_ID_1;
-                    msg.RECIPIENT_MESSAGING_GROUP_NAME_1 = messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_1;
-                    msg.RECIPIENT_MESSAGING_GROUP_NAME_EN_1 = messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_EN_1;
-                    msg.IS_MESSAGE_GROUP = true;
+                var adminGroup = new ACCOUNT_MESSAGING_GROUP_MEMBERSHIP();
+                adminGroup.UserName = group.CREATED_UserName;
+                listMember.Add(adminGroup);
 
-                    foreach (ACCOUNT_MESSAGING_GROUP_MEMBERSHIP item in listMember)
+                /*Thêm vào CSDL*/
+                var messageFeed = new MESSAGE_FEED();
+                messageFeed.FROM_DATE = DateTime.Now;
+                messageFeed.UserName = chat.data.UserName;
+                messageFeed.CURRENT_FIRST_NAME = accountSend.CURRENT_FIRST_NAME;
+                messageFeed.CURRENT_MIDDLE_NAME = accountSend.CURRENT_MIDDLE_NAME;
+                messageFeed.CURRENT_LAST_NAME = accountSend.CURRENT_LAST_NAME;
+                messageFeed.CONFERENCE_ID = chat.data.CONFERENCE_ID;
+                messageFeed.CONFERENCE_NAME = conference.CONFERENCE_NAME;
+                messageFeed.CONFERENCE_NAME_EN = conference.CONFERENCE_NAME_EN;
+                messageFeed.PUBLIC_OR_PRIVATE_MESSAGE = "PRIVATE";
+                messageFeed.MESSAGE_CONTENT = chat.Body;
+                messageFeed.RECIPIENT_MESSAGING_GROUP_ID_1 = group.MESSAGING_GROUP_ID;
+                messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_1 = group.MESSAGING_GROUP_NAME;
+                messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_EN_1 = group.MESSAGING_GROUP_NAME;
+                new NewFeedModel().addNewFeed(messageFeed);
+
+                /*Tạo dữ liệu trả về*/
+                var msg = new MessageResponse();
+                msg.MESSAGE_FEED_ID = messageFeed.MESSAGE_FEED_ID;
+                msg.MESSAGE_CONTENT = messageFeed.MESSAGE_CONTENT;
+                msg.IsMoreThanOneDay = false;
+                msg.IsToDay = DateTimeFormater.CheckIsToday(messageFeed.FROM_DATE.Value);
+                msg.TimeFormat = DateTimeFormater.GetTimeAgo(messageFeed.FROM_DATE.Value);
+                msg.Time = messageFeed.FROM_DATE.Value;
+                msg.UserName = messageFeed.UserName;
+                msg.PERSON_ID_SEND = accountSend.PERSON_ID;
+                msg.ORGANIZATION_SEND = accountSend.CURRENT_HOME_ORGANIZATION_NAME;
+                msg.ORGANIZATION_EN_SEND = accountSend.CURRENT_HOME_ORGANIZATION_NAME_EN;
+                msg.Image = accountSend.Image;
+                msg.FULL_NAME_PERSON_SEND = Utils.GetFullName(messageFeed.CURRENT_FIRST_NAME, messageFeed.CURRENT_MIDDLE_NAME, messageFeed.CURRENT_LAST_NAME);
+                msg.RECIPIENT_MESSAGING_GROUP_ID_1 = messageFeed.RECIPIENT_MESSAGING_GROUP_ID_1;
+                msg.RECIPIENT_MESSAGING_GROUP_NAME_1 = messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_1;
+                msg.RECIPIENT_MESSAGING_GROUP_NAME_EN_1 = messageFeed.RECIPIENT_MESSAGING_GROUP_NAME_EN_1;
+                msg.IS_MESSAGE_GROUP = true;
+
+                foreach (ACCOUNT_MESSAGING_GROUP_MEMBERSHIP item in listMember)
+                {
+
+                    var memberRecive = db.ACCOUNT_DEVICE_RELATIONSHIP.SingleOrDefault(x => x.UserName == item.UserName);
+                    if (memberRecive != null)
                     {
-                       
-                        var memberRecive = db.ACCOUNT_DEVICE_RELATIONSHIP.SingleOrDefault(x => x.UserName == item.UserName);
-                        if (memberRecive != null)
+                        var deviceId = memberRecive.DEVICE_TOKEN;
+                        if (deviceId != null)
                         {
-                            var deviceId = memberRecive.DEVICE_TOKEN;
-                            if (deviceId != null)
+                            var result = "-1";
+                            var webAddr = "https://fcm.googleapis.com/fcm/send";
+
+                            var httpWebRequest = (HttpWebRequest)WebRequest.Create(webAddr);
+                            httpWebRequest.ContentType = "application/json";
+                            httpWebRequest.Headers.Add("Authorization:key=" + StringResource.Server_fcm_key);
+                            httpWebRequest.Method = "POST";
+
+                            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
                             {
-                                var result = "-1";
-                                var webAddr = "https://fcm.googleapis.com/fcm/send";
 
-                                var httpWebRequest = (HttpWebRequest)WebRequest.Create(webAddr);
-                                httpWebRequest.ContentType = "application/json";
-                                httpWebRequest.Headers.Add("Authorization:key=" + StringResource.Server_fcm_key);
-                                httpWebRequest.Method = "POST";
+                                var notification = new Notification();
+                                notification.body = chat.Body;
+                                notification.title = msg.FULL_NAME_PERSON_SEND;
+                                notification.sound = chat.Sound;
+                                notification.priority = chat.Priority;
 
-                                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                                JsonData data = new JsonData();
+                                data.Data = JsonConvert.SerializeObject(msg);
+
+                                var json = new DataJson();
+                                json.notification = notification;
+                                json.data = data;
+                                json.to = deviceId;
+
+                                streamWriter.Write(JsonConvert.SerializeObject(json));
+                                streamWriter.Flush();
+
+                                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
                                 {
-
-                                    var notification = new Notification();
-                                    notification.body = chat.Body;
-                                    notification.title = msg.FULL_NAME_PERSON_SEND;
-                                    notification.sound = chat.Sound;
-                                    notification.priority = chat.Priority;
-
-                                    JsonData data = new JsonData();
-                                    data.Data = JsonConvert.SerializeObject(msg);
-
-                                    var json = new DataJson();
-                                    json.notification = notification;
-                                    json.data = data;
-                                    json.to = deviceId;
-
-                                    streamWriter.Write(JsonConvert.SerializeObject(json));
-                                    streamWriter.Flush();
-
-                                    var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                                    using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                                    {
-                                        result = streamReader.ReadToEnd();
-                                    }
+                                    result = streamReader.ReadToEnd();
                                 }
                             }
                         }
                     }
-
-                    return ResponseSuccess(StringResource.Success, msg);
                 }
+
+                return ResponseSuccess(StringResource.Success, msg);
             }
         }
 
@@ -266,10 +264,6 @@ namespace CoMS.Controllers
             {
                 return ResponseFail(StringResource.Message_group_do_not_exist);
             }
-            else if (group.CREATED_UserName != userName)
-            {
-                return ResponseFail(StringResource.You_do_not_have_permission_to_add_members);
-            }
             else
             {
                 var list = new AccountMessagingGroupMemberModel().getListJoinChannel(userName, MESSAGING_GROUP_ID);
@@ -283,7 +277,7 @@ namespace CoMS.Controllers
         public HttpResponseMessage ApprovedRequest(string userName, string userNameApprove, int MESSAGING_GROUP_ID)
         {
             var account = db.ACCOUNTs.SingleOrDefault(x => x.UserName == userName);
-            var group = db.MESSAGING_GROUP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && x.CREATED_UserName == userName && (x.DELETED == false || x.DELETED == null));
+            var group = db.MESSAGING_GROUP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && (x.DELETED == false || x.DELETED == null));
             if (account == null)
             {
                 return ResponseFail(StringResource.Account_does_not_exist);
@@ -314,7 +308,7 @@ namespace CoMS.Controllers
         {
             var account = db.ACCOUNTs.SingleOrDefault(x => x.UserName == userName);
             var accountReject = db.ACCOUNTs.SingleOrDefault(x => x.UserName == userNameReject);
-            var group = db.MESSAGING_GROUP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && x.CREATED_UserName == userName && (x.DELETED == false || x.DELETED == null));
+            var group = db.MESSAGING_GROUP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && (x.DELETED == false || x.DELETED == null));
             if (account == null || accountReject == null)
             {
                 return ResponseFail(StringResource.Account_does_not_exist);
@@ -346,25 +340,39 @@ namespace CoMS.Controllers
         public HttpResponseMessage CheckIsJoinChannel(string userName, int MESSAGING_GROUP_ID)
         {
             var account = db.ACCOUNTs.SingleOrDefault(x => x.UserName == userName);
+            var group = db.MESSAGING_GROUP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID);
             if (account == null)
             {
                 return ResponseFail(StringResource.Account_does_not_exist);
+            }else if(group == null)
+            {
+                return ResponseFail(StringResource.Message_group_do_not_exist);
             }
             else
             {
+                
                 var check = new CheckJoin();
                 var result = db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP.SingleOrDefault(x => x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && x.UserName == userName && (x.DELETED == false || x.DELETED == null));
                 if (result != null)
                 {
                     check.UserName = result.UserName;
                     check.MESSAGING_GROUP_ID = result.MESSAGING_GROUP_ID;
+                    check.MESSAGING_GROUP_MODERATOR = result.MESSAGING_GROUP_MODERATOR;
                     check.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED = result.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED;
+                    return ResponseSuccess(StringResource.Success, check);
+                }else if (group.CREATED_UserName == userName)
+                {
+                    check.UserName = userName;
+                    check.MESSAGING_GROUP_ID = MESSAGING_GROUP_ID;
+                    check.MESSAGING_GROUP_MODERATOR = true;
+                    check.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED = "GROUP ASSIGNED";
                     return ResponseSuccess(StringResource.Success, check);
                 }
                 else
                 {
                     check.UserName = userName;
                     check.MESSAGING_GROUP_ID = MESSAGING_GROUP_ID;
+                    check.MESSAGING_GROUP_MODERATOR = false;
                     check.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED = "GROUP UNASSIGNED";
                     return ResponseSuccess(StringResource.Success, check);
                 }
@@ -391,6 +399,7 @@ namespace CoMS.Controllers
     {
         public string UserName { get; set; }
         public decimal MESSAGING_GROUP_ID { get; set; }
+        public bool? MESSAGING_GROUP_MODERATOR { get; set; }
         public string GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED { get; set; }
     }
 }

@@ -106,6 +106,15 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account does not author.
+        /// </summary>
+        public static string Account_does_not_author {
+            get {
+                return ResourceManager.GetString("Account_does_not_author", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tài khoản không tồn tại..
         /// </summary>
         public static string Account_does_not_exist {
@@ -223,11 +232,29 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Conference presentation do not exist.
+        /// </summary>
+        public static string Conference_presentation_type_do_not_exist {
+            get {
+                return ResourceManager.GetString("Conference_presentation_type_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Conference session do not exist.
         /// </summary>
         public static string Conference_session_do_not_exist {
             get {
                 return ResourceManager.GetString("Conference_session_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conference session topic do not exist.
+        /// </summary>
+        public static string Conference_session_topic_do_not_exist {
+            get {
+                return ResourceManager.GetString("Conference_session_topic_do_not_exist", resourceCulture);
             }
         }
         
@@ -300,6 +327,33 @@ namespace CoMS.Resources {
         public static string English {
             get {
                 return ResourceManager.GetString("English", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expired submit paper abstract.
+        /// </summary>
+        public static string Expired_submit_paper_abstract {
+            get {
+                return ResourceManager.GetString("Expired_submit_paper_abstract", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expired_submit_paper_text.
+        /// </summary>
+        public static string Expired_submit_paper_text {
+            get {
+                return ResourceManager.GetString("Expired_submit_paper_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expired update paper abstract.
+        /// </summary>
+        public static string Expired_update_paper_abstract {
+            get {
+                return ResourceManager.GetString("Expired_update_paper_abstract", resourceCulture);
             }
         }
         
@@ -439,6 +493,78 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not found paper abstract.
+        /// </summary>
+        public static string Not_found_paper_abstract {
+            get {
+                return ResourceManager.GetString("Not_found_paper_abstract", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Out of time.
+        /// </summary>
+        public static string Out_of_time {
+            get {
+                return ResourceManager.GetString("Out_of_time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paper Abstract accepted..
+        /// </summary>
+        public static string Paper_Abstract_accepted {
+            get {
+                return ResourceManager.GetString("Paper_Abstract_accepted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paper abstract do not exist.
+        /// </summary>
+        public static string Paper_abstract_do_not_exist {
+            get {
+                return ResourceManager.GetString("Paper_abstract_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paper Abstract is being reviewed. Please wait for results..
+        /// </summary>
+        public static string Paper_Abstract_is_being_reviewed_please_wait_for_results {
+            get {
+                return ResourceManager.GetString("Paper_Abstract_is_being_reviewed_please_wait_for_results", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paper Text accepted..
+        /// </summary>
+        public static string Paper_Text_accepted {
+            get {
+                return ResourceManager.GetString("Paper_Text_accepted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paper text do not exist.
+        /// </summary>
+        public static string Paper_text_do_not_exist {
+            get {
+                return ResourceManager.GetString("Paper_text_do_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paper Text is being reviewed please wait for results..
+        /// </summary>
+        public static string Paper_Text_is_being_reviewed_please_wait_for_results {
+            get {
+                return ResourceManager.GetString("Paper_Text_is_being_reviewed_please_wait_for_results", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mật khẩu không đúng..
         /// </summary>
         public static string Password_is_incorrect {
@@ -453,6 +579,15 @@ namespace CoMS.Resources {
         public static string Password_must_not_be_less_than_6_characters {
             get {
                 return ResourceManager.GetString("Password_must_not_be_less_than_6_characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Person do not exist.
+        /// </summary>
+        public static string Person_do_not_exist {
+            get {
+                return ResourceManager.GetString("Person_do_not_exist", resourceCulture);
             }
         }
         
@@ -574,11 +709,29 @@ namespace CoMS.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of submition after review has out..
+        /// </summary>
+        public static string The_number_of_submition_after_review_has_out {
+            get {
+                return ResourceManager.GetString("The_number_of_submition_after_review_has_out", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Token is not empty.
         /// </summary>
         public static string Token_is_not_empty {
             get {
                 return ResourceManager.GetString("Token_is_not_empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type of study do not exist.
+        /// </summary>
+        public static string Type_of_study_do_not_exist {
+            get {
+                return ResourceManager.GetString("Type_of_study_do_not_exist", resourceCulture);
             }
         }
         

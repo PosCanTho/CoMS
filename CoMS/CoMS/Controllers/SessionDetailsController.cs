@@ -43,7 +43,7 @@ namespace CoMS.Controllers
 
             if (query != null)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, query));
+                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, query.Distinct()));
             }
             else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
         }
@@ -91,7 +91,7 @@ namespace CoMS.Controllers
             }
             if (listResult != null)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult.OrderBy(x => x.PAPER_ID)));
+                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult.OrderBy(x => x.PAPER_ID).Distinct()));
             }
             else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
         }
@@ -108,7 +108,7 @@ namespace CoMS.Controllers
 
             if (listResult != null)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult));
+                return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, listResult.Distinct()));
             }
             else { return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(404, StringResource.Username_or_password_incorrect, null)); }
         }

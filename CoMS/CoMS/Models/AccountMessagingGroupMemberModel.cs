@@ -23,7 +23,7 @@ namespace CoMS.Models
         public object getListJoinChannel(string userName, int MESSAGING_GROUP_ID)
         {
             var account = new AccountModel();
-            var list = db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP.Where(x => x.CREATED_UserName == userName && x.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED == "GROUP JOIN REQUEST" && x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && (x.DELETED == false || x.DELETED == null))
+            var list = db.ACCOUNT_MESSAGING_GROUP_MEMBERSHIP.Where(x => x.GROUP_ASSIGNED_OR_GROUP_JOIN_REQUEST_OR_GROUP_JOIN_REQUEST_APPROVED == "GROUP JOIN REQUEST" && x.MESSAGING_GROUP_ID == MESSAGING_GROUP_ID && (x.DELETED == false || x.DELETED == null))
                 .ToList()
                 .AsEnumerable()
                 .Select(x => new  {

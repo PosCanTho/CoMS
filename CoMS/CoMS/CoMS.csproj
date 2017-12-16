@@ -245,6 +245,7 @@
     <Compile Include="Controllers\FollowController.cs" />
     <Compile Include="Controllers\GroupController.cs" />
     <Compile Include="Controllers\NewFeedController.cs" />
+    <Compile Include="Controllers\PaperTextController.cs" />
     <Compile Include="Controllers\SessionDetailsController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Entities Framework\ACCOUNT.cs" />
@@ -338,6 +339,8 @@
     <Compile Include="Entities Framework\WINFORM_GROUP_FUNCTION_FOR_CONFERENCE.cs" />
     <Compile Include="Entities Framework\WINFORM_GROUP_MENU_FOR_CONFERENCE.cs" />
     <Compile Include="Entities Framework\WINFORM_MENU.cs" />
+    <Compile Include="Models\PaperAbstractModel.cs" />
+    <Compile Include="Models\PaperTextModel.cs" />
     <Compile Include="Models\AuthorPaperTextModel.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\BookmarkController.cs" />

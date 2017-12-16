@@ -393,7 +393,7 @@ namespace CoMS.Controllers
             var selected1 = db.SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA.SingleOrDefault(x => x.CONFERENCE_ID == conferenceId && x.UserName == userName1);
             if (selected1 == null)
             {
-                return ResponseFail(StringResource.Not_found);
+                return ResponseSuccess(StringResource.Not_found);
             }
             if (selected1.CONFERENCE_SESSION_ID_1 != null && selected1.MANDATORY_FUNCTION_OR_REGISTERED_SESSION_OR_SELF_SELECTION_1 != null)
             {
