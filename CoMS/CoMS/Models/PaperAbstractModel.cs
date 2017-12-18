@@ -90,6 +90,57 @@ namespace CoMS.Models
             return new MyPaperAbtract();
         }
 
+        public MyPaperAbtract getMyPaperAbstract(int paperId, int reviewTime)
+        {
+            var paperAbstract = db.PAPER_ABSTRACT.Find(paperId);
+            if (reviewTime == 5)
+            {
+                var myPaper = new MyPaperAbtract(paperAbstract.PAPER_ABSTRACT_TITLE_5, paperAbstract.PAPER_ABSTRACT_TITLE_EN_5, paperAbstract.CONFERENCE_SESSION_TOPIC_ID_5, paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_5,
+                    paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_5, paperAbstract.PAPER_ABSTRACT_TEXT_5, paperAbstract.PAPER_ABSTRACT_TEXT_EN_5, paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_5, paperAbstract.WORD_COUNT_OF_PAPER_ABSTRACT_5,
+                    paperAbstract.KEYWORDS_5, paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_5, paperAbstract.TYPE_OF_STUDY_ID_5, paperAbstract.TYPE_OF_STUDY_NAME_5, paperAbstract.TYPE_OF_STUDY_NAME_EN_5,
+                    paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_5, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_5, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_5, paperAbstract.FIRST_SUBMITTED_DATE_5, paperAbstract.LAST_REVISED_DATE_5);
+                return myPaper;
+            }
+            else if (reviewTime == 4)
+            {
+                var myPaper = new MyPaperAbtract(paperAbstract.PAPER_ABSTRACT_TITLE_4, paperAbstract.PAPER_ABSTRACT_TITLE_EN_4, paperAbstract.CONFERENCE_SESSION_TOPIC_ID_4, paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_4,
+                     paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_4, paperAbstract.PAPER_ABSTRACT_TEXT_4, paperAbstract.PAPER_ABSTRACT_TEXT_EN_4, paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_4, paperAbstract.WORD_COUNT_OF_PAPER_ABSTRACT_4,
+                     paperAbstract.KEYWORDS_4, paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_4, paperAbstract.TYPE_OF_STUDY_ID_4, paperAbstract.TYPE_OF_STUDY_NAME_4, paperAbstract.TYPE_OF_STUDY_NAME_EN_4,
+                     paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_4, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_4, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_4, paperAbstract.FIRST_SUBMITTED_DATE_4, paperAbstract.LAST_REVISED_DATE_4);
+                return myPaper;
+            }
+            else if (reviewTime == 3)
+            {
+                var myPaper = new MyPaperAbtract(paperAbstract.PAPER_ABSTRACT_TITLE_3, paperAbstract.PAPER_ABSTRACT_TITLE_EN_3, paperAbstract.CONFERENCE_SESSION_TOPIC_ID_3, paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_3,
+                     paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_3, paperAbstract.PAPER_ABSTRACT_TEXT_3, paperAbstract.PAPER_ABSTRACT_TEXT_EN_3, paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_3, paperAbstract.WORD_COUNT_OF_PAPER_ABSTRACT_3,
+                     paperAbstract.KEYWORDS_3, paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_3, paperAbstract.TYPE_OF_STUDY_ID_3, paperAbstract.TYPE_OF_STUDY_NAME_3, paperAbstract.TYPE_OF_STUDY_NAME_EN_3,
+                     paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_3, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_3, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_3, paperAbstract.FIRST_SUBMITTED_DATE_3, paperAbstract.LAST_REVISED_DATE_3);
+                return myPaper;
+            }
+            else if (reviewTime == 2)
+            {
+                var myPaper = new MyPaperAbtract(paperAbstract.PAPER_ABSTRACT_TITLE_2, paperAbstract.PAPER_ABSTRACT_TITLE_EN_2, paperAbstract.CONFERENCE_SESSION_TOPIC_ID_2, paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_2,
+                    paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_2, paperAbstract.PAPER_ABSTRACT_TEXT_2, paperAbstract.PAPER_ABSTRACT_TEXT_EN_2, paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_2, paperAbstract.WORD_COUNT_OF_PAPER_ABSTRACT_2,
+                    paperAbstract.KEYWORDS_2, paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_2, paperAbstract.TYPE_OF_STUDY_ID_2, paperAbstract.TYPE_OF_STUDY_NAME_2, paperAbstract.TYPE_OF_STUDY_NAME_EN_2,
+                    paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_2, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_2, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_2, paperAbstract.FIRST_SUBMITTED_DATE_2, paperAbstract.LAST_REVISED_DATE_2);
+                return myPaper;
+            }
+            else if (reviewTime == 1)
+            {
+                var myPaper = new MyPaperAbtract(paperAbstract.PAPER_ABSTRACT_TITLE_1, paperAbstract.PAPER_ABSTRACT_TITLE_EN_1, paperAbstract.CONFERENCE_SESSION_TOPIC_ID_1, paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_1,
+                     paperAbstract.CONFERENCE_SESSION_TOPIC_NAME_EN_1, paperAbstract.PAPER_ABSTRACT_TEXT_1, paperAbstract.PAPER_ABSTRACT_TEXT_EN_1, paperAbstract.PAPER_ABSTRACT_ATTACHED_FILENAME_1, paperAbstract.WORD_COUNT_OF_PAPER_ABSTRACT_1,
+                     paperAbstract.KEYWORDS_1, paperAbstract.FULL_PAPER_OR_WORK_IN_PROGRESS_1, paperAbstract.TYPE_OF_STUDY_ID_1, paperAbstract.TYPE_OF_STUDY_NAME_1, paperAbstract.TYPE_OF_STUDY_NAME_EN_1,
+                     paperAbstract.CONFERENCE_PRESENTATION_TYPE_ID_1, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_1, paperAbstract.CONFERENCE_PRESENTATION_TYPE_NAME_EN_1, paperAbstract.FIRST_SUBMITTED_DATE_1, paperAbstract.LAST_REVISED_DATE_1);
+                return myPaper;
+            }
+            return new MyPaperAbtract();
+        }
+
+        public CONFERENCE_BOARD_OF_REVIEW getConferenceBoardOfReview(int boardId)
+        {
+            return db.CONFERENCE_BOARD_OF_REVIEW.Find(boardId);
+        }
+
         public int getTimesSent(PAPER_ABSTRACT paperAbstract)
         {
             if (!String.IsNullOrEmpty(paperAbstract.PAPER_ABSTRACT_TITLE_5) || !String.IsNullOrEmpty(paperAbstract.PAPER_ABSTRACT_TITLE_EN_5))

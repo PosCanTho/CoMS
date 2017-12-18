@@ -79,6 +79,38 @@ namespace CoMS.Models
             return new MyPaperText();
         }
 
+        public MyPaperText getMyPaperText(int paperId, int reviewTime)
+        {
+            var paperText = db.PAPER_TEXT.Find(paperId);
+            if (reviewTime == 5)
+            {
+                var myPaper = new MyPaperText(paperText.PAPER_TEXT_TITLE_5, paperText.PAPER_TEXT_TITLE_EN_5, paperText.PAPER_TEXT_5, paperText.PAPER_TEXT_EN_5, paperText.PAPER_TEXT_ATTACHED_FILENAME_5, paperText.NUMBER_OF_PAGES_OF_PAPER_TEXT_5, paperText.FIRST_SUBMITTED_DATE_5, paperText.LAST_REVISED_DATE_5);
+                return myPaper;
+            }
+            else if (reviewTime == 4)
+            {
+                var myPaper = new MyPaperText(paperText.PAPER_TEXT_TITLE_4, paperText.PAPER_TEXT_TITLE_EN_4, paperText.PAPER_TEXT_4, paperText.PAPER_TEXT_EN_4, paperText.PAPER_TEXT_ATTACHED_FILENAME_4, paperText.NUMBER_OF_PAGES_OF_PAPER_TEXT_4, paperText.FIRST_SUBMITTED_DATE_4, paperText.LAST_REVISED_DATE_4);
+                return myPaper;
+            }
+            else if (reviewTime == 3)
+            {
+                var myPaper = new MyPaperText(paperText.PAPER_TEXT_TITLE_3, paperText.PAPER_TEXT_TITLE_EN_3, paperText.PAPER_TEXT_3, paperText.PAPER_TEXT_EN_3, paperText.PAPER_TEXT_ATTACHED_FILENAME_3, paperText.NUMBER_OF_PAGES_OF_PAPER_TEXT_3, paperText.FIRST_SUBMITTED_DATE_3, paperText.LAST_REVISED_DATE_3);
+                return myPaper;
+            }
+            else if (reviewTime == 2)
+            {
+                var myPaper = new MyPaperText(paperText.PAPER_TEXT_TITLE_2, paperText.PAPER_TEXT_TITLE_EN_2, paperText.PAPER_TEXT_2, paperText.PAPER_TEXT_EN_2, paperText.PAPER_TEXT_ATTACHED_FILENAME_2, paperText.NUMBER_OF_PAGES_OF_PAPER_TEXT_2, paperText.FIRST_SUBMITTED_DATE_2, paperText.LAST_REVISED_DATE_2);
+                return myPaper;
+            }
+            else if (reviewTime == 1)
+            {
+                var myPaper = new MyPaperText(paperText.PAPER_TEXT_TITLE_1, paperText.PAPER_TEXT_TITLE_EN_1, paperText.PAPER_TEXT_1, paperText.PAPER_TEXT_EN_1, paperText.PAPER_TEXT_ATTACHED_FILENAME_1, paperText.NUMBER_OF_PAGES_OF_PAPER_TEXT_1, paperText.FIRST_SUBMITTED_DATE_1, paperText.LAST_REVISED_DATE_1);
+                return myPaper;
+            }
+
+            return new MyPaperText();
+        }
+
         public int getTimesSent(PAPER_TEXT paperText)
         {
             if (!String.IsNullOrEmpty(paperText.PAPER_TEXT_TITLE_5) || !String.IsNullOrEmpty(paperText.PAPER_TEXT_TITLE_EN_5))

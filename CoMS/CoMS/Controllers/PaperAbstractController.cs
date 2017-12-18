@@ -732,39 +732,67 @@ namespace CoMS.Controllers
         public HttpResponseMessage ListReviewingHistoryPaperAbstract(int paperId, int conferenceId, int reviewTime = 1)
         {
             var paper = db.PAPER_ABSTRACT.Find(paperId);
+            var model = new PaperAbstractModel();
             if (paper == null)
             {
                 return ResponseFail(StringResource.Paper_abstract_do_not_exist);
             }
             else
             {
-                var listReviewing = db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP.Where(x => x.PAPER_ID == paperId && x.CONFERENCE_ID == conferenceId && x.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == reviewTime && x.PROPOSED_CONFERENCE_SESSION_TOPIC_ID != null)
-               .Select(x => new {
-                   x.PERSON_ID,
-                   x.CONFERENCE_BOARD_OF_REVIEW_ID,
-                   x.CONFERENCE_ID,
-                   x.PAPER_ID,
-                   x.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
-                   x.REVIEWED_DATE,
-                   x.PROPOSED_CONFERENCE_SESSION_TOPIC_ID,
-                   x.PROPOSED_CONFERENCE_SESSION_TOPIC_NAME,
-                   x.PROPOSED_CONFERENCE_SESSION_TOPIC_NAME_EN,
-                   x.PROPOSED_TYPE_OF_STUDY_ID,
-                   x.PROPOSED_TYPE_OF_STUDY_NAME,
-                   x.PROPOSED_TYPE_OF_STUDY_NAME_EN,
-                   x.PROPOSED_FOR_PRESENTATION,
-                   x.PROPOSED_CONFERENCE_PRESENTATION_TYPE_ID,
-                   x.PROPOSED_CONFERENCE_PRESENTATION_TYPE_NAME,
-                   x.PROPOSED_CONFERENCE_PRESENTATION_TYPE_NAME_EN,
-                   x.PAPER_ABSTRACT_REVIEW_RATING_POINT,
-                   x.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
-                   x.REVIEW_TEXT,
-                   x.REVIEW_TEXT_EN,
-                   x.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
-                   x.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE
-               }).OrderByDescending(x => x.REVIEWED_DATE);
+                var paperAbstract = model.getMyPaperAbstract(paperId, reviewTime);
+                var listReviewing = (from r in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
+                                     join b in db.CONFERENCE_BOARD_OF_REVIEW on r.CONFERENCE_BOARD_OF_REVIEW_ID equals b.CONFERENCE_BOARD_OF_REVIEW_ID
+                                     join p in db.People on r.PERSON_ID equals p.PERSON_ID
+                                     select new { r, b, p })
+                                     .AsEnumerable()
+                                    .Select(x => new
+                                    {
+                                        x.r.PERSON_ID,
+                                        x.r.CONFERENCE_BOARD_OF_REVIEW_ID,
+                                        x.r.CONFERENCE_ID,
+                                        x.r.PAPER_ID,
+                                        REVIEW_CURRENT_FIRST_NAME = x.p.CURRENT_FIRST_NAME,
+                                        REVIEW_CURRENT_MIDDLE_NAME = x.p.CURRENT_MIDDLE_NAME,
+                                        REVIEW_CURRENT_LAST_NAME = x.p.CURRENT_LAST_NAME,
+                                        REVIEW_FULL_NAME = Utils.GetFullName(x.p.CURRENT_FIRST_NAME, x.p.CURRENT_MIDDLE_NAME, x.p.CURRENT_LAST_NAME),
+                                        paperAbstract.FIRST_SUBMITTED_DATE,
+                                        paperAbstract.LAST_REVISED_DATE,
+                                        x.b.CONFERENCE_BOARD_OF_REVIEW_NAME,
+                                        x.b.CONFERENCE_BOARD_OF_REVIEW_NAME_EN,
+                                        x.r.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER,
+                                        x.r.REVIEWED_DATE,
+                                        x.r.PROPOSED_CONFERENCE_SESSION_TOPIC_ID,
+                                        x.r.PROPOSED_CONFERENCE_SESSION_TOPIC_NAME,
+                                        x.r.PROPOSED_CONFERENCE_SESSION_TOPIC_NAME_EN,
+                                        x.r.PROPOSED_TYPE_OF_STUDY_ID,
+                                        x.r.PROPOSED_TYPE_OF_STUDY_NAME,
+                                        x.r.PROPOSED_TYPE_OF_STUDY_NAME_EN,
+                                        x.r.PROPOSED_FOR_PRESENTATION,
+                                        x.r.PROPOSED_CONFERENCE_PRESENTATION_TYPE_ID,
+                                        x.r.PROPOSED_CONFERENCE_PRESENTATION_TYPE_NAME,
+                                        x.r.PROPOSED_CONFERENCE_PRESENTATION_TYPE_NAME_EN,
+                                        x.r.PAPER_ABSTRACT_REVIEW_RATING_POINT,
+                                        x.r.SIGNIFICANT_REVISION_OR_MINIMAL_REVISION_OR_REVISION_NEEDED_OR_NO_REVISION_NEEDED,
+                                        x.r.REVIEW_TEXT,
+                                        x.r.REVIEW_TEXT_EN,
+                                        x.r.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
+                                        x.r.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
+                                    }).OrderByDescending(x => x.REVIEWED_DATE);
                 return ResponseSuccess(StringResource.Success, listReviewing);
             }
+        }
+
+        [HttpPost]
+        [Route("api/CheckSubmitDeadlinePaperAbstract")]
+        public HttpResponseMessage CheckSubmitDeadlinePaperAbstract(int conferenceId)
+        {
+            var model = new PaperAbstractModel();
+            var result = model.checkConferencePaperAbstractSubmitExpired(conferenceId);
+            if (result == true)
+            {
+                return ResponseSuccess(StringResource.Success);
+            }
+            return ResponseFail(StringResource.Expired_submit_paper_abstract);
         }
     }
 
