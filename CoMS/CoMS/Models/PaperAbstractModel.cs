@@ -196,8 +196,8 @@ namespace CoMS.Models
             try
             {
                 var conference = db.CONFERENCEs.Find(conferenceId);
-                if (DateTime.Now < conference.PAPER_ABSTRACT_DEADLINE_1 || DateTime.Now < conference.PAPER_ABSTRACT_DEADLINE_2 || DateTime.Now < conference.PAPER_ABSTRACT_DEADLINE_3
-                    || DateTime.Now < conference.PAPER_ABSTRACT_DEADLINE_4 || DateTime.Now < conference.PAPER_ABSTRACT_DEADLINE_5)
+                if (DateTime.Now <= conference.PAPER_ABSTRACT_DEADLINE_1 || DateTime.Now <= conference.PAPER_ABSTRACT_DEADLINE_2 || DateTime.Now <= conference.PAPER_ABSTRACT_DEADLINE_3
+                    || DateTime.Now <= conference.PAPER_ABSTRACT_DEADLINE_4 || DateTime.Now <= conference.PAPER_ABSTRACT_DEADLINE_5)
                 {
                     return true;
                 }
