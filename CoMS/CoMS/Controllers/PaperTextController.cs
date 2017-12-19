@@ -76,6 +76,59 @@ namespace CoMS.Controllers
         }
 
         [HttpPost]
+        [Route("api/GetFormSubmitPaperText")]
+        public HttpResponseMessage GetFormSubmitPaperText(int conferenceId)
+        {
+            var conference = db.CONFERENCEs.Find(conferenceId);
+            var form = new FormSubmitPaperText();
+            if (DateTime.Now <= conference.PAPER_TEXT_DEADLINE_1)
+            {
+                form.NUMBER_PAPER_TEXT_DEADLINE = 1;
+                form.PAPER_TEXT_DEADLINE = conference.PAPER_TEXT_DEADLINE_1;
+            }
+            else if (DateTime.Now <= conference.PAPER_TEXT_DEADLINE_2)
+            {
+                form.NUMBER_PAPER_TEXT_DEADLINE = 2;
+                form.PAPER_TEXT_DEADLINE = conference.PAPER_TEXT_DEADLINE_2;
+            }
+            else if (DateTime.Now <= conference.PAPER_TEXT_DEADLINE_3)
+            {
+                form.NUMBER_PAPER_TEXT_DEADLINE = 3;
+                form.PAPER_TEXT_DEADLINE = conference.PAPER_TEXT_DEADLINE_3;
+            }
+            else if (DateTime.Now <= conference.PAPER_TEXT_DEADLINE_4)
+            {
+                form.NUMBER_PAPER_TEXT_DEADLINE = 4;
+                form.PAPER_TEXT_DEADLINE = conference.PAPER_TEXT_DEADLINE_4;
+            }
+            else if (DateTime.Now <= conference.PAPER_TEXT_DEADLINE_5)
+            {
+                form.NUMBER_PAPER_TEXT_DEADLINE = 5;
+                form.PAPER_TEXT_DEADLINE = conference.PAPER_TEXT_DEADLINE_5;
+            }
+            else
+            {
+                return ResponseFail(StringResource.Out_of_time);
+            }
+            form.ListSessionTopic = db.CONFERENCE_SESSION_TOPIC.Where(x => x.CONFERENCE_ID == conferenceId).
+                                    Select(x => new
+                                    {
+                                        x.CONFERENCE_SESSION_TOPIC_ID,
+                                        x.CONFERENCE_SESSION_TOPIC_NAME,
+                                        x.CONFERENCE_SESSION_TOPIC_NAME_EN
+                                    });
+            form.ListTypeOfStudy = from c in db.CONFERENCE_TYPE_OF_STUDY_RELATIONSHIP
+                                   join t in db.TYPE_OF_STUDY on c.TYPE_OF_STUDY_ID equals t.TYPE_OF_STUDY_ID
+                                   where c.CONFERENCE_ID == conferenceId
+                                   select new { t.TYPE_OF_STUDY_ID, t.TYPE_OF_STUDY_NAME, t.TYPE_OF_STUDY_NAME_EN };
+            form.ListPresentationType = from s in db.SESSION_TOPIC_CONFERENCE_PRESENTATION_TYPE
+                                        join c in db.CONFERENCE_PRESENTATION_TYPE on s.CONFERENCE_PRESENTATION_TYPE_ID equals c.CONFERENCE_PRESENTATION_TYPE_ID
+                                        where s.CONFERENCE_ID == conferenceId
+                                        select new { c.CONFERENCE_PRESENTATION_TYPE_ID, c.CONFERENCE_PRESENTATION_TYPE_NAME, c.CONFERENCE_PRESENTATION_TYPE_NAME_EN };
+            return ResponseSuccess(StringResource.Success, form);
+        }
+
+        [HttpPost]
         [Route("api/WithDrawPaperText")]
         public HttpResponseMessage WithDrawPaperText([FromBody]WithDrawForm body)
         {
@@ -579,10 +632,11 @@ namespace CoMS.Controllers
             }
             else
             {
-                var paperAbstract = model.getMyPaperText(paperId, reviewTime);
+                var paperText = model.getMyPaperText(paperId, reviewTime);
                 var listReviewing = (from r in db.REVIEWER_PAPER_TEXT_RELATIONSHIP
                                      join b in db.CONFERENCE_BOARD_OF_REVIEW on r.CONFERENCE_BOARD_OF_REVIEW_ID equals b.CONFERENCE_BOARD_OF_REVIEW_ID
                                      join p in db.People on r.PERSON_ID equals p.PERSON_ID
+                                     where r.PAPER_ID == paperId && r.CONFERENCE_ID == conferenceId && r.PAPER_TEXT_SUBMISSION_DEADLINE_ORDER_NUMBER == reviewTime && r.REVIEWED_DATE != null
                                      select new { r, b, p })
                                      .AsEnumerable()
                                     .Select(x => new
@@ -595,8 +649,10 @@ namespace CoMS.Controllers
                                         REVIEW_CURRENT_MIDDLE_NAME = x.p.CURRENT_MIDDLE_NAME,
                                         REVIEW_CURRENT_LAST_NAME = x.p.CURRENT_LAST_NAME,
                                         REVIEW_FULL_NAME = Utils.GetFullName(x.p.CURRENT_FIRST_NAME, x.p.CURRENT_MIDDLE_NAME, x.p.CURRENT_LAST_NAME),
-                                        paperAbstract.FIRST_SUBMITTED_DATE,
-                                        paperAbstract.LAST_REVISED_DATE,
+                                        paperText.PAPER_TEXT_TITLE,
+                                        paperText.PAPER_TEXT_TITLE_EN,
+                                        paperText.FIRST_SUBMITTED_DATE,
+                                        paperText.LAST_REVISED_DATE,
                                         x.b.CONFERENCE_BOARD_OF_REVIEW_NAME,
                                         x.b.CONFERENCE_BOARD_OF_REVIEW_NAME_EN,
                                         x.r.PAPER_TEXT_SUBMISSION_DEADLINE_ORDER_NUMBER,
@@ -616,7 +672,7 @@ namespace CoMS.Controllers
                                         x.r.REVIEW_TEXT_EN,
                                         x.r.APPROVAL_OR_REJECTION_OF_PAPER_TEXT,
                                         x.r.APPROVAL_OR_REJECTION_OF_PAPER_TEXT_DATE,
-                                    }).OrderByDescending(x => x.REVIEWED_DATE);
+                                    }).Distinct().OrderByDescending(x => x.REVIEWED_DATE);
                 return ResponseSuccess(StringResource.Success, listReviewing);
             }
         }
@@ -677,6 +733,15 @@ namespace CoMS.Controllers
             }
             return ResponseFail(StringResource.Expired_submit_paper_text);
         }
+    }
+
+    public class FormSubmitPaperText
+    {
+        public int NUMBER_PAPER_TEXT_DEADLINE { get; set; }
+        public DateTime? PAPER_TEXT_DEADLINE { get; set; }
+        public object ListSessionTopic { get; set; }
+        public object ListTypeOfStudy { get; set; }
+        public object ListPresentationType { get; set; }
     }
 
     public class PaperTextSubmit

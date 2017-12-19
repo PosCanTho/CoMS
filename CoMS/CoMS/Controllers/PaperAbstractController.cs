@@ -108,8 +108,7 @@ namespace CoMS.Controllers
             }
             else
             {
-                form.NUMBER_PAPER_ABSTRACT_DEADLINE = -1;
-                form.PAPER_ABSTRACT_DEADLINE = DateTime.Now;
+                return ResponseFail(StringResource.Out_of_time);
             }
             form.ListSessionTopic = db.CONFERENCE_SESSION_TOPIC.Where(x => x.CONFERENCE_ID == conferenceId).
                                     Select(x => new
@@ -743,6 +742,7 @@ namespace CoMS.Controllers
                 var listReviewing = (from r in db.REVIEWER_PAPER_ABSTRACT_RELATIONSHIP
                                      join b in db.CONFERENCE_BOARD_OF_REVIEW on r.CONFERENCE_BOARD_OF_REVIEW_ID equals b.CONFERENCE_BOARD_OF_REVIEW_ID
                                      join p in db.People on r.PERSON_ID equals p.PERSON_ID
+                                     where r.PAPER_ID == paperId && r.CONFERENCE_ID == conferenceId && r.PAPER_ABSTRACT_SUBMISSION_DEADLINE_ORDER_NUMBER == reviewTime && r.REVIEWED_DATE != null
                                      select new { r, b, p })
                                      .AsEnumerable()
                                     .Select(x => new
@@ -755,6 +755,8 @@ namespace CoMS.Controllers
                                         REVIEW_CURRENT_MIDDLE_NAME = x.p.CURRENT_MIDDLE_NAME,
                                         REVIEW_CURRENT_LAST_NAME = x.p.CURRENT_LAST_NAME,
                                         REVIEW_FULL_NAME = Utils.GetFullName(x.p.CURRENT_FIRST_NAME, x.p.CURRENT_MIDDLE_NAME, x.p.CURRENT_LAST_NAME),
+                                        paperAbstract.PAPER_ABSTRACT_TITLE,
+                                        paperAbstract.PAPER_ABSTRACT_TITLE_EN,
                                         paperAbstract.FIRST_SUBMITTED_DATE,
                                         paperAbstract.LAST_REVISED_DATE,
                                         x.b.CONFERENCE_BOARD_OF_REVIEW_NAME,
@@ -777,7 +779,7 @@ namespace CoMS.Controllers
                                         x.r.REVIEW_TEXT_EN,
                                         x.r.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT,
                                         x.r.APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT_DATE,
-                                    }).OrderByDescending(x => x.REVIEWED_DATE);
+                                    }).Distinct().OrderByDescending(x => x.REVIEWED_DATE);
                 return ResponseSuccess(StringResource.Success, listReviewing);
             }
         }
