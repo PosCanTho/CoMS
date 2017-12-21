@@ -57,8 +57,9 @@ namespace CoMS.Controllers
             {
                 var listAuthor = (from a in db.AUTHOR_PAPER_ABSTRACT_RELATIONSHIP
                                   join au in db.AUTHORs on a.PERSON_ID equals au.PERSON_ID
+                                  join p in db.People on a.PERSON_ID equals p.PERSON_ID
                                   where a.PAPER_ID == paperId && au.CONFERENCE_ID == a.CONFERENCE_ID
-                                  select new { a, au })
+                                  select new { a, au, p })
                                  .AsEnumerable()
                                  .Distinct()
                                  .Select(x => new
@@ -69,7 +70,8 @@ namespace CoMS.Controllers
                                      x.au.CURRENT_FIRST_NAME,
                                      x.au.CURRENT_MIDDLE_NAME,
                                      x.au.CURRENT_LAST_NAME,
-                                     FULL_NAME = Utils.GetFullName(x.au.CURRENT_FIRST_NAME, x.au.CURRENT_MIDDLE_NAME, x.au.CURRENT_LAST_NAME)
+                                     FULL_NAME = Utils.GetFullName(x.au.CURRENT_FIRST_NAME, x.au.CURRENT_MIDDLE_NAME, x.au.CURRENT_LAST_NAME),
+                                     x.p.CURRENT_PERSONAL_EMAIL,
                                  }).Distinct();
                 return ResponseSuccess(StringResource.Success, listAuthor);
             }
@@ -135,7 +137,8 @@ namespace CoMS.Controllers
             string searchString = body.SEARCH_STRING;
             var result = (from a in db.AUTHORs
                           join ac in db.ACCOUNTs on a.PERSON_ID equals ac.PERSON_ID
-                          select new { a, ac })
+                          join p in db.People on a.PERSON_ID equals p.PERSON_ID
+                          select new { a, ac, p })
                          .AsEnumerable()
                          .Where(x => x.ac.CURRENT_EMAIL.Contains(searchString) || x.ac.CURRENT_EMAIL.ToLower().Contains(searchString.ToLower()))
                          .Select(x => new
@@ -149,7 +152,8 @@ namespace CoMS.Controllers
                              x.ac.CURRENT_EMAIL,
                              x.ac.CURRENT_HOME_ORGANIZATION_ID,
                              x.ac.CURRENT_HOME_ORGANIZATION_NAME,
-                             x.ac.CURRENT_HOME_ORGANIZATION_NAME_EN
+                             x.ac.CURRENT_HOME_ORGANIZATION_NAME_EN,
+                             x.p.CURRENT_PERSONAL_TITLE
                          })
                          .Distinct();
             return ResponseSuccess(StringResource.Success, result);
@@ -284,7 +288,6 @@ namespace CoMS.Controllers
                 for (int i = 0; i < body.ListAuthor.Count; i++)
                 {
                     var item = body.ListAuthor[i];
-                    if (!model.checkIsAuthor(item.PERSON_ID)) return ResponseFail(StringResource.Account_does_not_author);
                     model.addAuthorPaperAbstract(item, body.CONFERENCE_ID, paperAbstact.PAPER_ID, i);
                 }
                 return ResponseSuccess(StringResource.Success);
@@ -796,6 +799,31 @@ namespace CoMS.Controllers
             }
             return ResponseFail(StringResource.Expired_submit_paper_abstract);
         }
+
+        [HttpPost]
+        [Route("api/CheckPaperAbstractSubmitionNumber")]
+        public HttpResponseMessage CheckPaperAbstractSubmitionNumber(int paperId)
+        {
+            var model = new PaperAbstractModel();
+            var paperAbstract = db.PAPER_ABSTRACT.Find(paperId);
+            if (paperAbstract == null)
+            {
+                return ResponseFail(StringResource.Paper_abstract_do_not_exist);
+            }
+            else
+            {
+                var result = model.getTimesSent(paperAbstract);
+                if (paperAbstract.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_ABSTRACT != null)
+                {
+                    if (result >= 5)
+                    {
+                        return ResponseFail(StringResource.The_number_of_submition_after_review_has_out);
+                    }
+                }
+                 return ResponseSuccess(StringResource.Success);
+            }
+           
+        }
     }
 
     public class FormSubmitPaperAbstract
@@ -857,4 +885,5 @@ namespace CoMS.Controllers
     {
         public string SEARCH_STRING { get; set; }
     }
+
 }

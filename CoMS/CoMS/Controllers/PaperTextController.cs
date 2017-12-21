@@ -57,8 +57,9 @@ namespace CoMS.Controllers
             {
                 var listAuthor = (from a in db.AUTHOR_PAPER_TEXT_RELATIONSHIP
                                   join au in db.AUTHORs on a.PERSON_ID equals au.PERSON_ID
+                                  join p in db.People on a.PERSON_ID equals p.PERSON_ID
                                   where a.PAPER_ID == paperId && au.CONFERENCE_ID == a.CONFERENCE_ID
-                                  select new { a, au })
+                                  select new { a, au,p })
                                  .AsEnumerable()
                                  .Distinct()
                                  .Select(x => new
@@ -69,7 +70,8 @@ namespace CoMS.Controllers
                                      x.au.CURRENT_FIRST_NAME,
                                      x.au.CURRENT_MIDDLE_NAME,
                                      x.au.CURRENT_LAST_NAME,
-                                     FULL_NAME = Utils.GetFullName(x.au.CURRENT_FIRST_NAME, x.au.CURRENT_MIDDLE_NAME, x.au.CURRENT_LAST_NAME)
+                                     FULL_NAME = Utils.GetFullName(x.au.CURRENT_FIRST_NAME, x.au.CURRENT_MIDDLE_NAME, x.au.CURRENT_LAST_NAME),
+                                     x.p.CURRENT_PERSONAL_EMAIL
                                  }).Distinct();
                 return ResponseSuccess(StringResource.Success, listAuthor);
             }
@@ -210,7 +212,6 @@ namespace CoMS.Controllers
                 for (int i = 0; i < body.ListAuthor.Count; i++)
                 {
                     var item = body.ListAuthor[i];
-                    if (!model.checkIsAuthor(item.PERSON_ID)) return ResponseFail(StringResource.Account_does_not_author);
                     model.addAuthorPaperText(item, body.CONFERENCE_ID, paperText.PAPER_ID, i);
                 }
                 return ResponseSuccess(StringResource.Success);
@@ -732,6 +733,30 @@ namespace CoMS.Controllers
                 return ResponseSuccess(StringResource.Success);
             }
             return ResponseFail(StringResource.Expired_submit_paper_text);
+        }
+
+        [HttpPost]
+        [Route("api/CheckPaperTextSubmitionNumber")]
+        public HttpResponseMessage CheckPaperTextSubmitionNumber(int paperId)
+        {
+            var model = new PaperTextModel();
+            var paperText = db.PAPER_TEXT.Find(paperId);
+            if (paperText == null)
+            {
+                return ResponseFail(StringResource.Paper_text_do_not_exist);
+            }
+            else
+            {
+                var result = model.getTimesSent(paperText);
+                if (paperText.FINAL_APPROVAL_OR_REJECTION_OF_PAPER_TEXT != null)
+                {
+                    if (result >= 5)
+                    {
+                        return ResponseFail(StringResource.The_number_of_submition_after_review_has_out);
+                    }
+                }
+                return ResponseSuccess(StringResource.Success);
+            }
         }
     }
 

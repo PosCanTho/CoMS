@@ -24,7 +24,7 @@ namespace CoMS.Controllers
             if (selected == null)
             {
                 var resultNew = new List<Agenda>();
-                var listSessionNew = db.CONFERENCE_SESSION.Where(x => x.CONFERENCE_ID == conferenceId);
+                var listSessionNew = db.CONFERENCE_SESSION.Where(x => x.CONFERENCE_ID == conferenceId && x.WALK_IN_OR_REGISTERED_SESSION == "WALK IN");
                 foreach (var session in listSessionNew)
                 {
                     var agenda = new Agenda();
@@ -280,7 +280,7 @@ namespace CoMS.Controllers
                         index++;
                 }
                 var result = new List<Agenda>();
-                var listSession = db.CONFERENCE_SESSION.Where(x => x.CONFERENCE_ID == conferenceId);
+                var listSession = db.CONFERENCE_SESSION.Where(x => x.CONFERENCE_ID == conferenceId && x.WALK_IN_OR_REGISTERED_SESSION == "WALK IN");
 
                 foreach (var session in listSession)
                 {
@@ -375,6 +375,39 @@ namespace CoMS.Controllers
                     }
                 }
 
+                var person = db.ACCOUNTs.SingleOrDefault(x => x.UserName == userName);
+                var listRegister = db.MANDATORY_OR_REGISTED_CONFERENCE_SESSION.Where(x => x.PERSON_ID == person.PERSON_ID && x.CONFERENCE_ID == conferenceId);
+
+                foreach (var reg in listRegister) {
+                    if (!result.Any(x => x.CONFERENCE_SESSION_ID == reg.CONFERENCE_SESSION_ID))
+                    {
+
+                        var session = db.CONFERENCE_SESSION.SingleOrDefault(x => x.CONFERENCE_SESSION_ID == reg.CONFERENCE_SESSION_ID && x.CONFERENCE_ID == conferenceId);
+                        var agenda = new Agenda();
+
+                        agenda.CONFERENCE_SESSION_ID = session.CONFERENCE_SESSION_ID;
+                        agenda.WALK_IN_OR_REGISTERED_SESSION = session.WALK_IN_OR_REGISTERED_SESSION;
+                        agenda.CONFERENCE_SESSION_TOPIC_ID = session.CONFERENCE_SESSION_TOPIC_ID;
+                        agenda.CONFERENCE_SESSION_TOPIC_NAME = session.CONFERENCE_SESSION_TOPIC_NAME;
+                        agenda.CONFERENCE_SESSION_TOPIC_NAME_EN = session.CONFERENCE_SESSION_TOPIC_NAME_EN;
+                        agenda.CONFERENCE_SESSION_NAME = session.CONFERENCE_SESSION_NAME;
+                        agenda.CONFERENCE_SESSION_NAME_EN = session.CONFERENCE_SESSION_NAME_EN;
+                        agenda.CONFERENCE_ID = session.CONFERENCE_ID;
+                        agenda.CONFERENCE_NAME = session.CONFERENCE_NAME;
+                        agenda.CONFERENCE_NAME_EN = session.CONFERENCE_NAME_EN;
+                        agenda.START_DATETIME = session.START_DATETIME;
+                        agenda.END_DATETIME = session.END_DATETIME;
+                        agenda.FACILITY_ID = session.FACILITY_ID;
+                        agenda.FACILITY_NAME = session.FACILITY_NAME;
+                        agenda.FACILITY_NAME_EN = session.FACILITY_NAME_EN;
+
+                        agenda.SELECTED = false;
+                        agenda.MANDATORY_FUNCTION_OR_REGISTERED_SESSION_OR_SELF_SELECTION = "";
+
+                        result.Add(agenda);
+                    }
+                }
+
                 if (result != null)
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, new ResponseData(0, StringResource.Success, result));
@@ -387,7 +420,7 @@ namespace CoMS.Controllers
         [Route("api/SelectedAgendaWithUser")]
         public HttpResponseMessage SelectedAgendaWithUser(int conferenceId, string userName1, string userName2)
         {
-            var listSession = db.CONFERENCE_SESSION.Where(x => x.CONFERENCE_ID == conferenceId);
+            var listSession = db.CONFERENCE_SESSION.Where(x => x.CONFERENCE_ID == conferenceId && x.WALK_IN_OR_REGISTERED_SESSION == "WALK IN");
 
             var listAgenda1 = new List<MyAgenda>();
             var selected1 = db.SELECTED_CONFERENCE_SESSIONS_IN_ACCOUNT_AGENDA.SingleOrDefault(x => x.CONFERENCE_ID == conferenceId && x.UserName == userName1);
